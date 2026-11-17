@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TechAsset.Application.DTOs;
 using TechAsset.Application.Interfaces;
 using TechAsset.Domain.Entities;
 using TechAsset.Domain.Enums;
@@ -58,5 +59,50 @@ public class UsuarioRepository : IUsuarioRepository
     public async Task AgregarAsync(Usuario usuario, CancellationToken ct = default)
     {
         await _context.Usuarios.AddAsync(usuario, ct);
+    }
+
+    public async Task<(IReadOnlyList<Usuario> Items, int TotalItems)> ListarPaginadoAsync(ParametrosConsultaUsuarios parametros, CancellationToken ct = default)
+    {
+        var query = _context.Usuarios
+            .AsNoTracking()
+            .Include(u => u.Area)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(parametros.Texto))
+        {
+            var t = parametros.Texto.Trim().ToLower();
+            query = query.Where(u => u.Nom_Usuario.ToLower().Contains(t)
+                                  || u.Ape_Usuario.ToLower().Contains(t)
+                                  || u.Cor_Usuario.ToLower().Contains(t));
+        }
+
+        if (parametros.Rol.HasValue)
+        {
+            query = query.Where(u => u.Rol_Usuario == parametros.Rol.Value);
+        }
+
+        if (parametros.Activo.HasValue)
+        {
+            query = query.Where(u => u.Act_Usuario == parametros.Activo.Value);
+        }
+
+        if (parametros.AreaId.HasValue)
+        {
+            query = query.Where(u => u.Ida_Usuario == parametros.AreaId.Value);
+        }
+
+        var totalItems = await query.CountAsync(ct);
+        var tamano = Math.Clamp(parametros.TamanoPagina, 1, 100);
+        var totalPaginas = (int)Math.Ceiling(totalItems / (double)tamano);
+        var pagina = Math.Clamp(parametros.Pagina, 1, Math.Max(1, totalPaginas));
+
+        var items = await query
+            .OrderBy(u => u.Nom_Usuario)
+            .ThenBy(u => u.Ape_Usuario)
+            .Skip((pagina - 1) * tamano)
+            .Take(tamano)
+            .ToListAsync(ct);
+
+        return (items, totalItems);
     }
 }

@@ -1,20 +1,36 @@
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using TechAsset.Api.Extensions;
+using TechAsset.Api.Middlewares;
+using TechAsset.Application.Extensions;
 using TechAsset.Infrastructure.Data;
 using TechAsset.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Infraestructura y acceso a datos
+// Extension methods de arquitectura
+builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddFrontendCors();
+builder.Services.AddAuthCookie(builder.Environment);
+builder.Services.AddPoliticasDeAcceso();
+builder.Services.AddLoginRateLimiting(builder.Environment);
 
 var app = builder.Build();
+
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -22,10 +38,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors(ApiExtensions.CorsPolicyName);
+
+app.UseRateLimiter();
+
+app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
-// Migración y Seeder inicial
+// Seeder inicial
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -39,4 +61,5 @@ using (var scope = app.Services.CreateScope())
 
 app.Run();
 
+// Requerido para WebApplicationFactory en pruebas de integración
 public partial class Program { }

@@ -23,5 +23,6 @@ public static class Mensajes
     public const string AreaRequerida = "Debe seleccionar un área válida.";
     public const string EstadoTransicionInvalida = "La transición de estado solicitada no es válida para la entidad.";
     public const string NoAutorizado = "No cuenta con los permisos necesarios para realizar esta operación.";
+    public const string AccesoDenegado = "No cuenta con los permisos necesarios para realizar esta operación.";
     public const string RecursoNoEncontrado = "El recurso solicitado no fue encontrado.";
 }
