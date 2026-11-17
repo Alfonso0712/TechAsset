@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TechAsset.Application.DTOs;
 using TechAsset.Application.Interfaces;
 using TechAsset.Domain.Entities;
 using TechAsset.Domain.Enums;
@@ -73,5 +74,135 @@ public class PrestamoRepository : IPrestamoRepository
     public async Task AgregarAsync(Prestamo prestamo, CancellationToken ct = default)
     {
         await _context.Prestamos.AddAsync(prestamo, ct);
+    }
+
+    public async Task<(IReadOnlyList<Prestamo> Items, int TotalItems)> ListarPaginadoAsync(
+        ParametrosConsultaPrestamos parametros,
+        RolUsuario rolActor,
+        Guid actorId,
+        CancellationToken ct = default)
+    {
+        var query = _context.Prestamos
+            .AsNoTracking()
+            .Include(p => p.Equipo)
+            .Include(p => p.Solicitante)
+                .ThenInclude(u => u!.Area)
+            .Include(p => p.Responsable)
+            .AsQueryable();
+
+        // Control de Alcance: Si es Colaborador, solo ve sus propios préstamos
+        if (rolActor == RolUsuario.Colaborador)
+        {
+            query = query.Where(p => p.Idu_Prestamo == actorId);
+        }
+        else if (parametros.ColaboradorId.HasValue)
+        {
+            query = query.Where(p => p.Idu_Prestamo == parametros.ColaboradorId.Value);
+        }
+
+        if (parametros.Estado.HasValue)
+        {
+            query = query.Where(p => p.Est_Prestamo == parametros.Estado.Value);
+        }
+
+        if (parametros.EquipoId.HasValue)
+        {
+            query = query.Where(p => p.Ide_Prestamo == parametros.EquipoId.Value);
+        }
+
+        if (parametros.FechaDesde.HasValue)
+        {
+            query = query.Where(p => p.Fpr_Prestamo >= parametros.FechaDesde.Value);
+        }
+
+        if (parametros.FechaHasta.HasValue)
+        {
+            query = query.Where(p => p.Fpr_Prestamo <= parametros.FechaHasta.Value);
+        }
+
+        var totalItems = await query.CountAsync(ct);
+        var tamano = Math.Clamp(parametros.TamanoPagina, 1, 100);
+        var totalPaginas = (int)Math.Ceiling(totalItems / (double)tamano);
+        var pagina = Math.Clamp(parametros.Pagina, 1, Math.Max(1, totalPaginas));
+
+        var items = await query
+            .OrderByDescending(p => p.Fpr_Prestamo)
+            .ThenByDescending(p => p.Fre_Creacion)
+            .Skip((pagina - 1) * tamano)
+            .Take(tamano)
+            .ToListAsync(ct);
+
+        return (items, totalItems);
+    }
+
+    public async Task<int> ContarTotalAsync(CancellationToken ct = default)
+    {
+        return await _context.Prestamos.AsNoTracking().CountAsync(ct);
+    }
+
+    public async Task<string?> ObtenerAreaConMayorUsoAsync(CancellationToken ct = default)
+    {
+        var areaLider = await _context.Prestamos
+            .AsNoTracking()
+            .Include(p => p.Solicitante)
+                .ThenInclude(u => u!.Area)
+            .Where(p => p.Solicitante != null && p.Solicitante.Area != null)
+            .GroupBy(p => p.Solicitante!.Area!.Nom_Area)
+            .Select(g => new { Area = g.Key, Total = g.Count() })
+            .OrderByDescending(x => x.Total)
+            .FirstOrDefaultAsync(ct);
+
+        return areaLider?.Area;
+    }
+
+    public async Task<IReadOnlyList<PrestamosPorAreaDto>> ObtenerPrestamosPorAreaAsync(int? limite = null, CancellationToken ct = default)
+    {
+        var query = _context.Prestamos
+            .AsNoTracking()
+            .Include(p => p.Solicitante)
+                .ThenInclude(u => u!.Area)
+            .Where(p => p.Solicitante != null && p.Solicitante.Area != null)
+            .GroupBy(p => p.Solicitante!.Area!.Nom_Area)
+            .Select(g => new PrestamosPorAreaDto(g.Key, g.Count()))
+            .OrderByDescending(x => x.TotalPrestamos);
+
+        if (limite.HasValue)
+        {
+            return await query.Take(limite.Value).ToListAsync(ct);
+        }
+
+        return await query.ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<EquiposMasUtilizadosDto>> ObtenerEquiposMasUtilizadosAsync(int limite = 10, CancellationToken ct = default)
+    {
+        return await _context.Prestamos
+            .AsNoTracking()
+            .Include(p => p.Equipo)
+            .Where(p => p.Equipo != null)
+            .GroupBy(p => new { p.Ide_Prestamo, p.Equipo!.Cop_Equipo, p.Equipo.Nom_Equipo, p.Equipo.Cat_Equipo })
+            .Select(g => new EquiposMasUtilizadosDto(
+                g.Key.Ide_Prestamo,
+                g.Key.Cop_Equipo,
+                g.Key.Nom_Equipo,
+                g.Key.Cat_Equipo,
+                g.Count()
+            ))
+            .OrderByDescending(x => x.TotalPrestamos)
+            .Take(limite)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<Prestamo>> ObtenerSolicitudesPendientesRecientesAsync(int limite = 5, CancellationToken ct = default)
+    {
+        return await _context.Prestamos
+            .AsNoTracking()
+            .Include(p => p.Equipo)
+            .Include(p => p.Solicitante)
+                .ThenInclude(u => u!.Area)
+            .Where(p => p.Est_Prestamo == EstadoPrestamo.Pendiente)
+            .OrderBy(p => p.Fpr_Prestamo)
+            .Take(limite)
+            .ToListAsync(ct);
     }
 }
