@@ -1,0 +1,42 @@
+## Build and binary directories
+bin/
+obj/
+node_modules/
+dist/
+coverage/
+
+## IDE and editor directories
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Environment and sensitive files
+*.local.json
+appsettings.*.local.json
+.env
+.env.*
+!.env.example
+secrets.json
+*.credentials
+*.key
+*.pem
+*.pfx
+
+## Database backups and data dumps
+*.dump
+*.bak
+*.backup
+*dump*.sql
+*backup*.sql
+*datos*.sql
+!backend/scripts/*.sql
+!docs/database/init/*.sql
+
+## Logs and OS artifacts
+*.log
+Thumbs.db
+[Ee]xpress/
