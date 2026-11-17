@@ -1,0 +1,61 @@
+name: CI TechAsset
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend:
+    name: Backend CI (.NET 8)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout de código
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restaurar dependencias NuGet
+        run: dotnet restore TechAsset.sln
+
+      - name: Compilar solución (Release)
+        run: dotnet build TechAsset.sln --no-restore -c Release
+
+      - name: Ejecutar pruebas unitarias e integración
+        run: dotnet test TechAsset.sln --no-build -c Release --verbosity normal
+
+  frontend:
+    name: Frontend CI (React + Vite + Vitest)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout de código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias npm
+        run: npm ci
+        working-directory: frontend
+
+      - name: Validar calidad de código y accesibilidad (ESLint 9)
+        run: npm run lint
+        working-directory: frontend
+
+      - name: Ejecutar pruebas unitarias y componentes (Vitest)
+        run: npm test
+        working-directory: frontend
+
+      - name: Compilar bundle de producción
+        run: npm run build
+        working-directory: frontend

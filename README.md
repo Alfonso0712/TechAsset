@@ -94,6 +94,7 @@ TechAsset/
 │   └── scripts/                  # Scripts SQL de soporte
 ├── docs/
 │   ├── analisis.md               # Especificación técnica, análisis, trazabilidad y ciclo de vida
+│   ├── informe-tecnico.md        # Informe técnico exhaustivo, arquitectura, accesibilidad y heurísticas
 │   ├── database/init/            # Scripts de creación de base y rol de mínimo privilegio
 │   └── diagramas/                # Diagramas arquitectónicos en Mermaid (.mmd)
 ├── frontend/

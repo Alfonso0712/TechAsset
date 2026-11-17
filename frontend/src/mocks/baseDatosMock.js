@@ -1,0 +1,222 @@
+import { ROLES } from '../constants/roles';
+import { PERMISOS } from '../constants/permisos';
+import { ESTADOS_EQUIPO, CATEGORIAS_EQUIPO, ESTADOS_PRESTAMO, TIPOS_MOVIMIENTO } from '../constants/estados';
+
+const areasMock = [
+  { id: '11111111-1111-1111-1111-111111111111', nombre: 'Tecnología de la Información', activo: true },
+  { id: '22222222-2222-2222-2222-222222222222', nombre: 'Desarrollo de Software', activo: true },
+  { id: '33333333-3333-3333-3333-333333333333', nombre: 'Infraestructura y Redes', activo: true }
+];
+
+let usuarioSesion = null;
+
+let usuariosMock = [
+  {
+    id: 'a0000000-0000-0000-0000-000000000001',
+    nombres: 'Carlos',
+    apellidos: 'Mendoza Admin',
+    nombreCompleto: 'Carlos Mendoza Admin',
+    correo: 'admin@innovatech.com',
+    rol: ROLES.ADMINISTRADOR,
+    areaId: areasMock[0].id,
+    areaNombre: areasMock[0].nombre,
+    activo: true,
+    tema: 'claro',
+    tamanoLetra: 'Normal'
+  },
+  {
+    id: 'a0000000-0000-0000-0000-000000000002',
+    nombres: 'Elena',
+    apellidos: 'Ríos Responsable',
+    nombreCompleto: 'Elena Ríos Responsable',
+    correo: 'resp.tecnologia@innovatech.com',
+    rol: ROLES.RESPONSABLE_TECNOLOGIA,
+    areaId: areasMock[0].id,
+    areaNombre: areasMock[0].nombre,
+    activo: true,
+    tema: 'claro',
+    tamanoLetra: 'Normal'
+  },
+  {
+    id: 'a0000000-0000-0000-0000-000000000003',
+    nombres: 'Luis',
+    apellidos: 'Alarcón Colaborador',
+    nombreCompleto: 'Luis Alarcón Colaborador',
+    correo: 'colaborador1@innovatech.com',
+    rol: ROLES.COLABORADOR,
+    areaId: areasMock[1].id,
+    areaNombre: areasMock[1].nombre,
+    activo: true,
+    tema: 'claro',
+    tamanoLetra: 'Normal'
+  }
+];
+
+let equiposMock = [
+  {
+    id: 'e0000000-0000-0000-0000-000000000001',
+    codigoPatrimonial: 'INNO-LAP-001',
+    nombre: 'ThinkPad T14 Gen 4',
+    categoria: CATEGORIAS_EQUIPO.LAPTOP,
+    marca: 'Lenovo',
+    estado: ESTADOS_EQUIPO.DISPONIBLE,
+    ubicacion: 'Almacén Central TI - Estante A1'
+  },
+  {
+    id: 'e0000000-0000-0000-0000-000000000002',
+    codigoPatrimonial: 'INNO-LAP-002',
+    nombre: 'Latitude 5430 Rugged',
+    categoria: CATEGORIAS_EQUIPO.LAPTOP,
+    marca: 'Dell',
+    estado: ESTADOS_EQUIPO.PRESTADO,
+    ubicacion: 'Laboratorio de Pruebas'
+  },
+  {
+    id: 'e0000000-0000-0000-0000-000000000003',
+    codigoPatrimonial: 'INNO-MON-001',
+    nombre: 'UltraSharp 27" 4K',
+    categoria: CATEGORIAS_EQUIPO.MONITOR,
+    marca: 'Dell',
+    estado: ESTADOS_EQUIPO.DISPONIBLE,
+    ubicacion: 'Piso 3 - Área de Diseño'
+  }
+];
+
+let prestamosMock = [
+  {
+    id: 'p0000000-0000-0000-0000-000000000001',
+    fechaPrestamo: '2026-11-10',
+    fechaDevolucionEstimada: '2026-11-20',
+    fechaDevolucionReal: null,
+    motivo: 'Desarrollo en cliente',
+    observacion: null,
+    estado: ESTADOS_PRESTAMO.ACTIVO,
+    solicitanteId: usuariosMock[2].id,
+    solicitanteNombre: usuariosMock[2].nombreCompleto,
+    solicitanteCorreo: usuariosMock[2].correo,
+    solicitanteArea: usuariosMock[2].areaNombre,
+    equipoId: equiposMock[1].id,
+    equipoCodigo: equiposMock[1].codigoPatrimonial,
+    equipoNombre: equiposMock[1].nombre,
+    equipoCategoria: equiposMock[1].categoria,
+    responsableId: usuariosMock[1].id,
+    responsableNombre: usuariosMock[1].nombreCompleto
+  }
+];
+
+let movimientosMock = [
+  {
+    id: 'm0000000-0000-0000-0000-000000000001',
+    equipoId: equiposMock[1].id,
+    equipoCodigo: equiposMock[1].codigoPatrimonial,
+    equipoNombre: equiposMock[1].nombre,
+    usuarioId: usuariosMock[1].id,
+    usuarioNombre: usuariosMock[1].nombreCompleto,
+    tipo: TIPOS_MOVIMIENTO.PRESTAMO_APROBADO,
+    estadoAnterior: 'Disponible',
+    estadoNuevo: 'Prestado',
+    detalle: 'Préstamo aprobado en mock',
+    fecha: '2026-11-10T10:00:00Z'
+  }
+];
+
+export async function ejecutarPeticionMock(ruta, { metodo = 'GET', cuerpo = null } = {}) {
+  // Simular latencia de red
+  await new Promise(r => setTimeout(r, 60));
+
+  // 1. Auth
+  if (ruta === '/api/auth/login' && metodo === 'POST') {
+    const usuario = usuariosMock.find(u => u.correo.toLowerCase() === cuerpo.correo.toLowerCase());
+    if (!usuario) {
+      return { estado: 401, datos: { error: 'CredencialesIncorrectas', mensaje: 'Credenciales incorrectas.' } };
+    }
+    usuarioSesion = usuario;
+    const permisos = Object.values(PERMISOS);
+    return { estado: 200, datos: { usuario, permisos } };
+  }
+
+  if (ruta === '/api/auth/logout' && metodo === 'POST') {
+    usuarioSesion = null;
+    return { estado: 200, datos: { mensaje: 'Sesión cerrada' } };
+  }
+
+  if (ruta === '/api/auth/me') {
+    if (!usuarioSesion) {
+      return { estado: 401, datos: { mensaje: 'No autenticado' } };
+    }
+    return { estado: 200, datos: { usuario: usuarioSesion, permisos: Object.values(PERMISOS) } };
+  }
+
+  // 2. Areas
+  if (ruta === '/api/areas') {
+    return { estado: 200, datos: areasMock };
+  }
+
+  // 3. Equipos
+  if (ruta.startsWith('/api/equipos') && metodo === 'GET') {
+    return {
+      estado: 200,
+      datos: {
+        items: equiposMock,
+        pagina: 1,
+        tamanoPagina: 10,
+        totalItems: equiposMock.length,
+        totalPaginas: 1
+      }
+    };
+  }
+
+  // 4. Prestamos
+  if (ruta.startsWith('/api/prestamos') && metodo === 'GET') {
+    return {
+      estado: 200,
+      datos: {
+        items: prestamosMock,
+        pagina: 1,
+        tamanoPagina: 10,
+        totalItems: prestamosMock.length,
+        totalPaginas: 1
+      }
+    };
+  }
+
+  // 5. Dashboard
+  if (ruta === '/api/reportes/dashboard') {
+    return {
+      estado: 200,
+      datos: {
+        totalEquipos: equiposMock.length,
+        equiposDisponibles: equiposMock.filter(e => e.estado === 'Disponible').length,
+        equiposPrestados: equiposMock.filter(e => e.estado === 'Prestado').length,
+        equiposMantenimiento: 0,
+        equiposBaja: 0,
+        totalPrestamos: prestamosMock.length,
+        areaMayorUso: 'Desarrollo de Software',
+        distribucionPorEstado: [
+          { estado: 'Disponible', cantidad: 2, porcentaje: 66.7 },
+          { estado: 'Prestado', cantidad: 1, porcentaje: 33.3 }
+        ],
+        prestamosPorArea: [
+          { area: 'Desarrollo de Software', totalPrestamos: 1 }
+        ],
+        solicitudesPendientes: []
+      }
+    };
+  }
+
+  // 6. Movimientos de auditoria (RF-17)
+  if (ruta.startsWith('/api/reportes/movimientos')) {
+    return {
+      estado: 200,
+      datos: {
+        items: movimientosMock,
+        pagina: 1,
+        tamanoPagina: 10,
+        totalItems: movimientosMock.length,
+        totalPaginas: 1
+      }
+    };
+  }
+
+  return { estado: 200, datos: {} };
+}

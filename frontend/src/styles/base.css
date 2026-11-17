@@ -1,0 +1,94 @@
+/* Estilos base TechAsset · WCAG 2.2 AA */
+*, *::before, *::after { box-sizing: border-box; }
+html {
+  font-family: "Montserrat Variable", "Segoe UI", system-ui, Arial, sans-serif;
+  font-size: 100%;
+  line-height: 1.6;
+  background-color: var(--fondo);
+  color: var(--texto);
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--fondo);
+  color: var(--texto);
+  overflow-x: hidden;
+}
+h1 { font-size: 1.75rem; font-weight: 700; line-height: 1.3; margin: 0; }
+h2 { font-size: 1.25rem; font-weight: 600; line-height: 1.3; margin: 0; }
+h3 { font-size: 1rem; font-weight: 600; line-height: 1.3; margin: 0; }
+p { max-width: 70ch; line-height: 1.6; margin: 0; }
+
+.ancho-lectura { max-width: 70ch; }
+.cifra-tabular { font-variant-numeric: tabular-nums; }
+
+.fondo-modal {
+  background-color: rgba(15, 23, 42, 0.7);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+:focus-visible {
+  outline: 0.125rem solid var(--anillo-foco);
+  outline-offset: 0.125rem;
+}
+
+.barra-lateral :focus-visible {
+  outline: 0.125rem solid var(--acento-sobre-oscuro);
+  outline-offset: 0.125rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 47.9375rem) {
+  .tabla-responsiva thead {
+    position: absolute;
+    width: 0.0625rem;
+    height: 0.0625rem;
+    padding: 0;
+    margin: -0.0625rem;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .tabla-responsiva tbody tr {
+    display: block;
+    height: auto !important;
+    margin-bottom: 1rem;
+    border: 1px solid var(--borde);
+    border-radius: var(--radius-lg);
+    background-color: var(--superficie);
+    padding: 0.75rem;
+  }
+  .tabla-responsiva tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--borde);
+    text-align: right;
+  }
+  .tabla-responsiva tbody td:last-child {
+    border-bottom: 0;
+  }
+  .tabla-responsiva tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    text-align: left;
+    margin-right: 1rem;
+    color: var(--texto-suave);
+  }
+}
