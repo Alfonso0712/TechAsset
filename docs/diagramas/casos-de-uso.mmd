@@ -1,0 +1,73 @@
+graph TD
+    subgraph Actores
+        Admin["Administrador"]
+        Resp["Responsable de Tecnología"]
+        Colab["Colaborador"]
+    end
+
+    subgraph "Módulo de Usuarios"
+        CU01["RF-01: Registrar Usuario"]
+        CU02["RF-02: Actualizar Usuario"]
+        CU03["RF-03: Consultar Usuarios"]
+        CU04["RF-04: Deshabilitar/Reactivar Usuario"]
+    end
+
+    subgraph "Módulo de Inventario (Equipos)"
+        CU05["RF-05: Registrar Equipo Tecnológico"]
+        CU06["RF-06: Actualizar Equipo"]
+        CU07["RF-07: Consultar Inventario de Equipos"]
+        CU08["RF-08: Actualizar Estado del Equipo (Mantenimiento/Baja)"]
+    end
+
+    subgraph "Módulo de Préstamos"
+        CU09["RF-09: Solicitar/Registrar Préstamo"]
+        CU10["RF-10: Aprobar / Rechazar Préstamo"]
+        CU11["RF-10: Registrar Devolución con Observación"]
+        CU12["RF-11/12: Consultar Préstamos (Activos e Historial)"]
+    end
+
+    subgraph "Módulo de Dashboard y Reportes"
+        CU13["RF-13: Visualizar Dashboard General (KPIs)"]
+        CU14["RF-14: Reporte de Equipos por Estado"]
+        CU15["RF-15: Reporte de Equipos Más Utilizados"]
+        CU16["RF-16: Reporte de Préstamos por Área"]
+        CU17["RF-17: Historial de Movimientos de Equipos"]
+    end
+
+    %% Relaciones Administrador
+    Admin --> CU01
+    Admin --> CU02
+    Admin --> CU03
+    Admin --> CU04
+    Admin --> CU05
+    Admin --> CU06
+    Admin --> CU07
+    Admin --> CU08
+    Admin --> CU09
+    Admin --> CU12
+    Admin --> CU13
+    Admin --> CU14
+    Admin --> CU15
+    Admin --> CU16
+    Admin --> CU17
+
+    %% Relaciones Responsable de Tecnología
+    Resp --> CU03
+    Resp --> CU05
+    Resp --> CU06
+    Resp --> CU07
+    Resp --> CU08
+    Resp --> CU09
+    Resp --> CU10
+    Resp --> CU11
+    Resp --> CU12
+    Resp --> CU13
+    Resp --> CU14
+    Resp --> CU15
+    Resp --> CU16
+    Resp --> CU17
+
+    %% Relaciones Colaborador
+    Colab --> CU07
+    Colab --> CU09
+    Colab --> CU12

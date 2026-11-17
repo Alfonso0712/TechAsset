@@ -1,0 +1,70 @@
+sequenceDiagram
+    autonumber
+    actor Colab as Colaborador
+    actor Resp as Responsable de Tecnología
+    participant API as PrestamosController (API)
+    participant Svc as PrestamoService (Application)
+    participant DomE as Equipo (Domain)
+    participant DomP as Prestamo (Domain)
+    participant UoW as UnitOfWork (Infrastructure)
+    participant DB as PostgreSQL (DB)
+
+    %% FASE 1: SOLICITUD DE PRÉSTAMO
+    rect rgb(240, 250, 248)
+    note right of Colab: 1. Solicitud de Préstamo (Estado: Pendiente)
+    Colab->>API: POST /api/prestamos (SolicitarPrestamoDto)
+    API->>Svc: SolicitarPrestamoAsync(dto, idColaborador)
+    Svc->>UoW: Equipos.ObtenerPorIdAsync(dto.IdEquipo)
+    UoW-->>Svc: equipo
+    Svc->>DomE: PuedePrestarse()
+    DomE-->>Svc: true (Disponible)
+    Svc->>DomP: CrearSolicitud(idColaborador, idEquipo, fechaPres, fechaDev, motivo)
+    DomP-->>Svc: nuevoPrestamo (Estado: Pendiente)
+    Svc->>UoW: Prestamos.AgregarAsync(nuevoPrestamo)
+    Svc->>UoW: Movimientos.AgregarAsync(Movimiento.RegistroSolicitud)
+    Svc->>UoW: GuardarCambiosAsync()
+    UoW->>DB: INSERT prestamos, INSERT movimientos_equipo
+    DB-->>UoW: OK (Commit)
+    Svc-->>API: PrestamoDto
+    API-->>Colab: 201 Created (Prestamo en estado Pendiente)
+    end
+
+    %% FASE 2: EVALUACIÓN Y APROBACIÓN
+    rect rgb(235, 245, 255)
+    note right of Resp: 2. Evaluación y Aprobación (Estado: Activo)
+    Resp->>API: PATCH /api/prestamos/{id}/aprobar
+    API->>Svc: AprobarPrestamoAsync(idPrestamo, idResponsable)
+    Svc->>UoW: Prestamos.ObtenerConEquipoAsync(idPrestamo)
+    UoW-->>Svc: prestamo, equipo
+    Svc->>UoW: Prestamos.ExistePrestamoActivoAsync(equipo.Id_Equipo)
+    UoW-->>Svc: false (Doble validación RN-01)
+    Svc->>DomP: Aprobar(idResponsable)
+    DomP-->>Svc: prestamo actualizado (Estado: Activo, Idr_Prestamo asignado)
+    Svc->>DomE: MarcarComoPrestado()
+    DomE-->>Svc: equipo actualizado (Estado: Prestado)
+    Svc->>UoW: Movimientos.AgregarAsync(Movimiento.AprobacionPrestamo)
+    Svc->>UoW: GuardarCambiosAsync()
+    UoW->>DB: UPDATE prestamos, UPDATE equipos, INSERT movimientos_equipo
+    DB-->>UoW: OK (Commit bajo índice único parcial)
+    Svc-->>API: PrestamoDto
+    API-->>Resp: 200 OK (Préstamo Activo, Equipo Prestado)
+    end
+
+    %% FASE 3: REGISTRO DE DEVOLUCIÓN
+    rect rgb(245, 240, 255)
+    note right of Resp: 3. Registro de Devolución con Observación Obligatoria (RN-10)
+    Resp->>API: PATCH /api/prestamos/{id}/devolver (DevolverPrestamoDto)
+    API->>Svc: RegistrarDevolucionAsync(idPrestamo, dto.Observacion, idResponsable)
+    Svc->>UoW: Prestamos.ObtenerConEquipoAsync(idPrestamo)
+    UoW-->>Svc: prestamo, equipo
+    Svc->>DomP: RegistrarDevolucion(dto.Observacion, DateOnly.FromDateTime(Now))
+    DomP-->>Svc: prestamo devuelto (Estado: Devuelto, Fdr asignada)
+    Svc->>DomE: MarcarComoDisponible()
+    DomE-->>Svc: equipo disponible (Estado: Disponible)
+    Svc->>UoW: Movimientos.AgregarAsync(Movimiento.DevolucionEquipo)
+    Svc->>UoW: GuardarCambiosAsync()
+    UoW->>DB: UPDATE prestamos, UPDATE equipos, INSERT movimientos_equipo
+    DB-->>UoW: OK (Commit)
+    Svc-->>API: PrestamoDto
+    API-->>Resp: 200 OK (Préstamo Devuelto, Equipo Disponible)
+    end

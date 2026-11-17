@@ -1,0 +1,142 @@
+classDiagram
+    direction TB
+
+    class AuditableEntity {
+        <<abstract>>
+        +DateTime Fre_Creacion
+        +DateTime? Fma_Modificacion
+        +string? Ucr_Creador
+        +string? Umo_Modificador
+    }
+
+    class Area {
+        +Guid Id_Area
+        +string Nom_Area
+        +bool Act_Area
+        +Crear(string nombre) Area$
+        +Actualizar(string nombre) void
+        +Desactivar() void
+        +Activar() void
+    }
+
+    class Usuario {
+        +Guid Id_Usuario
+        +string Nom_Usuario
+        +string Ape_Usuario
+        +string Cor_Usuario
+        +string Has_Usuario
+        +RolUsuario Rol_Usuario
+        +Guid Ida_Usuario
+        +bool Act_Usuario
+        +string Tema
+        +string Tamano_Letra
+        +Crear(string nombres, string apellidos, string correo, string hash, RolUsuario rol, Guid idArea) Usuario$
+        +ActualizarDatos(string nombres, string apellidos, Guid idArea) void
+        +ActualizarRol(RolUsuario nuevoRol) void
+        +ActualizarPreferencias(string tema, string tamanoLetra) void
+        +Desactivar() void
+        +Activar() void
+    }
+
+    class Equipo {
+        +Guid Id_Equipo
+        +string Cop_Equipo
+        +string Nom_Equipo
+        +CategoriaEquipo Cat_Equipo
+        +string Mar_Equipo
+        +EstadoEquipo Est_Equipo
+        +string Ubi_Equipo
+        +Crear(string codigoPatrimonial, string nombre, CategoriaEquipo categoria, string marca, string ubicacion) Equipo$
+        +Actualizar(string nombre, CategoriaEquipo categoria, string marca, string ubicacion) void
+        +PuedePrestarse() bool
+        +MarcarComoPrestado() void
+        +MarcarComoDisponible() void
+        +CambiarEstado(EstadoEquipo nuevoEstado) void
+    }
+
+    class Prestamo {
+        +Guid Id_Prestamo
+        +DateOnly Fpr_Prestamo
+        +DateOnly Fde_Prestamo
+        +DateOnly? Fdr_Prestamo
+        +string Mot_Prestamo
+        +string? Obs_Prestamo
+        +EstadoPrestamo Est_Prestamo
+        +Guid Idu_Prestamo
+        +Guid Ide_Prestamo
+        +Guid? Idr_Prestamo
+        +CrearSolicitud(Guid idUsuario, Guid idEquipo, DateOnly fechaPrestamo, DateOnly fechaDevolucion, string motivo) Prestamo$
+        +CrearDirecto(Guid idUsuario, Guid idEquipo, Guid idResponsable, DateOnly fechaPrestamo, DateOnly fechaDevolucion, string motivo) Prestamo$
+        +Aprobar(Guid idResponsable) void
+        +Rechazar(Guid idResponsable, string motivoRechazo) void
+        +RegistrarDevolucion(string observacion, DateOnly? fechaDevolucionReal) void
+    }
+
+    class MovimientoEquipo {
+        +Guid Id_Movimiento
+        +Guid Ide_Movimiento
+        +Guid Idu_Movimiento
+        +TipoMovimientoEquipo Tip_Movimiento
+        +string Est_Anterior
+        +string Est_Nuevo
+        +string Det_Movimiento
+        +DateTime Fec_Movimiento
+        +Registrar(Guid idEquipo, Guid idUsuario, TipoMovimientoEquipo tipo, string estadoAnterior, string estadoNuevo, string detalle) MovimientoEquipo$
+    }
+
+    class RolUsuario {
+        <<enumeration>>
+        Administrador
+        ResponsableTecnologia
+        Colaborador
+    }
+
+    class CategoriaEquipo {
+        <<enumeration>>
+        Laptop
+        ComputadoraEscritorio
+        Monitor
+        Impresora
+        Tablet
+        Proyector
+        EquipoRed
+    }
+
+    class EstadoEquipo {
+        <<enumeration>>
+        Disponible
+        Prestado
+        Mantenimiento
+        Baja
+    }
+
+    class EstadoPrestamo {
+        <<enumeration>>
+        Pendiente
+        Activo
+        Devuelto
+        Rechazado
+    }
+
+    class TipoMovimientoEquipo {
+        <<enumeration>>
+        Registro
+        CambioEstado
+        PrestamoSolicitado
+        PrestamoAprobado
+        PrestamoRechazado
+        Devolucion
+        Edicion
+    }
+
+    AuditableEntity <|-- Area
+    AuditableEntity <|-- Usuario
+    AuditableEntity <|-- Equipo
+    AuditableEntity <|-- Prestamo
+
+    Area "1" -- "0..*" Usuario : agrupa
+    Usuario "1" -- "0..*" Prestamo : solicita
+    Usuario "0..1" -- "0..*" Prestamo : aprueba
+    Equipo "1" -- "0..*" Prestamo : objeto
+    Equipo "1" -- "0..*" MovimientoEquipo : registra trazabilidad
+    Usuario "1" -- "0..*" MovimientoEquipo : ejecuta accion

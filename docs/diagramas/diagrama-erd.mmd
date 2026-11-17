@@ -1,0 +1,76 @@
+erDiagram
+    AREAS ||--o{ USUARIOS : "emplea a"
+    USUARIOS ||--o{ PRESTAMOS : "solicita (idu_prestamo)"
+    USUARIOS ||--o{ PRESTAMOS : "aprueba/gestiona (idr_prestamo)"
+    USUARIOS ||--o{ MOVIMIENTOS_EQUIPO : "registra accion"
+    EQUIPOS ||--o{ PRESTAMOS : "es objeto de"
+    EQUIPOS ||--o{ MOVIMIENTOS_EQUIPO : "registra historial"
+
+    AREAS {
+        uuid id_area PK "Identificador único"
+        varchar nom_area UK "Nombre de área (único)"
+        boolean act_area "Estado activo (soft delete)"
+        timestamptz fre_area "Fecha de creación"
+        timestamptz fma_area "Fecha de modificación"
+        varchar ucr_area "Usuario creador"
+        varchar umo_area "Usuario modificador"
+    }
+
+    USUARIOS {
+        uuid id_usuario PK "Identificador único"
+        varchar nom_usuario "Nombres"
+        varchar ape_usuario "Apellidos"
+        varchar cor_usuario UK "Correo institucional único (RN-08)"
+        varchar has_usuario "Hash PBKDF2"
+        varchar rol_usuario "Rol (Administrador/ResponsableTecnologia/Colaborador)"
+        uuid ida_usuario FK "Área a la que pertenece"
+        boolean act_usuario "Estado activo (soft delete)"
+        varchar tema "Preferencia de tema (claro/oscuro)"
+        varchar tamano_letra "Preferencia de fuente (A-/A/A+)"
+        timestamptz fre_usuario "Fecha de creación"
+        timestamptz fma_usuario "Fecha de modificación"
+        varchar ucr_usuario "Usuario creador"
+        varchar umo_usuario "Usuario modificador"
+    }
+
+    EQUIPOS {
+        uuid id_equipo PK "Identificador único"
+        varchar cop_equipo UK "Código patrimonial único (RN-07)"
+        varchar nom_equipo "Nombre descriptivo"
+        varchar cat_equipo "Categoría de activo tecnológico"
+        varchar mar_equipo "Marca del equipo"
+        varchar est_equipo "Estado operativo (Disponible/Prestado/Mantenimiento/Baja)"
+        varchar ubi_equipo "Ubicación física"
+        timestamptz fre_equipo "Fecha de creación"
+        timestamptz fma_equipo "Fecha de modificación"
+        varchar ucr_equipo "Usuario creador"
+        varchar umo_equipo "Usuario modificador"
+    }
+
+    PRESTAMOS {
+        uuid id_prestamo PK "Identificador único"
+        date fpr_prestamo "Fecha de préstamo"
+        date fde_prestamo "Fecha de devolución estimada (RN-04)"
+        date fdr_prestamo "Fecha de devolución real (nullable)"
+        text mot_prestamo "Motivo del préstamo"
+        text obs_prestamo "Observación de devolución (RN-10)"
+        varchar est_prestamo "Estado (Pendiente/Activo/Devuelto/Rechazado)"
+        uuid idu_prestamo FK "Usuario solicitante"
+        uuid ide_prestamo FK "Equipo prestado (RN-01: Único Activo)"
+        uuid idr_prestamo FK "Responsable de Tecnología que aprueba (RN-05)"
+        timestamptz fre_prestamo "Fecha de creación"
+        timestamptz fma_prestamo "Fecha de modificación"
+        varchar ucr_prestamo "Usuario creador"
+        varchar umo_prestamo "Usuario modificador"
+    }
+
+    MOVIMIENTOS_EQUIPO {
+        uuid id_movimiento PK "Identificador único"
+        uuid ide_movimiento FK "Equipo involucrado"
+        uuid idu_movimiento FK "Usuario que ejecuta la acción"
+        varchar tip_movimiento "Tipo de movimiento"
+        varchar est_anterior "Estado anterior del equipo"
+        varchar est_nuevo "Nuevo estado del equipo"
+        text det_movimiento "Detalle explicativo"
+        timestamptz fec_movimiento "Fecha y hora exacta del evento"
+    }
