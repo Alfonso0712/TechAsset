@@ -1,19 +1,19 @@
-/* TechAsset Design System Tokens · Paleta Cian + Azul Marino · Innovatech Solutions · WCAG 2.2 AA */
+/* TechAsset Design System Tokens · Colorimetría v3 · Innovatech Solutions · WCAG 2.2 AA */
 :root {
   /* Modo Claro */
-  --fondo: #EEF9FF;
+  --fondo: #F4F6FA;
   --superficie: #FFFFFF;
-  --superficie-2: #E1F2FC;
-  --borde: #C9E3F2;
-  --borde-control: #6E8CA6;
-  --texto: #091E3E;
-  --texto-suave: #4F5D73;
+  --superficie-2: #EBF0F8;
+  --borde: #D0D8E8;
+  --borde-control: #7B8BA6;
+  --texto: #0F172A;
+  --texto-suave: #4A5568;
 
-  /* Colores de Marca Primarios */
-  --primario: #0277B5;
-  --primario-hover: #01629A;
-  --primario-enlace: #01629A;
-  --primario-suave: #E1F2FC;
+  /* Colores de Marca Primarios (Botones azul marino institucional) */
+  --primario: #091E3E;
+  --primario-hover: #12335F;
+  --primario-enlace: #0369A1;
+  --primario-suave: #EBF0F8;
   --sobre-primario: #FFFFFF;
 
   /* Acento decorativo (subrayados, iconos, resaltados; nunca botón con blanco ni texto sobre blanco) */
@@ -27,19 +27,23 @@
   --lateral-hover: rgba(255, 255, 255, 0.08);
 
   /* Foco visible de accesibilidad */
-  --anillo-foco: #0277B5;
+  --anillo-foco: #0369A1;
 
   /* Estados Semánticos (Modo Claro) */
   --exito-texto: #14532D;
   --exito-borde: #15803D;
   --exito-fondo: #DAF4E5;
-  --info-texto: #1E40AF;
+
+  --info-texto: #312E81;
   --info-borde: #2563EB;
-  --info-fondo: #EFF6FF;
+  --info-fondo: #E0E7FF;
+
   --advertencia-texto: #6B3F00;
   --advertencia-borde: #D97706;
   --advertencia-fondo: #FFF1CC;
+
   --peligro-texto: #7F1D1D;
+  --peligro-borde: #DC2626;
   --peligro-fondo: #FDE2E2;
 
   /* Tokens Específicos de Error Accesible (WCAG AA/AAA) */
@@ -78,8 +82,8 @@
   --aprobada-fondo: var(--exito-fondo);
   --rechazada-texto: var(--peligro-texto);
   --rechazada-fondo: var(--peligro-fondo);
-  --cancelada-texto: #4F5D73;
-  --cancelada-fondo: #E1F2FC;
+  --cancelada-texto: #4A5568;
+  --cancelada-fondo: #EBF0F8;
 
   /* Botones de acción semánticos */
   --btn-success-bg: #15803D;
@@ -100,9 +104,9 @@
   --btn-warning-hover-bg: #B45309;
   --btn-warning-hover-fg: #FFFFFF;
 
-  /* Gradiente de fondo login TechAsset (#091E3E -> #0277B5 con transparencia) */
+  /* Gradiente de fondo login TechAsset (#091E3E -> #12335F con transparencia) */
   --superposicion-marca-inicio: rgba(9, 30, 62, 0.92);
-  --superposicion-marca-fin: rgba(2, 119, 181, 0.25);
+  --superposicion-marca-fin: rgba(18, 51, 95, 0.35);
 
   /* Radios de borde y alturas (WCAG 2.2 AA touch target >= 44px / 2.75rem) */
   --radius-sm: 0.375rem;
@@ -118,24 +122,24 @@
 @media (prefers-color-scheme: dark) {
   html:not([data-tema="claro"]) {
     /* Modo Oscuro */
-    --fondo: #050F1E;
-    --superficie: #0A1A33;
-    --superficie-2: #10264A;
-    --borde: #1E3557;
-    --borde-control: #5F7FA3;
-    --texto: #EAF4FB;
-    --texto-suave: #A9BFD6;
+    --fondo: #0B1220;
+    --superficie: #121C33;
+    --superficie-2: #172443;
+    --borde: #263554;
+    --borde-control: #6F83A8;
+    --texto: #E8EEF9;
+    --texto-suave: #A9B8D4;
 
-    --primario: #06A3DA;
-    --primario-hover: #38BDF0;
-    --primario-enlace: #38BDF0;
-    --primario-suave: #10264A;
+    --primario: #38BDF0;
+    --primario-hover: #7DD3FC;
+    --primario-enlace: #7DD3FC;
+    --primario-suave: #172443;
     --sobre-primario: #04152B;
 
     --acento: #38BDF0;
     --acento-sobre-oscuro: #38BDF0;
 
-    --lateral-fondo: #040C18;
+    --lateral-fondo: #08101F;
     --lateral-texto: #D3E3F2;
     --lateral-activo-fondo: #12335F;
     --lateral-hover: rgba(255, 255, 255, 0.08);
@@ -146,13 +150,17 @@
     --exito-texto: #BBF7D0;
     --exito-borde: #4ADE80;
     --exito-fondo: #0F3323;
+
     --info-texto: #93C5FD;
     --info-borde: #60A5FA;
     --info-fondo: #172554;
+
     --advertencia-texto: #FDE68A;
     --advertencia-borde: #F59E0B;
     --advertencia-fondo: #382306;
+
     --peligro-texto: #FECACA;
+    --peligro-borde: #F87171;
     --peligro-fondo: #341113;
 
     /* Tokens Específicos de Error Accesible (WCAG AA/AAA) */
@@ -185,34 +193,34 @@
     --aprobada-fondo: var(--exito-fondo);
     --rechazada-texto: var(--peligro-texto);
     --rechazada-fondo: var(--peligro-fondo);
-    --cancelada-texto: #A9BFD6;
-    --cancelada-fondo: #1E3557;
+    --cancelada-texto: #A9B8D4;
+    --cancelada-fondo: #263554;
 
-    --superposicion-marca-inicio: rgba(4, 12, 24, 0.95);
-    --superposicion-marca-fin: rgba(2, 119, 181, 0.30);
+    --superposicion-marca-inicio: rgba(8, 16, 31, 0.95);
+    --superposicion-marca-fin: rgba(18, 51, 95, 0.35);
   }
 }
 
 html[data-tema="oscuro"] {
-  /* Modo Oscuro */
-  --fondo: #050F1E;
-  --superficie: #0A1A33;
-  --superficie-2: #10264A;
-  --borde: #1E3557;
-  --borde-control: #5F7FA3;
-  --texto: #EAF4FB;
-  --texto-suave: #A9BFD6;
+  /* Modo Oscuro Forzado */
+  --fondo: #0B1220;
+  --superficie: #121C33;
+  --superficie-2: #172443;
+  --borde: #263554;
+  --borde-control: #6F83A8;
+  --texto: #E8EEF9;
+  --texto-suave: #A9B8D4;
 
-  --primario: #06A3DA;
-  --primario-hover: #38BDF0;
-  --primario-enlace: #38BDF0;
-  --primario-suave: #10264A;
+  --primario: #38BDF0;
+  --primario-hover: #7DD3FC;
+  --primario-enlace: #7DD3FC;
+  --primario-suave: #172443;
   --sobre-primario: #04152B;
 
   --acento: #38BDF0;
   --acento-sobre-oscuro: #38BDF0;
 
-  --lateral-fondo: #040C18;
+  --lateral-fondo: #08101F;
   --lateral-texto: #D3E3F2;
   --lateral-activo-fondo: #12335F;
   --lateral-hover: rgba(255, 255, 255, 0.08);
@@ -223,13 +231,17 @@ html[data-tema="oscuro"] {
   --exito-texto: #BBF7D0;
   --exito-borde: #4ADE80;
   --exito-fondo: #0F3323;
+
   --info-texto: #93C5FD;
   --info-borde: #60A5FA;
   --info-fondo: #172554;
+
   --advertencia-texto: #FDE68A;
   --advertencia-borde: #F59E0B;
   --advertencia-fondo: #382306;
+
   --peligro-texto: #FECACA;
+  --peligro-borde: #F87171;
   --peligro-fondo: #341113;
 
   /* Tokens Específicos de Error Accesible (WCAG AA/AAA) */
@@ -262,14 +274,9 @@ html[data-tema="oscuro"] {
   --aprobada-fondo: var(--exito-fondo);
   --rechazada-texto: var(--peligro-texto);
   --rechazada-fondo: var(--peligro-fondo);
-  --cancelada-texto: #A9BFD6;
-  --cancelada-fondo: #1E3557;
+  --cancelada-texto: #A9B8D4;
+  --cancelada-fondo: #263554;
 
-  --superposicion-marca-inicio: rgba(4, 12, 24, 0.95);
-  --superposicion-marca-fin: rgba(2, 119, 181, 0.30);
+  --superposicion-marca-inicio: rgba(8, 16, 31, 0.95);
+  --superposicion-marca-fin: rgba(18, 51, 95, 0.35);
 }
-
-/* Escalas tipográficas accesibles */
-html[data-tamano-fuente="87.5%"] { font-size: 87.5%; }
-html[data-tamano-fuente="100%"] { font-size: 100%; }
-html[data-tamano-fuente="112.5%"] { font-size: 112.5%; }

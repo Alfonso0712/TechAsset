@@ -77,6 +77,7 @@ for (const archivo of archivos) {
 
           // Descartar utilidades estructurales
           if (/^(0|1|2|4|8|t|b|l|r|x|y|t-0|b-0|l-0|r-0|t-2|b-2|l-2|r-2|solid|dashed|dotted|double|none|collapse|separate)$/.test(nombreColor)) continue;
+          if (/^[tlrbxy]-\[.+\]$/.test(nombreColor) || /^\[.+\]$/.test(nombreColor)) continue;
           if (/^(xs|sm|base|lg|xl|2xl|3xl|4xl|center|left|right|justify|wrap|nowrap|opacity|clip)$/.test(nombreColor)) continue;
           if (/^(auto|cover|contain|fixed|local|scroll|bottom|top|center)$/.test(nombreColor)) continue;
 

@@ -12,22 +12,22 @@ describe('Componente Badge', () => {
   it('aplica estilos de éxito para estado Disponible', () => {
     const { container } = render(<Badge estado={ESTADOS_EQUIPO.DISPONIBLE} />);
     const badge = container.firstChild;
-    expect(badge).toHaveClass('bg-disponible-fondo');
-    expect(badge).toHaveClass('text-disponible-texto');
+    expect(badge).toHaveClass('bg-exito-fondo');
+    expect(badge).toHaveClass('text-exito-texto');
   });
 
   it('aplica estilos de información para estado Prestamo Activo', () => {
     const { container } = render(<Badge estado={ESTADOS_PRESTAMO.ACTIVO} />);
     const badge = container.firstChild;
-    expect(badge).toHaveClass('bg-prestado-fondo');
-    expect(badge).toHaveClass('text-prestado-texto');
+    expect(badge).toHaveClass('bg-info-fondo');
+    expect(badge).toHaveClass('text-info-texto');
   });
 
   it('aplica estilos de peligro para estado Baja', () => {
     const { container } = render(<Badge estado={ESTADOS_EQUIPO.BAJA} />);
     const badge = container.firstChild;
-    expect(badge).toHaveClass('bg-baja-fondo');
-    expect(badge).toHaveClass('text-baja-texto');
+    expect(badge).toHaveClass('bg-peligro-fondo');
+    expect(badge).toHaveClass('text-peligro-texto');
   });
 
   it('aplica variante discreta cuando la prop discreto es true', () => {

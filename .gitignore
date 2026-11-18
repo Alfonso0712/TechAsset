@@ -4,6 +4,7 @@ obj/
 node_modules/
 dist/
 coverage/
+.vite/
 
 ## IDE and editor directories
 .vs/

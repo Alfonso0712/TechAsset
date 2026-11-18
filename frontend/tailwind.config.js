@@ -33,6 +33,7 @@ export default {
         'advertencia-borde': 'var(--advertencia-borde)',
         'advertencia-fondo': 'var(--advertencia-fondo)',
         'peligro-texto': 'var(--peligro-texto)',
+        'peligro-borde': 'var(--peligro-borde)',
         'peligro-fondo': 'var(--peligro-fondo)',
 
         'error-texto': 'var(--error-texto)',
