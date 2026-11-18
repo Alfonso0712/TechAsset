@@ -125,7 +125,7 @@ export default function Ingresar() {
         >
           Iniciar sesión
         </Button>
-        <p className="flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold text-primario-enlace dark:text-[#7DD3FC] select-none pt-1 m-0">
+        <p className="flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold text-acento-sobre-oscuro select-none pt-1 m-0">
           <Icono nombre="KeyRound" className="w-4 h-4 shrink-0" aria-hidden="true" />
           <span>¿Olvidaste tu contraseña? Pruébalo aquí</span>
         </p>

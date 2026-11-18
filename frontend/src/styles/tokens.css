@@ -109,7 +109,7 @@
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-pill: 9999px;
-  --radius-full: 50%;
+  --radius-full: 9999px;
   --radio-control: var(--radius-md);
   --radio-tarjeta: var(--radius-lg);
   --alto-control: 2.75rem;
