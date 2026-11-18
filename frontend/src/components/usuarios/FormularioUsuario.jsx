@@ -9,13 +9,13 @@ import { useFormulario } from '../../hooks/useFormulario';
 import { validarUsuario } from '../../validation/reglasUsuario';
 import { usuarioService } from '../../services/usuarioService';
 import { areaService } from '../../services/areaService';
-import { interpretarRespuestaError } from '../../validation/interpretarRespuesta';
+import { interpretarRespuesta } from '../../validation/interpretarRespuesta';
 import { ROLES } from '../../constants/roles';
 
 const OPCIONES_ROL = [
   { valor: ROLES.COLABORADOR, etiqueta: 'Colaborador (Solicitante)' },
-  { valor: ROLES.RESPONSABLE_TECNOLOGIA, etiqueta: 'Responsable de Tecnología (Gestión / Aprobaciones)' },
-  { valor: ROLES.ADMINISTRADOR, etiqueta: 'Administrador (Control total del sistema)' }
+  { valor: ROLES.RESPONSABLE_TECNOLOGIA, etiqueta: 'Responsable de Tecnología' },
+  { valor: ROLES.ADMINISTRADOR, etiqueta: 'Administrador' }
 ];
 
 export default function FormularioUsuario({
@@ -27,17 +27,7 @@ export default function FormularioUsuario({
   const esEdicion = Boolean(usuarioAEditar);
   const [areas, setAreas] = useState([]);
 
-  const {
-    valores,
-    errores,
-    enviando,
-    mensajeGeneral,
-    setMensajeGeneral,
-    cambiarValor,
-    marcarTocado,
-    reiniciar,
-    manejarEnvio
-  } = useFormulario({
+  const form = useFormulario({
     valoresIniciales: {
       nombres: usuarioAEditar?.nombres || '',
       apellidos: usuarioAEditar?.apellidos || '',
@@ -47,7 +37,7 @@ export default function FormularioUsuario({
       areaId: usuarioAEditar?.areaId || ''
     },
     validar: (vals) => validarUsuario(vals, esEdicion),
-    onSubmit: async (datos) => {
+    alEnviar: async (datos, { setErrores, setErrorGeneral, enfocarPrimerError }) => {
       let resp;
       if (esEdicion) {
         resp = await usuarioService.actualizar(usuarioAEditar.id, {
@@ -60,18 +50,26 @@ export default function FormularioUsuario({
         resp = await usuarioService.crear(datos);
       }
 
-      if (resp.estado === 200 || resp.estado === 201) {
-        alGuardarExitoso?.(resp.datos);
+      const res = interpretarRespuesta(resp);
+      if (res.ok) {
+        alGuardarExitoso?.(esEdicion ? 'Usuario actualizado con éxito.' : 'Usuario registrado con éxito.', res.datos);
         alCerrar();
-      } else {
-        setMensajeGeneral(interpretarRespuestaError(resp.estado, resp.datos));
+        return;
       }
+
+      if (res.errores && Object.keys(res.errores).length > 0) {
+        setErrores(res.errores);
+        enfocarPrimerError(res.errores);
+        return;
+      }
+
+      setErrorGeneral(res.errorGeneral || 'No se pudo guardar el usuario.');
     }
   });
 
   useEffect(() => {
     if (abierto) {
-      reiniciar({
+      form.setValores({
         nombres: usuarioAEditar?.nombres || '',
         apellidos: usuarioAEditar?.apellidos || '',
         correo: usuarioAEditar?.correo || '',
@@ -79,106 +77,113 @@ export default function FormularioUsuario({
         rol: usuarioAEditar?.rol || ROLES.COLABORADOR,
         areaId: usuarioAEditar?.areaId || ''
       });
+      form.setErrores({});
+      form.setErrorGeneral('');
 
-      areaService.listarActivas().then(res => {
-        if (res.estado === 200 && Array.isArray(res.datos)) {
-          setAreas(res.datos.map(a => ({ valor: a.id, etiqueta: a.nombre })));
+      areaService.listarActivas().then((res) => {
+        const resp = interpretarRespuesta(res);
+        if (resp.ok && Array.isArray(resp.datos)) {
+          setAreas(resp.datos.map((a) => ({ valor: a.id, etiqueta: a.nombre })));
         }
       });
     }
-  }, [abierto, usuarioAEditar, reiniciar]);
+  }, [abierto, usuarioAEditar]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <ModalDialog
       abierto={abierto}
       alCerrar={alCerrar}
-      titulo={esEdicion ? 'Editar Usuario' : 'Registrar Nuevo Usuario'}
-      subtitulo={esEdicion ? `Actualice los datos de ${usuarioAEditar.nombreCompleto}` : 'Alta de cuenta corporativa institucional'}
-      textoPrimario={esEdicion ? 'Guardar Cambios' : 'Crear Usuario'}
+      titulo={esEdicion ? 'Editar usuario' : 'Nuevo usuario'}
+      subtitulo={esEdicion ? `Actualice los datos de ${usuarioAEditar.nombreCompleto}` : 'Alta de cuenta corporativa'}
+      textoPrimario={esEdicion ? 'Guardar cambios' : 'Crear usuario'}
       textoSecundario="Cancelar"
       variantePrimaria="primary"
-      enProceso={enviando}
-      alConfirmar={manejarEnvio}
+      enProceso={form.enProceso}
+      alConfirmar={form.manejarEnvio}
       tamano="md"
     >
-      <form onSubmit={manejarEnvio} className="space-y-4" noValidate>
-        {mensajeGeneral && <AlertMessage variante="peligro" mensaje={mensajeGeneral} />}
+      <form onSubmit={form.manejarEnvio} className="space-y-4" noValidate>
+        {form.errorGeneral && <AlertMessage variante="error" rol="alert" mensaje={form.errorGeneral} />}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <CampoFormulario
             id="nombres"
             etiqueta="Nombres"
-            error={errores.nombres}
+            error={form.errores.nombres}
             obligatorio
           >
             <TextInput
+              ref={form.registrarRef('nombres')}
               id="nombres"
-              name="nombres"
+              nombre="nombres"
               placeholder="Juan Carlos"
-              value={valores.nombres}
-              onChange={(e) => cambiarValor('nombres', e.target.value)}
-              onBlur={() => marcarTocado('nombres')}
-              error={Boolean(errores.nombres)}
-              disabled={enviando}
+              valor={form.valores.nombres}
+              alCambiar={(e) => form.cambiarValor('nombres', e.target.value)}
+              alSalir={() => form.manejarBlur('nombres')}
+              error={form.errores.nombres}
+              soloLectura={form.enProceso}
             />
           </CampoFormulario>
 
           <CampoFormulario
             id="apellidos"
             etiqueta="Apellidos"
-            error={errores.apellidos}
+            error={form.errores.apellidos}
             obligatorio
           >
             <TextInput
+              ref={form.registrarRef('apellidos')}
               id="apellidos"
-              name="apellidos"
+              nombre="apellidos"
               placeholder="Pérez García"
-              value={valores.apellidos}
-              onChange={(e) => cambiarValor('apellidos', e.target.value)}
-              onBlur={() => marcarTocado('apellidos')}
-              error={Boolean(errores.apellidos)}
-              disabled={enviando}
+              valor={form.valores.apellidos}
+              alCambiar={(e) => form.cambiarValor('apellidos', e.target.value)}
+              alSalir={() => form.manejarBlur('apellidos')}
+              error={form.errores.apellidos}
+              soloLectura={form.enProceso}
             />
           </CampoFormulario>
         </div>
 
         <CampoFormulario
           id="correoUsuario"
-          etiqueta="Correo Corporativo"
-          error={errores.correo}
+          etiqueta="Correo corporativo"
+          error={form.errores.correo}
           obligatorio={!esEdicion}
-          ayuda={esEdicion ? 'El correo corporativo no puede modificarse.' : 'Debe ser único en el sistema (RN-08).'}
+          ayuda={esEdicion ? 'El correo corporativo no puede modificarse.' : 'Debe ser único en la organización.'}
         >
           <TextInput
+            ref={form.registrarRef('correo')}
             id="correoUsuario"
-            name="correoUsuario"
+            nombre="correo"
             type="email"
             placeholder="usuario@innovatech.com"
-            value={valores.correo}
-            onChange={(e) => cambiarValor('correo', e.target.value)}
-            onBlur={() => marcarTocado('correo')}
-            error={Boolean(errores.correo)}
-            disabled={esEdicion || enviando}
+            valor={form.valores.correo}
+            alCambiar={(e) => form.cambiarValor('correo', e.target.value)}
+            alSalir={() => form.manejarBlur('correo')}
+            error={form.errores.correo}
+            soloLectura={esEdicion || form.enProceso}
           />
         </CampoFormulario>
 
         {!esEdicion && (
           <CampoFormulario
             id="contrasenaUsuario"
-            etiqueta="Contraseña Temporal"
-            error={errores.contrasena}
+            etiqueta="Contraseña temporal"
+            error={form.errores.contrasena}
             obligatorio
             ayuda="Mínimo 8 caracteres corporativos."
           >
             <PasswordInput
+              ref={form.registrarRef('contrasena')}
               id="contrasenaUsuario"
-              name="contrasenaUsuario"
+              nombre="contrasena"
               placeholder="••••••••"
-              value={valores.contrasena}
-              onChange={(e) => cambiarValor('contrasena', e.target.value)}
-              onBlur={() => marcarTocado('contrasena')}
-              error={Boolean(errores.contrasena)}
-              disabled={enviando}
+              valor={form.valores.contrasena}
+              alCambiar={(e) => form.cambiarValor('contrasena', e.target.value)}
+              alSalir={() => form.manejarBlur('contrasena')}
+              error={form.errores.contrasena}
+              soloLectura={form.enProceso}
             />
           </CampoFormulario>
         )}
@@ -186,39 +191,41 @@ export default function FormularioUsuario({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <CampoFormulario
             id="areaId"
-            etiqueta="Área Corporativa"
-            error={errores.areaId}
+            etiqueta="Área corporativa"
+            error={form.errores.areaId}
             obligatorio
           >
             <SelectInput
+              ref={form.registrarRef('areaId')}
               id="areaId"
-              name="areaId"
+              nombre="areaId"
               placeholder="Seleccione el área"
               opciones={areas}
-              value={valores.areaId}
-              onChange={(e) => cambiarValor('areaId', e.target.value)}
-              onBlur={() => marcarTocado('areaId')}
-              error={Boolean(errores.areaId)}
-              disabled={enviando}
+              valor={form.valores.areaId}
+              alCambiar={(e) => form.cambiarValor('areaId', e.target.value)}
+              alSalir={() => form.manejarBlur('areaId')}
+              error={form.errores.areaId}
+              soloLectura={form.enProceso}
             />
           </CampoFormulario>
 
           <CampoFormulario
             id="rol"
-            etiqueta="Rol del Usuario"
-            error={errores.rol}
+            etiqueta="Rol del usuario"
+            error={form.errores.rol}
             obligatorio
           >
             <SelectInput
+              ref={form.registrarRef('rol')}
               id="rol"
-              name="rol"
+              nombre="rol"
               placeholder="Seleccione el rol"
               opciones={OPCIONES_ROL}
-              value={valores.rol}
-              onChange={(e) => cambiarValor('rol', e.target.value)}
-              onBlur={() => marcarTocado('rol')}
-              error={Boolean(errores.rol)}
-              disabled={enviando}
+              valor={form.valores.rol}
+              alCambiar={(e) => form.cambiarValor('rol', e.target.value)}
+              alSalir={() => form.manejarBlur('rol')}
+              error={form.errores.rol}
+              soloLectura={form.enProceso}
             />
           </CampoFormulario>
         </div>

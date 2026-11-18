@@ -7,12 +7,13 @@ import AlertMessage from '../ui/AlertMessage';
 import { useFormulario } from '../../hooks/useFormulario';
 import { validarEquipo } from '../../validation/reglasEquipo';
 import { equipoService } from '../../services/equipoService';
-import { interpretarRespuestaError } from '../../validation/interpretarRespuesta';
+import { interpretarRespuesta } from '../../validation/interpretarRespuesta';
 import { CATEGORIAS_EQUIPO, ESTADOS_EQUIPO } from '../../constants/estados';
+import { MAPA_CATEGORIAS_EQUIPO } from '../../constants/etiquetas';
 
 const OPCIONES_CATEGORIA = Object.entries(CATEGORIAS_EQUIPO).map(([_, valor]) => ({
   valor,
-  etiqueta: valor
+  etiqueta: MAPA_CATEGORIAS_EQUIPO?.[valor] || valor
 }));
 
 const OPCIONES_ESTADO_INICIAL = [
@@ -28,17 +29,7 @@ export default function FormularioEquipo({
 }) {
   const esEdicion = Boolean(equipoAEditar);
 
-  const {
-    valores,
-    errores,
-    enviando,
-    mensajeGeneral,
-    setMensajeGeneral,
-    cambiarValor,
-    marcarTocado,
-    reiniciar,
-    manejarEnvio
-  } = useFormulario({
+  const form = useFormulario({
     valoresIniciales: {
       codigoPatrimonial: equipoAEditar?.codigoPatrimonial || '',
       nombre: equipoAEditar?.nombre || '',
@@ -48,7 +39,7 @@ export default function FormularioEquipo({
       estadoInicial: equipoAEditar?.estado || ESTADOS_EQUIPO.DISPONIBLE
     },
     validar: (vals) => validarEquipo(vals, esEdicion),
-    onSubmit: async (datos) => {
+    alEnviar: async (datos, { setErrores, setErrorGeneral, enfocarPrimerError }) => {
       let resp;
       if (esEdicion) {
         resp = await equipoService.actualizar(equipoAEditar.id, {
@@ -61,18 +52,26 @@ export default function FormularioEquipo({
         resp = await equipoService.crear(datos);
       }
 
-      if (resp.estado === 200 || resp.estado === 201) {
-        alGuardarExitoso?.(resp.datos);
+      const res = interpretarRespuesta(resp);
+      if (res.ok) {
+        alGuardarExitoso?.(esEdicion ? 'Equipo actualizado con éxito.' : 'Equipo registrado con éxito.', res.datos);
         alCerrar();
-      } else {
-        setMensajeGeneral(interpretarRespuestaError(resp.estado, resp.datos));
+        return;
       }
+
+      if (res.errores && Object.keys(res.errores).length > 0) {
+        setErrores(res.errores);
+        enfocarPrimerError(res.errores);
+        return;
+      }
+
+      setErrorGeneral(res.errorGeneral || 'No se pudo guardar el equipo.');
     }
   });
 
   useEffect(() => {
     if (abierto) {
-      reiniciar({
+      form.setValores({
         codigoPatrimonial: equipoAEditar?.codigoPatrimonial || '',
         nombre: equipoAEditar?.nombre || '',
         categoria: equipoAEditar?.categoria || '',
@@ -80,81 +79,86 @@ export default function FormularioEquipo({
         ubicacion: equipoAEditar?.ubicacion || '',
         estadoInicial: equipoAEditar?.estado || ESTADOS_EQUIPO.DISPONIBLE
       });
+      form.setErrores({});
+      form.setErrorGeneral('');
     }
-  }, [abierto, equipoAEditar, reiniciar]);
+  }, [abierto, equipoAEditar]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <ModalDialog
       abierto={abierto}
       alCerrar={alCerrar}
-      titulo={esEdicion ? 'Editar Equipo Tecnológico' : 'Registrar Nuevo Equipo'}
+      titulo={esEdicion ? 'Editar equipo' : 'Nuevo equipo'}
       subtitulo={esEdicion ? `Actualice los datos del equipo ${equipoAEditar.codigoPatrimonial}` : 'Ingrese los datos para dar de alta un equipo en inventario'}
-      textoPrimario={esEdicion ? 'Guardar Cambios' : 'Registrar Equipo'}
+      textoPrimario={esEdicion ? 'Guardar cambios' : 'Registrar equipo'}
       textoSecundario="Cancelar"
       variantePrimaria="primary"
-      enProceso={enviando}
-      alConfirmar={manejarEnvio}
+      enProceso={form.enProceso}
+      alConfirmar={form.manejarEnvio}
       tamano="md"
     >
-      <form onSubmit={manejarEnvio} className="space-y-4" noValidate>
-        {mensajeGeneral && (
-          <AlertMessage variante="peligro" mensaje={mensajeGeneral} />
+      <form onSubmit={form.manejarEnvio} className="space-y-4" noValidate>
+        {form.errorGeneral && (
+          <AlertMessage variante="error" rol="alert" mensaje={form.errorGeneral} />
         )}
 
         <CampoFormulario
           id="codigoPatrimonial"
-          etiqueta="Código Patrimonial"
-          error={errores.codigoPatrimonial}
+          etiqueta="Código patrimonial"
+          error={form.errores.codigoPatrimonial}
           obligatorio={!esEdicion}
-          ayuda={esEdicion ? 'El código patrimonial no puede modificarse una vez registrado.' : 'Identificador único patrimonial (ej. INNO-LAP-099).'}
+          ayuda={esEdicion ? 'El código patrimonial no puede modificarse una vez registrado.' : 'Identificador único patrimonial (ej. EQ-LAP-099).'}
         >
           <TextInput
+            ref={form.registrarRef('codigoPatrimonial')}
             id="codigoPatrimonial"
-            name="codigoPatrimonial"
-            placeholder="INNO-LAP-001"
-            value={valores.codigoPatrimonial}
-            onChange={(e) => cambiarValor('codigoPatrimonial', e.target.value.toUpperCase())}
-            onBlur={() => marcarTocado('codigoPatrimonial')}
-            error={Boolean(errores.codigoPatrimonial)}
-            disabled={esEdicion || enviando}
+            nombre="codigoPatrimonial"
+            placeholder="EQ-LAP-001"
+            valor={form.valores.codigoPatrimonial}
+            alCambiar={(e) => form.cambiarValor('codigoPatrimonial', e.target.value.toUpperCase())}
+            alSalir={() => form.manejarBlur('codigoPatrimonial')}
+            error={form.errores.codigoPatrimonial}
+            soloLectura={esEdicion || form.enProceso}
           />
         </CampoFormulario>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <CampoFormulario
             id="nombre"
-            etiqueta="Nombre del Equipo"
-            error={errores.nombre}
+            etiqueta="Nombre del equipo"
+            error={form.errores.nombre}
             obligatorio
           >
             <TextInput
+              ref={form.registrarRef('nombre')}
               id="nombre"
-              name="nombre"
+              nombre="nombre"
               placeholder="ThinkPad T14 Gen 4"
-              value={valores.nombre}
-              onChange={(e) => cambiarValor('nombre', e.target.value)}
-              onBlur={() => marcarTocado('nombre')}
-              error={Boolean(errores.nombre)}
-              disabled={enviando}
+              valor={form.valores.nombre}
+              alCambiar={(e) => form.cambiarValor('nombre', e.target.value)}
+              alSalir={() => form.manejarBlur('nombre')}
+              error={form.errores.nombre}
+              soloLectura={form.enProceso}
             />
           </CampoFormulario>
 
           <CampoFormulario
             id="categoria"
             etiqueta="Categoría"
-            error={errores.categoria}
+            error={form.errores.categoria}
             obligatorio
           >
             <SelectInput
+              ref={form.registrarRef('categoria')}
               id="categoria"
-              name="categoria"
+              nombre="categoria"
               placeholder="Seleccionar categoría"
               opciones={OPCIONES_CATEGORIA}
-              value={valores.categoria}
-              onChange={(e) => cambiarValor('categoria', e.target.value)}
-              onBlur={() => marcarTocado('categoria')}
-              error={Boolean(errores.categoria)}
-              disabled={enviando}
+              valor={form.valores.categoria}
+              alCambiar={(e) => form.cambiarValor('categoria', e.target.value)}
+              alSalir={() => form.manejarBlur('categoria')}
+              error={form.errores.categoria}
+              soloLectura={form.enProceso}
             />
           </CampoFormulario>
         </div>
@@ -163,36 +167,38 @@ export default function FormularioEquipo({
           <CampoFormulario
             id="marca"
             etiqueta="Marca"
-            error={errores.marca}
+            error={form.errores.marca}
             obligatorio
           >
             <TextInput
+              ref={form.registrarRef('marca')}
               id="marca"
-              name="marca"
+              nombre="marca"
               placeholder="Lenovo / Dell / HP"
-              value={valores.marca}
-              onChange={(e) => cambiarValor('marca', e.target.value)}
-              onBlur={() => marcarTocado('marca')}
-              error={Boolean(errores.marca)}
-              disabled={enviando}
+              valor={form.valores.marca}
+              alCambiar={(e) => form.cambiarValor('marca', e.target.value)}
+              alSalir={() => form.manejarBlur('marca')}
+              error={form.errores.marca}
+              soloLectura={form.enProceso}
             />
           </CampoFormulario>
 
           <CampoFormulario
             id="ubicacion"
-            etiqueta="Ubicación Física"
-            error={errores.ubicacion}
+            etiqueta="Ubicación física"
+            error={form.errores.ubicacion}
             obligatorio
           >
             <TextInput
+              ref={form.registrarRef('ubicacion')}
               id="ubicacion"
-              name="ubicacion"
+              nombre="ubicacion"
               placeholder="Almacén Central TI - Estante B"
-              value={valores.ubicacion}
-              onChange={(e) => cambiarValor('ubicacion', e.target.value)}
-              onBlur={() => marcarTocado('ubicacion')}
-              error={Boolean(errores.ubicacion)}
-              disabled={enviando}
+              valor={form.valores.ubicacion}
+              alCambiar={(e) => form.cambiarValor('ubicacion', e.target.value)}
+              alSalir={() => form.manejarBlur('ubicacion')}
+              error={form.errores.ubicacion}
+              soloLectura={form.enProceso}
             />
           </CampoFormulario>
         </div>
@@ -200,17 +206,19 @@ export default function FormularioEquipo({
         {!esEdicion && (
           <CampoFormulario
             id="estadoInicial"
-            etiqueta="Estado Inicial de Alta"
-            error={errores.estadoInicial}
+            etiqueta="Estado inicial de alta"
+            error={form.errores.estadoInicial}
           >
             <SelectInput
+              ref={form.registrarRef('estadoInicial')}
               id="estadoInicial"
-              name="estadoInicial"
+              nombre="estadoInicial"
               placeholder="Estado inicial"
               opciones={OPCIONES_ESTADO_INICIAL}
-              value={valores.estadoInicial}
-              onChange={(e) => cambiarValor('estadoInicial', e.target.value)}
-              disabled={enviando}
+              valor={form.valores.estadoInicial}
+              alCambiar={(e) => form.cambiarValor('estadoInicial', e.target.value)}
+              error={form.errores.estadoInicial}
+              soloLectura={form.enProceso}
             />
           </CampoFormulario>
         )}
