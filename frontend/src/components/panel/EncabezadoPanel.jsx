@@ -3,7 +3,12 @@ import { useFocoAlMontar } from '../../hooks/useFocoAlMontar';
 import Button from '../ui/Button';
 import Icono from '../ui/Icono';
 
-export default function EncabezadoPanel({ puedeSolicitar = false, alSolicitarPrestamo }) {
+export default function EncabezadoPanel({
+  puedeRegistrarDirecto = false,
+  puedeSolicitar = false,
+  alRegistrarPrestamo,
+  alSolicitarPrestamo
+}) {
   const refTitulo = useFocoAlMontar(true, 'Panel');
 
   return (
@@ -20,14 +25,21 @@ export default function EncabezadoPanel({ puedeSolicitar = false, alSolicitarPre
           Resumen general del inventario y los préstamos de equipos.
         </p>
       </div>
-      {puedeSolicitar && (
+      {puedeRegistrarDirecto ? (
+        <div className="flex items-center gap-2.5 shrink-0">
+          <Button variante="primario" alHacerClic={alRegistrarPrestamo}>
+            <Icono nombre="Plus" className="w-4 h-4 mr-1.5 shrink-0" />
+            <span>Registrar préstamo</span>
+          </Button>
+        </div>
+      ) : puedeSolicitar ? (
         <div className="flex items-center gap-2.5 shrink-0">
           <Button variante="primario" alHacerClic={alSolicitarPrestamo}>
             <Icono nombre="Plus" className="w-4 h-4 mr-1.5 shrink-0" />
             <span>Solicitar préstamo</span>
           </Button>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -8,9 +8,13 @@ import Sidebar from '../components/navegacion/Sidebar';
 import Header from '../components/navegacion/Header';
 import PageContainer from '../components/navegacion/PageContainer';
 import FormularioSolicitarPrestamo from '../components/prestamos/FormularioSolicitarPrestamo';
+import FormularioPrestamoDirecto from '../components/prestamos/FormularioPrestamoDirecto';
+import { PERMISOS } from '../constants/permisos';
 
 export default function LayoutPrincipal({ children }) {
-  const { usuario } = useAuth();
+  const { usuario, puede } = useAuth();
+  const esResponsable = usuario?.rol === 'ResponsableTecnologia' || puede(PERMISOS.PRESTAMOS_APROBAR_RECHAZAR);
+  const esColaborador = usuario?.rol === 'Colaborador' || (!esResponsable && puede(PERMISOS.PRESTAMOS_SOLICITAR));
   const ubicacion = useLocation();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [modalPrestamo, setModalPrestamo] = useState({ abierto: false, equipoId: '' });
@@ -61,12 +65,22 @@ export default function LayoutPrincipal({ children }) {
         </PageContainer>
       </div>
 
-      <FormularioSolicitarPrestamo
-        abierto={modalPrestamo.abierto}
-        equipoPreseleccionadoId={modalPrestamo.equipoId}
-        alCerrar={cerrarModalPrestamo}
-        alGuardarExitoso={manejarPrestamoCreado}
-      />
+      {esResponsable && modalPrestamo.abierto && (
+        <FormularioPrestamoDirecto
+          abierto={modalPrestamo.abierto}
+          equipoPreseleccionadoId={modalPrestamo.equipoId}
+          alCerrar={cerrarModalPrestamo}
+          alExito={manejarPrestamoCreado}
+        />
+      )}
+      {esColaborador && modalPrestamo.abierto && (
+        <FormularioSolicitarPrestamo
+          abierto={modalPrestamo.abierto}
+          equipoPreseleccionadoId={modalPrestamo.equipoId}
+          alCerrar={cerrarModalPrestamo}
+          alExito={manejarPrestamoCreado}
+        />
+      )}
     </div>
   );
 }

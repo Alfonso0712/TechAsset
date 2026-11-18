@@ -11,9 +11,11 @@ import { usuarioService } from '../../services/usuarioService';
 import { interpretarRespuestaError } from '../../validation/interpretarRespuesta';
 import { ESTADOS_EQUIPO } from '../../constants/estados';
 import { fechaHoyLocal } from '../../utils/fechas';
+import { CLASES_FORMULARIO } from '../formulario/CampoFormulario';
 
 export default function FormularioPrestamoDirecto({
   abierto = false,
+  equipoPreseleccionadoId = '',
   alCerrar,
   alExito,
   alGuardarExitoso
@@ -38,7 +40,7 @@ export default function FormularioPrestamoDirecto({
   } = useFormulario({
     valoresIniciales: {
       idUsuario: '',
-      idEquipo: '',
+      idEquipo: equipoPreseleccionadoId || '',
       fechaPrestamo: hoyStr,
       fechaDevolucionEstimada: '',
       motivo: ''
@@ -75,7 +77,7 @@ export default function FormularioPrestamoDirecto({
     if (abierto) {
       reiniciar({
         idUsuario: '',
-        idEquipo: '',
+        idEquipo: equipoPreseleccionadoId || '',
         fechaPrestamo: hoyStr,
         fechaDevolucionEstimada: '',
         motivo: ''
@@ -101,29 +103,32 @@ export default function FormularioPrestamoDirecto({
         setCargandoDatos(false);
       });
     }
-  }, [abierto, hoyStr, reiniciar]);
+  }, [abierto, equipoPreseleccionadoId, hoyStr, reiniciar]);
+
+  const tieneCambios = Boolean(valores.idUsuario || valores.idEquipo || valores.motivo);
 
   return (
     <ModalDialog
       abierto={abierto}
       alCerrar={alCerrar}
-      titulo="Otorgar Préstamo Directo"
-      subtitulo="Asignación directa de equipo a un colaborador (se registra en estado Activo)"
-      textoPrimario="Otorgar Préstamo"
+      titulo="Registrar préstamo"
+      subtitulo="Asignación directa de equipo a un colaborador (nace en estado Activo)"
+      textoPrimario="Registrar préstamo"
       textoSecundario="Cancelar"
       variantePrimaria="primary"
       enProceso={enviando}
       alConfirmar={manejarEnvio}
+      tieneCambiosSinGuardar={tieneCambios}
       tamano="md"
     >
-      <form onSubmit={manejarEnvio} className="space-y-4" noValidate>
+      <form onSubmit={manejarEnvio} className={CLASES_FORMULARIO.formulario} noValidate>
         {mensajeGeneral && <AlertMessage variante="peligro" mensaje={mensajeGeneral} />}
 
         <SelectInput
-          id="idUsuario"
+          id="idUsuarioDirecto"
           nombre="idUsuario"
-          etiqueta="Colaborador Beneficiario"
-          placeholder={cargandoDatos ? 'Cargando usuarios…' : 'Seleccione al colaborador'}
+          etiqueta="Colaborador Solicitante"
+          placeholder={cargandoDatos ? 'Cargando colaboradores…' : 'Seleccione al colaborador'}
           opciones={usuarios}
           valor={valores.idUsuario}
           alCambiar={(e) => cambiarValor('idUsuario', e.target.value)}
@@ -147,7 +152,7 @@ export default function FormularioPrestamoDirecto({
           deshabilitado={enviando || cargandoDatos}
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className={CLASES_FORMULARIO.filaDoble}>
           <DateInput
             id="fechaPrestamoDirecto"
             nombre="fechaPrestamoDirecto"

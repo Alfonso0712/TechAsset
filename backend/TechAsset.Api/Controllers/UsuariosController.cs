@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using TechAsset.Application.DTOs;
 using TechAsset.Application.Interfaces;
 using TechAsset.Domain.Constants;
+using TechAsset.Domain.Enums;
 
 namespace TechAsset.Api.Controllers;
 
@@ -24,11 +25,17 @@ public class UsuariosController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Policy = Permisos.UsuariosListar)]
     public async Task<ActionResult<PaginadoDto<UsuarioDto>>> Listar(
         [FromQuery] ParametrosConsultaUsuarios parametros,
         CancellationToken ct)
     {
+        var esAdmin = User.IsInRole(nameof(RolUsuario.Administrador));
+        var esResp = User.IsInRole(nameof(RolUsuario.ResponsableTecnologia));
+        if (!esAdmin && !esResp)
+        {
+            return Forbid();
+        }
+
         var resultado = await _usuarioService.ListarAsync(parametros, ct);
         return Ok(resultado);
     }
