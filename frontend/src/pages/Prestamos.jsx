@@ -1,316 +1,383 @@
-import { useState, useEffect, useCallback } from 'react';
+// Gestión y listado de préstamos de equipos tecnológicos · Fidelidad ReservaUPLA · WCAG 2.2 AA
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { useDebounce } from '../hooks/useDebounce';
+import { PERMISOS } from '../constants/permisos';
+import { ESTADOS_PRESTAMO } from '../constants/estados';
+import { normalizarTexto } from '../utils/normalizarTexto';
+import { formatearFecha } from '../utils/formatearFecha';
+import { obtenerIniciales } from '../utils/obtenerIniciales';
+import { prestamoService } from '../services/prestamoService';
+
+import EncabezadoPagina from '../components/navegacion/EncabezadoPagina';
+import FiltrosPrestamos from '../components/prestamos/FiltrosPrestamos';
+import PestanasEstado from '../components/prestamos/PestanasEstado';
+import AccionesFilaPrestamo from '../components/prestamos/AccionesFilaPrestamo';
 import TableList from '../components/ui/TableList';
-import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
+import Icono from '../components/ui/Icono';
 import Toast from '../components/ui/Toast';
-import FormularioSolicitarPrestamo from '../components/prestamos/FormularioSolicitarPrestamo';
-import FormularioPrestamoDirecto from '../components/prestamos/FormularioPrestamoDirecto';
+
+import ModalDetallePrestamo from '../components/prestamos/ModalDetallePrestamo';
 import ModalAprobarPrestamo from '../components/prestamos/ModalAprobarPrestamo';
 import ModalRechazarPrestamo from '../components/prestamos/ModalRechazarPrestamo';
 import ModalDevolverPrestamo from '../components/prestamos/ModalDevolverPrestamo';
-import { prestamoService } from '../services/prestamoService';
-import { useAuth } from '../hooks/useAuth';
-import { PERMISOS } from '../constants/permisos';
-import { ROLES } from '../constants/roles';
-import { ESTADOS_PRESTAMO } from '../constants/estados';
-import { formatearFecha } from '../utils/formatearFecha';
-
-const PESTANAS = [
-  { clave: '', etiqueta: 'Todos' },
-  { clave: ESTADOS_PRESTAMO.PENDIENTE, etiqueta: 'Pendientes' },
-  { clave: ESTADOS_PRESTAMO.ACTIVO, etiqueta: 'Activos' },
-  { clave: ESTADOS_PRESTAMO.DEVUELTO, etiqueta: 'Devueltos' },
-  { clave: ESTADOS_PRESTAMO.RECHAZADO, etiqueta: 'Rechazados' }
-];
+import FormularioSolicitarPrestamo from '../components/prestamos/FormularioSolicitarPrestamo';
 
 export default function Prestamos() {
   const { usuario, puede } = useAuth();
+  const [params, setParams] = useSearchParams();
+
   const [prestamos, setPrestamos] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [pestanaActiva, setPestanaActiva] = useState('');
-  const [toast, setToast] = useState(null);
+  const [error, setError] = useState(null);
+  const [toasts, setToasts] = useState([]);
+
+  // Filtros sincronizados con URL
+  const [busquedaTexto, setBusquedaTexto] = useState(() => params.get('texto') || '');
+  const [fechaDesde, setFechaDesde] = useState(() => params.get('desde') || '');
+  const [fechaHasta, setFechaHasta] = useState(() => params.get('hasta') || '');
+  const estadoFiltro = params.get('estado') || '';
+  const textoDebounce = useDebounce(busquedaTexto);
 
   // Modales
+  const [prestamoDetalle, setPrestamoDetalle] = useState(null);
+  const [prestamoParaAprobar, setPrestamoParaAprobar] = useState(null);
+  const [prestamoParaRechazar, setPrestamoParaRechazar] = useState(null);
+  const [prestamoParaDevolver, setPrestamoParaDevolver] = useState(null);
   const [modalSolicitarAbierto, setModalSolicitarAbierto] = useState(false);
-  const [modalDirectoAbierto, setModalDirectoAbierto] = useState(false);
-  const [modalAprobarAbierto, setModalAprobarAbierto] = useState(false);
-  const [modalRechazarAbierto, setModalRechazarAbierto] = useState(false);
-  const [modalDevolverAbierto, setModalDevolverAbierto] = useState(false);
-  const [prestamoSeleccionado, setPrestamoSeleccionado] = useState(null);
+
+  const puedeGestionar = puede(PERMISOS.PRESTAMOS_APROBAR_RECHAZAR);
+  const puedeSolicitar = puede(PERMISOS.PRESTAMOS_SOLICITAR);
+  const esColaborador = usuario?.rol === 'Colaborador';
 
   const cargarPrestamos = useCallback(async () => {
     setCargando(true);
+    setError(null);
     try {
-      const resp = await prestamoService.listar({
-        estado: pestanaActiva || undefined,
-        tamanoPagina: 50
-      });
-      if (resp.estado === 200 && resp.datos?.items) {
-        setPrestamos(resp.datos.items);
+      const resp = await prestamoService.listar({ tamanoPagina: 100 });
+      if (resp.estado === 200 && resp.datos) {
+        const items = Array.isArray(resp.datos) ? resp.datos : resp.datos.items || [];
+        setPrestamos(items);
       } else {
-        setPrestamos([]);
+        setError('No se pudieron cargar los registros de préstamos.');
       }
     } catch {
-      setPrestamos([]);
+      setError('Error de conexión al cargar préstamos.');
     } finally {
       setCargando(false);
     }
-  }, [pestanaActiva]);
+  }, []);
 
   useEffect(() => {
     cargarPrestamos();
   }, [cargarPrestamos]);
 
-  const esColaborador = usuario?.rol === ROLES.COLABORADOR;
-  const puedeSolicitar = puede(PERMISOS.PRESTAMOS_SOLICITAR);
-  const puedeAprobarRechazar = puede(PERMISOS.PRESTAMOS_APROBAR_RECHAZAR);
-  const puedeDevolver = puede(PERMISOS.PRESTAMOS_DEVOLVER);
+  // Si hay un query param 'id', abrir detalle automáticamente
+  useEffect(() => {
+    const idParam = params.get('id');
+    if (idParam && prestamos.length > 0) {
+      const encontrado = prestamos.find((p) => p.id === idParam);
+      if (encontrado) setPrestamoDetalle(encontrado);
+    }
+  }, [params, prestamos]);
+
+  const actualizarParametro = useCallback((clave, valor) => {
+    const nuevosParams = new URLSearchParams(params);
+    if (clave === 'estado') {
+      if (valor) nuevosParams.set('estado', valor);
+      else nuevosParams.delete('estado');
+    } else if (valor) {
+      nuevosParams.set(clave, valor);
+    } else {
+      nuevosParams.delete(clave);
+    }
+    setParams(nuevosParams, { replace: true });
+  }, [params, setParams]);
+
+  const agregarToast = (mensaje, tipo = 'exito') => {
+    setToasts((prev) => [...prev.slice(-2), { id: Date.now(), tipo, mensaje }]);
+  };
+
+  const handleExitoAccion = (mensaje) => {
+    setPrestamoParaAprobar(null);
+    setPrestamoParaRechazar(null);
+    setPrestamoParaDevolver(null);
+    setModalSolicitarAbierto(false);
+    agregarToast(mensaje);
+    cargarPrestamos();
+  };
+
+  // Cálculo de conteos reales para pestañas de estado
+  const conteos = useMemo(() => {
+    const base = {
+      total: prestamos.length,
+      pendientes: 0,
+      activos: 0,
+      devueltos: 0,
+      rechazados: 0
+    };
+    prestamos.forEach((p) => {
+      const est = p.estado;
+      if (est === ESTADOS_PRESTAMO.PENDIENTE || est === 'Pendiente') base.pendientes++;
+      else if (est === ESTADOS_PRESTAMO.ACTIVO || est === 'Activo' || est === 'Prestado') base.activos++;
+      else if (est === ESTADOS_PRESTAMO.DEVUELTO || est === 'Devuelto') base.devueltos++;
+      else if (est === ESTADOS_PRESTAMO.RECHAZADO || est === 'Rechazado') base.rechazados++;
+    });
+    return base;
+  }, [prestamos]);
+
+  // Filtrado y ordenamiento: pendientes primero, luego por fecha más reciente
+  const filtrados = useMemo(() => {
+    const busqueda = normalizarTexto(textoDebounce).toLowerCase();
+
+    return prestamos.filter((p) => {
+      if (estadoFiltro) {
+        if (estadoFiltro === ESTADOS_PRESTAMO.ACTIVO && p.estado !== 'Activo' && p.estado !== 'Prestado') return false;
+        if (estadoFiltro !== ESTADOS_PRESTAMO.ACTIVO && p.estado !== estadoFiltro) return false;
+      }
+      if (fechaDesde && p.fechaPrestamo < fechaDesde) return false;
+      if (fechaHasta && p.fechaPrestamo > fechaHasta) return false;
+
+      if (!busqueda) return true;
+      const solicitante = `${p.solicitanteNombre || p.solicitante?.nombreCompleto || ''} ${p.solicitanteCorreo || p.solicitante?.correo || ''} ${p.solicitanteArea || ''}`;
+      const equipo = `${p.equipoNombre || p.equipo?.nombre || ''} ${p.equipoCodigo || p.equipo?.codigoPatrimonial || ''}`;
+      const textoCompleto = `${solicitante} ${equipo} ${p.motivo || ''}`.toLowerCase();
+      return textoCompleto.includes(busqueda);
+    }).sort((a, b) => {
+      const esPendA = a.estado === 'Pendiente' ? 0 : 1;
+      const esPendB = b.estado === 'Pendiente' ? 0 : 1;
+      if (esPendA !== esPendB) return esPendA - esPendB;
+      return (b.fechaPrestamo || '').localeCompare(a.fechaPrestamo || '');
+    });
+  }, [prestamos, estadoFiltro, textoDebounce, fechaDesde, fechaHasta]);
 
   const columnas = [
     {
-      clave: 'equipoCodigo',
-      encabezado: 'Equipo',
+      clave: 'solicitante',
+      encabezado: 'Solicitante',
       ordenable: true,
-      render: (valor, fila) => (
-        <div>
-          <span className="font-mono font-bold text-primario">{valor}</span>
-          <p className="text-xs text-texto font-medium">{fila.equipoNombre}</p>
-        </div>
-      )
-    },
-    ...(!esColaborador ? [
-      {
-        clave: 'solicitanteNombre',
-        encabezado: 'Solicitante',
-        ordenable: true,
-        render: (valor, fila) => (
-          <div>
-            <p className="font-semibold text-texto leading-snug">{valor}</p>
-            <p className="text-xs text-texto-suave">{fila.solicitanteArea || fila.solicitanteCorreo}</p>
+      claseEncabezado: 'min-w-[14rem] px-3',
+      claseCelda: 'min-w-[14rem] px-3',
+      render: (p) => {
+        const nombre = p.solicitanteNombre || p.solicitante?.nombreCompleto || 'Colaborador';
+        const correo = p.solicitanteCorreo || p.solicitante?.correo || '';
+        const area = p.solicitanteArea || p.solicitante?.areaNombre || '';
+        return (
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="w-8 h-8 rounded-full bg-primario-suave text-primario dark:text-primario-enlace font-bold text-xs flex items-center justify-center shrink-0">
+              {obtenerIniciales(nombre) || 'U'}
+            </span>
+            <div className="min-w-0 flex-1">
+              <button
+                type="button"
+                onClick={() => setPrestamoDetalle(p)}
+                className="font-semibold text-texto hover:text-primario-enlace hover:underline line-clamp-1 block text-sm text-left"
+                title={nombre}
+              >
+                {nombre}
+              </button>
+              <p className="text-xs text-texto-suave truncate mt-0.5" title={`${correo} · ${area}`}>
+                {correo} {area ? `· ${area}` : ''}
+              </p>
+            </div>
           </div>
-        )
+        );
       }
-    ] : []),
+    },
     {
-      clave: 'fechaPrestamo',
+      clave: 'equipo',
+      encabezado: 'Equipo',
+      claseEncabezado: 'min-w-[13rem] px-3',
+      claseCelda: 'min-w-[13rem] px-3',
+      render: (p) => {
+        const nombre = p.equipoNombre || p.equipo?.nombre || 'Equipo';
+        const codigo = p.equipoCodigo || p.equipo?.codigoPatrimonial || '';
+        return (
+          <div className="min-w-0">
+            <p className="font-semibold text-texto line-clamp-1 block text-sm" title={nombre}>
+              {nombre}
+            </p>
+            {codigo && (
+              <span className="font-mono text-xs text-texto-suave block mt-0.5">
+                {codigo}
+              </span>
+            )}
+          </div>
+        );
+      }
+    },
+    {
+      clave: 'periodo',
       encabezado: 'Período',
       ordenable: true,
-      render: (_, fila) => (
-        <div className="text-xs">
-          <p className="text-texto font-medium">{formatearFecha(fila.fechaPrestamo)}</p>
-          <p className="text-texto-suave">hasta {formatearFecha(fila.fechaDevolucionEstimada)}</p>
+      claseEncabezado: 'w-[1%] whitespace-nowrap px-3',
+      claseCelda: 'w-[1%] whitespace-nowrap px-3 cifra-tabular',
+      render: (p) => (
+        <div className="min-w-0">
+          <span className="font-semibold text-texto block text-sm leading-snug">
+            {formatearFecha(p.fechaPrestamo)}
+          </span>
+          <span className="text-xs text-texto-suave mt-0.5 block leading-snug">
+            hasta {formatearFecha(p.fechaDevolucionEstimada)}
+          </span>
         </div>
       )
     },
     {
       clave: 'estado',
       encabezado: 'Estado',
-      ordenable: true,
-      render: (valor) => <Badge estado={valor} />
+      claseEncabezado: 'w-[1%] whitespace-nowrap px-3',
+      claseCelda: 'w-[1%] whitespace-nowrap px-3',
+      render: (p) => <Badge estado={p.estado} />
     },
     {
       clave: 'motivo',
       encabezado: 'Motivo / Detalle',
-      render: (valor, fila) => (
-        <div className="max-w-xs text-xs">
-          <p className="text-texto line-clamp-1">{valor}</p>
-          {fila.observacion && (
-            <p className="text-exito-texto italic line-clamp-1 mt-0.5">
-              Obs: {fila.observacion}
-            </p>
-          )}
-        </div>
+      claseEncabezado: 'min-w-[12rem] px-3 hidden xl:table-cell',
+      claseCelda: 'min-w-[12rem] px-3 hidden xl:table-cell',
+      render: (p) => (
+        <p className="text-xs text-texto-suave line-clamp-2 leading-relaxed" title={p.motivo}>
+          {p.motivo || 'Sin motivo especificado'}
+        </p>
       )
     },
     {
       clave: 'acciones',
       encabezado: 'Acciones',
-      claseCelda: 'text-right',
-      render: (_, fila) => (
-        <div className="flex items-center justify-end gap-1.5">
-          {puedeAprobarRechazar && fila.estado === ESTADOS_PRESTAMO.PENDIENTE && (
-            <>
-              <Button
-                variante="success"
-                tamano="sm"
-                icono="Check"
-                tooltip="Aprobar solicitud"
-                onClick={() => {
-                  setPrestamoSeleccionado(fila);
-                  setModalAprobarAbierto(true);
-                }}
-              />
-              <Button
-                variante="danger"
-                tamano="sm"
-                icono="X"
-                tooltip="Rechazar solicitud"
-                onClick={() => {
-                  setPrestamoSeleccionado(fila);
-                  setModalRechazarAbierto(true);
-                }}
-              />
-            </>
-          )}
-
-          {puedeDevolver && fila.estado === ESTADOS_PRESTAMO.ACTIVO && (
-            <Button
-              variante="primary"
-              tamano="sm"
-              icono="RotateCcw"
-              tooltip="Registrar devolución de equipo (RN-10)"
-              onClick={() => {
-                setPrestamoSeleccionado(fila);
-                setModalDevolverAbierto(true);
-              }}
-            >
-              Devolver
-            </Button>
-          )}
-        </div>
+      claseEncabezado: 'w-[1%] whitespace-nowrap text-right pl-3 pr-4',
+      claseCelda: 'w-[1%] whitespace-nowrap text-right pl-3 pr-4',
+      render: (p) => (
+        <AccionesFilaPrestamo
+          prestamo={p}
+          puedeGestionar={puedeGestionar}
+          alVerDetalle={() => setPrestamoDetalle(p)}
+          alAprobar={() => setPrestamoParaAprobar(p)}
+          alRechazar={() => setPrestamoParaRechazar(p)}
+          alDevolver={() => setPrestamoParaDevolver(p)}
+        />
       )
     }
   ];
 
+  const hayFiltrosActivos = Boolean(busquedaTexto.trim() || estadoFiltro || fechaDesde || fechaHasta);
+  const limpiarFiltros = () => {
+    setBusquedaTexto('');
+    setFechaDesde('');
+    setFechaHasta('');
+    setParams({}, { replace: true });
+  };
+
+  const tituloPagina = esColaborador ? 'Mis préstamos' : 'Préstamos';
+  const descPagina = esColaborador
+    ? 'Consulte sus solicitudes, estado de aprobación y devolución de equipos asignados.'
+    : 'Consulte, filtre y gestione las solicitudes y custodia de equipos corporativos.';
+
   return (
-    <div className="space-y-6 animate-in fade-in">
-      {/* Encabezado */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-texto">
-            Gestión de Préstamos de Equipos
-          </h1>
-          <p className="text-xs text-texto-suave mt-1">
-            {esColaborador
-              ? 'Mis solicitudes y equipos tecnológicos asignados en préstamo activo.'
-              : 'Control institucional de solicitudes, entregas en custodia y devoluciones técnicas.'}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {puedeAprobarRechazar && (
+    <div className="space-y-4 max-w-[1440px] mx-auto w-full">
+      <EncabezadoPagina
+        titulo={tituloPagina}
+        descripcion={descPagina}
+        accionPrimaria={
+          puedeSolicitar ? (
             <Button
-              variante="secondary"
-              icono="Plus"
-              onClick={() => setModalDirectoAbierto(true)}
+              variante="primario"
+              alHacerClic={() => setModalSolicitarAbierto(true)}
             >
-              Préstamo Directo
+              <Icono nombre="Plus" className="w-4 h-4 mr-1.5 shrink-0" />
+              <span>Solicitar préstamo</span>
             </Button>
-          )}
-          {puedeSolicitar && (
-            <Button
-              variante="primary"
-              icono="Plus"
-              onClick={() => setModalSolicitarAbierto(true)}
-            >
-              Solicitar Préstamo
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Pestañas de Estado */}
-      <div className="flex items-center gap-2 border-b border-borde overflow-x-auto pb-1">
-        {PESTANAS.map((pestana) => (
-          <button
-            key={pestana.clave}
-            type="button"
-            onClick={() => setPestanaActiva(pestana.clave)}
-            className={`px-4 py-2 text-xs font-semibold rounded-lg whitespace-nowrap transition-colors ${
-              pestanaActiva === pestana.clave
-                ? 'bg-primario text-sobre-primario shadow-xs'
-                : 'text-texto-suave hover:text-texto hover:bg-superficie-2'
-            }`}
-          >
-            {pestana.etiqueta}
-          </button>
-        ))}
-      </div>
-
-      {/* Tabla de Préstamos */}
-      <TableList
-        caption="Listado de préstamos y solicitudes de equipos"
-        columnas={columnas}
-        datos={prestamos}
-        cargando={cargando}
-        mensajeVacio="No se encontraron registros de préstamos."
+          ) : null
+        }
       />
 
-      {/* Modales */}
+      <FiltrosPrestamos
+        texto={busquedaTexto}
+        estado={estadoFiltro}
+        fechaDesde={fechaDesde}
+        fechaHasta={fechaHasta}
+        totalResultados={filtrados.length}
+        alCambiarTexto={setBusquedaTexto}
+        alCambiarFechaDesde={(v) => {
+          setFechaDesde(v);
+          actualizarParametro('desde', v);
+        }}
+        alCambiarFechaHasta={(v) => {
+          setFechaHasta(v);
+          actualizarParametro('hasta', v);
+        }}
+        alLimpiar={limpiarFiltros}
+      />
+
+      <PestanasEstado
+        estadoActivo={estadoFiltro}
+        conteos={conteos}
+        alSeleccionar={(e) => actualizarParametro('estado', e)}
+      />
+
+      <TableList
+        caption="Listado de solicitudes y custodia de equipos tecnológicos"
+        columnas={columnas}
+        datos={filtrados}
+        cargando={cargando}
+        esFiltroActivo={hayFiltrosActivos}
+        alLimpiarFiltros={limpiarFiltros}
+        mensajeVacio="No hay préstamos registrados aún"
+        descripcionVacia="Puede registrar una nueva solicitud de préstamo con el botón superior."
+      />
+
+      {/* Modales de Gestión de Préstamos */}
+      {prestamoDetalle && (
+        <ModalDetallePrestamo
+          abierto={Boolean(prestamoDetalle)}
+          prestamo={prestamoDetalle}
+          alCerrar={() => {
+            setPrestamoDetalle(null);
+            if (params.has('id')) {
+              actualizarParametro('id', null);
+            }
+          }}
+        />
+      )}
+
+      {prestamoParaAprobar && (
+        <ModalAprobarPrestamo
+          abierto={Boolean(prestamoParaAprobar)}
+          prestamo={prestamoParaAprobar}
+          alCerrar={() => setPrestamoParaAprobar(null)}
+          alExito={() => handleExitoAccion('Solicitud de préstamo aprobada exitosamente.')}
+        />
+      )}
+
+      {prestamoParaRechazar && (
+        <ModalRechazarPrestamo
+          abierto={Boolean(prestamoParaRechazar)}
+          prestamo={prestamoParaRechazar}
+          alCerrar={() => setPrestamoParaRechazar(null)}
+          alExito={() => handleExitoAccion('Solicitud de préstamo rechazada.')}
+        />
+      )}
+
+      {prestamoParaDevolver && (
+        <ModalDevolverPrestamo
+          abierto={Boolean(prestamoParaDevolver)}
+          prestamo={prestamoParaDevolver}
+          alCerrar={() => setPrestamoParaDevolver(null)}
+          alExito={() => handleExitoAccion('Devolución registrada correctamente.')}
+        />
+      )}
+
       {modalSolicitarAbierto && (
         <FormularioSolicitarPrestamo
           abierto={modalSolicitarAbierto}
           alCerrar={() => setModalSolicitarAbierto(false)}
-          alGuardarExitoso={() => {
-            cargarPrestamos();
-            setToast({ mensaje: 'Solicitud de préstamo enviada exitosamente.', variante: 'exito' });
-          }}
+          alExito={() => handleExitoAccion('Solicitud de préstamo enviada para revisión.')}
         />
       )}
 
-      {modalDirectoAbierto && (
-        <FormularioPrestamoDirecto
-          abierto={modalDirectoAbierto}
-          alCerrar={() => setModalDirectoAbierto(false)}
-          alGuardarExitoso={() => {
-            cargarPrestamos();
-            setToast({ mensaje: 'Préstamo directo otorgado y equipo marcado como Prestado.', variante: 'exito' });
-          }}
-        />
-      )}
-
-      {modalAprobarAbierto && (
-        <ModalAprobarPrestamo
-          abierto={modalAprobarAbierto}
-          prestamo={prestamoSeleccionado}
-          alCerrar={() => {
-            setModalAprobarAbierto(false);
-            setPrestamoSeleccionado(null);
-          }}
-          alExito={() => {
-            cargarPrestamos();
-            setToast({ mensaje: 'Préstamo aprobado y equipo entregado.', variante: 'exito' });
-          }}
-        />
-      )}
-
-      {modalRechazarAbierto && (
-        <ModalRechazarPrestamo
-          abierto={modalRechazarAbierto}
-          prestamo={prestamoSeleccionado}
-          alCerrar={() => {
-            setModalRechazarAbierto(false);
-            setPrestamoSeleccionado(null);
-          }}
-          alExito={() => {
-            cargarPrestamos();
-            setToast({ mensaje: 'Solicitud de préstamo rechazada.', variante: 'peligro' });
-          }}
-        />
-      )}
-
-      {modalDevolverAbierto && (
-        <ModalDevolverPrestamo
-          abierto={modalDevolverAbierto}
-          prestamo={prestamoSeleccionado}
-          alCerrar={() => {
-            setModalDevolverAbierto(false);
-            setPrestamoSeleccionado(null);
-          }}
-          alExito={() => {
-            cargarPrestamos();
-            setToast({ mensaje: 'Devolución registrada y equipo marcado como Disponible.', variante: 'exito' });
-          }}
-        />
-      )}
-
-      {toast && (
-        <Toast
-          mensaje={toast.mensaje}
-          variante={toast.variante}
-          alCerrar={() => setToast(null)}
-        />
-      )}
+      <Toast toasts={toasts} alCerrar={(id) => setToasts((prev) => prev.filter((t) => t.id !== id))} />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+// WCAG 2.2 AA · ISO 9241-110 · Paginación accesible con selector de filas y números · Fidelidad ReservaUPLA
 import Icono from './Icono';
 
 function obtenerItems(actual, total) {
@@ -11,7 +12,7 @@ export default function PaginacionTabla({
   paginaActual = 1,
   totalPaginas = 1,
   totalRegistros = 0,
-  tamanoPagina = 10,
+  tamanoPagina = 5,
   alCambiarPagina,
   alCambiarTamanoPagina
 }) {
@@ -36,9 +37,9 @@ export default function PaginacionTabla({
             value={tamanoPagina}
             onChange={(e) => alCambiarTamanoPagina?.(Number(e.target.value))}
             aria-label="Registros por página"
-            className="h-8 px-2.5 rounded-md border border-borde bg-superficie text-texto text-xs font-semibold focus:outline-none focus:border-primario"
+            className="h-8 px-2.5 rounded-pill border border-borde bg-superficie text-texto text-xs font-semibold focus:outline-none focus:border-primario-enlace"
           >
-            {[10, 25, 50].map((n) => (
+            {[5, 10, 20, 50].map((n) => (
               <option key={n} value={n}>
                 {n} / pág.
               </option>
@@ -55,7 +56,7 @@ export default function PaginacionTabla({
             disabled={desAnt}
             aria-disabled={desAnt}
             aria-label="Página anterior"
-            className="h-8 px-2.5 rounded-md border border-borde text-texto hover:bg-superficie-2 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1 font-semibold transition-colors"
+            className="h-8 px-2.5 rounded-control border border-borde text-texto hover:bg-superficie-2 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1 font-semibold transition-colors"
           >
             <Icono nombre="ChevronLeft" className="w-3.5 h-3.5" />
             <span>Anterior</span>
@@ -68,16 +69,17 @@ export default function PaginacionTabla({
                   type="button"
                   onClick={() => alCambiarPagina?.(it)}
                   aria-current={it === paginaActual ? 'page' : undefined}
-                  className={`h-8 min-w-[2rem] px-2 rounded-md border text-xs font-semibold transition-colors ${
+                  aria-label={`Página ${it}`}
+                  className={`w-8 h-8 rounded-control font-semibold text-xs transition-colors ${
                     it === paginaActual
-                      ? 'bg-primario text-sobre-primario border-primario'
-                      : 'border-borde text-texto hover:bg-superficie-2'
+                      ? 'bg-primario text-sobre-primario'
+                      : 'border border-borde text-texto hover:bg-superficie-2'
                   }`}
                 >
                   {it}
                 </button>
               ) : (
-                <span key={`sep-${idx}`} className="px-1 text-texto-suave">
+                <span key={`dots-${idx}`} className="w-6 text-center text-texto-suave">
                   …
                 </span>
               )
@@ -89,7 +91,7 @@ export default function PaginacionTabla({
             disabled={desSig}
             aria-disabled={desSig}
             aria-label="Página siguiente"
-            className="h-8 px-2.5 rounded-md border border-borde text-texto hover:bg-superficie-2 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1 font-semibold transition-colors"
+            className="h-8 px-2.5 rounded-control border border-borde text-texto hover:bg-superficie-2 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1 font-semibold transition-colors"
           >
             <span>Siguiente</span>
             <Icono nombre="ChevronRight" className="w-3.5 h-3.5" />

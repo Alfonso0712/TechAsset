@@ -3,13 +3,17 @@ import {
   ESTADOS_EQUIPO,
   ESTADOS_PRESTAMO
 } from '../../constants/estados';
+import {
+  obtenerEtiquetaEstadoEquipo,
+  obtenerEtiquetaEstadoPrestamo
+} from '../../constants/etiquetas';
 
 const ESTILOS_POR_VARIANTE = {
-  exito: 'bg-disponible-fondo text-disponible-texto border border-disponible-texto/20',
-  informacion: 'bg-prestado-fondo text-prestado-texto border border-prestado-texto/20',
-  advertencia: 'bg-pendiente-fondo text-pendiente-texto border border-pendiente-texto/20',
-  peligro: 'bg-baja-fondo text-baja-texto border border-baja-texto/20',
-  discreto: 'bg-superficie-2 text-texto-suave border border-borde/60'
+  exito: 'bg-exito-fondo text-exito-texto border border-exito-borde',
+  informacion: 'bg-info-fondo text-info-texto border border-info-borde',
+  advertencia: 'bg-advertencia-fondo text-advertencia-texto border border-advertencia-borde',
+  peligro: 'bg-peligro-fondo text-peligro-texto border border-peligro-borde',
+  discreto: 'bg-superficie-2 text-texto-suave border border-borde'
 };
 
 const VARIANTE_POR_ESTADO = {
@@ -18,26 +22,42 @@ const VARIANTE_POR_ESTADO = {
   [ESTADOS_EQUIPO.PRESTADO]: 'informacion',
   [ESTADOS_EQUIPO.MANTENIMIENTO]: 'advertencia',
   [ESTADOS_EQUIPO.BAJA]: 'peligro',
+  Disponible: 'exito',
+  Prestado: 'informacion',
+  Mantenimiento: 'advertencia',
+  Baja: 'peligro',
   // Préstamos
   [ESTADOS_PRESTAMO.PENDIENTE]: 'advertencia',
   [ESTADOS_PRESTAMO.ACTIVO]: 'informacion',
   [ESTADOS_PRESTAMO.DEVUELTO]: 'exito',
-  [ESTADOS_PRESTAMO.RECHAZADO]: 'peligro'
+  [ESTADOS_PRESTAMO.RECHAZADO]: 'peligro',
+  Pendiente: 'advertencia',
+  Activo: 'informacion',
+  Devuelto: 'exito',
+  Rechazado: 'peligro'
 };
 
 const ICONO_POR_ESTADO = {
   [ESTADOS_EQUIPO.DISPONIBLE]: 'CheckCircle2',
-  [ESTADOS_EQUIPO.PRESTADO]: 'Clock',
-  [ESTADOS_EQUIPO.MANTENIMIENTO]: 'Wrench',
-  [ESTADOS_EQUIPO.BAJA]: 'Ban',
+  [ESTADOS_EQUIPO.PRESTADO]: 'PackageCheck',
+  [ESTADOS_EQUIPO.MANTENIMIENTO]: 'AlertTriangle',
+  [ESTADOS_EQUIPO.BAJA]: 'XCircle',
+  Disponible: 'CheckCircle2',
+  Prestado: 'PackageCheck',
+  Mantenimiento: 'AlertTriangle',
+  Baja: 'XCircle',
   [ESTADOS_PRESTAMO.PENDIENTE]: 'Clock',
-  [ESTADOS_PRESTAMO.ACTIVO]: 'ArrowLeft',
+  [ESTADOS_PRESTAMO.ACTIVO]: 'PackageCheck',
   [ESTADOS_PRESTAMO.DEVUELTO]: 'CheckCircle2',
-  [ESTADOS_PRESTAMO.RECHAZADO]: 'XCircle'
+  [ESTADOS_PRESTAMO.RECHAZADO]: 'XCircle',
+  Pendiente: 'Clock',
+  Activo: 'PackageCheck',
+  Devuelto: 'CheckCircle2',
+  Rechazado: 'XCircle'
 };
 
 export default function Badge({ estado, variante: vProp, icono: iProp, discreto = false, children }) {
-  const etiqueta = children || estado || '';
+  const etiqueta = children || obtenerEtiquetaEstadoPrestamo(estado) || obtenerEtiquetaEstadoEquipo(estado) || estado || '';
   const variante = discreto ? 'discreto' : (vProp || VARIANTE_POR_ESTADO[estado] || 'discreto');
   const nombreIcono = iProp || ICONO_POR_ESTADO[estado] || 'Info';
   const clases = ESTILOS_POR_VARIANTE[variante] || ESTILOS_POR_VARIANTE.discreto;

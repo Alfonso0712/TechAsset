@@ -26,7 +26,7 @@ export default function RutaProtegida({ children, permiso }) {
         <EstadoVacio
           icono="Ban"
           titulo="Acceso Restringido"
-          descripcion="Su rol de usuario no cuenta con las autorizaciones requeridas para visualizar este módulo institucional."
+          descripcion="Su rol de usuario no cuenta con las autorizaciones requeridas para visualizar este módulo corporativo."
           accionTexto="Volver al Panel"
           alAccionar={() => window.history.back()}
         />

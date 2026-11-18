@@ -98,7 +98,7 @@ export default function FormularioPrestamoDirecto({
       abierto={abierto}
       alCerrar={alCerrar}
       titulo="Otorgar Préstamo Directo"
-      subtitulo="Asignación directa de equipo a un colaborador (Nace en estado Activo - RN-05)"
+      subtitulo="Asignación directa de equipo a un colaborador (se registra en estado Activo)"
       textoPrimario="Otorgar Préstamo"
       textoSecundario="Cancelar"
       variantePrimaria="primary"

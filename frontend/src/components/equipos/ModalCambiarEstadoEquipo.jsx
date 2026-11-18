@@ -24,7 +24,7 @@ export default function ModalCambiarEstadoEquipo({
   const opcionesEstado = [
     { valor: ESTADOS_EQUIPO.DISPONIBLE, etiqueta: 'Disponible (Operativo en inventario)' },
     { valor: ESTADOS_EQUIPO.MANTENIMIENTO, etiqueta: 'Mantenimiento (Reparación / Revisión técnica)' },
-    { valor: ESTADOS_EQUIPO.BAJA, etiqueta: 'Baja (Inoperativo / Desecho patrimonial - RN-06)' }
+    { valor: ESTADOS_EQUIPO.BAJA, etiqueta: 'Baja técnica (Inoperativo / Desecho patrimonial)' }
   ].filter(opt => opt.valor !== equipo.estado);
 
   const handleConfirmar = async () => {

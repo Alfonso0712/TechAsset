@@ -180,27 +180,71 @@ export async function ejecutarPeticionMock(ruta, { metodo = 'GET', cuerpo = null
     };
   }
 
-  // 5. Dashboard
+  // 5. Dashboard y Reportes
   if (ruta === '/api/reportes/dashboard') {
+    const disp = equiposMock.filter(e => e.estado === 'Disponible').length;
+    const prest = equiposMock.filter(e => e.estado === 'Prestado').length;
+    const mant = equiposMock.filter(e => e.estado === 'Mantenimiento').length;
+    const baja = equiposMock.filter(e => e.estado === 'Baja').length;
     return {
       estado: 200,
       datos: {
         totalEquipos: equiposMock.length,
-        equiposDisponibles: equiposMock.filter(e => e.estado === 'Disponible').length,
-        equiposPrestados: equiposMock.filter(e => e.estado === 'Prestado').length,
-        equiposMantenimiento: 0,
-        equiposBaja: 0,
+        equiposDisponibles: disp,
+        equiposPrestados: prest,
+        equiposMantenimiento: mant,
+        equiposBaja: baja,
         totalPrestamos: prestamosMock.length,
         areaMayorUso: 'Desarrollo de Software',
         distribucionPorEstado: [
-          { estado: 'Disponible', cantidad: 2, porcentaje: 66.7 },
-          { estado: 'Prestado', cantidad: 1, porcentaje: 33.3 }
+          { estado: 'Disponible', cantidad: disp, porcentaje: 54.8 },
+          { estado: 'Prestado', cantidad: prest, porcentaje: 25.8 },
+          { estado: 'Mantenimiento', cantidad: mant, porcentaje: 12.9 },
+          { estado: 'Baja', cantidad: baja, porcentaje: 6.5 }
         ],
         prestamosPorArea: [
-          { area: 'Desarrollo de Software', totalPrestamos: 1 }
+          { area: 'Desarrollo de Software', totalPrestamos: 10 },
+          { area: 'Aseguramiento de Calidad (QA)', totalPrestamos: 7 },
+          { area: 'Diseño y Experiencia (UX/UI)', totalPrestamos: 5 },
+          { area: 'Infraestructura y Redes', totalPrestamos: 3 }
         ],
-        solicitudesPendientes: []
+        solicitudesPendientes: prestamosMock.filter(p => p.estado === 'Pendiente')
       }
+    };
+  }
+
+  if (ruta === '/api/reportes/equipos-por-estado') {
+    return {
+      estado: 200,
+      datos: [
+        { estado: 'Disponible', estadoNombre: 'Disponible', cantidad: 17, porcentaje: 54.8 },
+        { estado: 'Prestado', estadoNombre: 'Prestado', cantidad: 8, porcentaje: 25.8 },
+        { estado: 'Mantenimiento', estadoNombre: 'Mantenimiento', cantidad: 4, porcentaje: 12.9 },
+        { estado: 'Baja', estadoNombre: 'Baja', cantidad: 2, porcentaje: 6.5 }
+      ]
+    };
+  }
+
+  if (ruta.startsWith('/api/reportes/equipos-mas-utilizados')) {
+    return {
+      estado: 200,
+      datos: [
+        { idEquipo: '1', codigoPatrimonial: 'EQ-LAP-001', nombreEquipo: 'MacBook Pro 16 M3 Max', categoria: 'Laptop', totalPrestamos: 5 },
+        { idEquipo: '2', codigoPatrimonial: 'EQ-LAP-003', nombreEquipo: 'Dell XPS 15 9530', categoria: 'Laptop', totalPrestamos: 4 },
+        { idEquipo: '3', codigoPatrimonial: 'EQ-MON-001', nombreEquipo: 'Dell UltraSharp 27 4K', categoria: 'Monitor', totalPrestamos: 3 }
+      ]
+    };
+  }
+
+  if (ruta === '/api/reportes/prestamos-por-area') {
+    return {
+      estado: 200,
+      datos: [
+        { area: 'Desarrollo de Software', totalPrestamos: 10 },
+        { area: 'Aseguramiento de Calidad (QA)', totalPrestamos: 7 },
+        { area: 'Diseño y Experiencia (UX/UI)', totalPrestamos: 5 },
+        { area: 'Infraestructura y Redes', totalPrestamos: 3 }
+      ]
     };
   }
 

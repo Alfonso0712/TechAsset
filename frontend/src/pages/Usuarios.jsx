@@ -1,273 +1,310 @@
-import { useState, useEffect, useCallback } from 'react';
-import FilterBar from '../components/ui/FilterBar';
+// Administración de usuarios, roles corporativos y control de acceso · Fidelidad ReservaUPLA · WCAG 2.2 AA
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { useDebounce } from '../hooks/useDebounce';
+import { PERMISOS } from '../constants/permisos';
+import { normalizarTexto } from '../utils/normalizarTexto';
+import { obtenerIniciales } from '../utils/obtenerIniciales';
+import { obtenerEtiquetaRol } from '../constants/etiquetas';
+import { usuarioService } from '../services/usuarioService';
+
+import EncabezadoPagina from '../components/navegacion/EncabezadoPagina';
+import FiltrosUsuarios from '../components/usuarios/FiltrosUsuarios';
+import AccionesFilaUsuario from '../components/usuarios/AccionesFilaUsuario';
+import FormularioUsuario from '../components/usuarios/FormularioUsuario';
+import ModalConfirmacion from '../components/ui/ModalConfirmacion';
 import TableList from '../components/ui/TableList';
 import Button from '../components/ui/Button';
+import Icono from '../components/ui/Icono';
 import Toast from '../components/ui/Toast';
-import ModalConfirmacion from '../components/ui/ModalConfirmacion';
-import FormularioUsuario from '../components/usuarios/FormularioUsuario';
-import { usuarioService } from '../services/usuarioService';
-import { ROLES } from '../constants/roles';
 
-const OPCIONES_ROL_FILTRO = [
-  { valor: '', etiqueta: 'Todos los roles' },
-  { valor: ROLES.ADMINISTRADOR, etiqueta: 'Administrador' },
-  { valor: ROLES.RESPONSABLE_TECNOLOGIA, etiqueta: 'Responsable Tecnología' },
-  { valor: ROLES.COLABORADOR, etiqueta: 'Colaborador' }
-];
+const ESTILOS_ROL_CHIP = {
+  Administrador: 'bg-primario-suave text-primario dark:text-primario-enlace border border-primario/25',
+  ResponsableTecnologia: 'bg-advertencia-fondo text-advertencia-texto border border-advertencia-borde',
+  Colaborador: 'bg-superficie-2 text-texto border border-borde'
+};
 
-const OPCIONES_ACTIVO_FILTRO = [
-  { valor: '', etiqueta: 'Todos los estados' },
-  { valor: 'true', etiqueta: 'Activos' },
-  { valor: 'false', etiqueta: 'Inactivos' }
-];
+function RolChip({ rol }) {
+  const etiqueta = obtenerEtiquetaRol(rol);
+  const clases = ESTILOS_ROL_CHIP[rol] || ESTILOS_ROL_CHIP.Colaborador;
+
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ${clases}`}>
+      {etiqueta}
+    </span>
+  );
+}
 
 export default function Usuarios() {
+  const { puede, usuario: usuarioActual } = useAuth();
   const [usuarios, setUsuarios] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [busqueda, setBusqueda] = useState('');
+  const [error, setError] = useState(null);
+
+  // Filtros
+  const [textoFiltro, setTextoFiltro] = useState('');
+  const textoDebounce = useDebounce(textoFiltro);
   const [rolFiltro, setRolFiltro] = useState('');
-  const [activoFiltro, setActivoFiltro] = useState('');
-  const [toast, setToast] = useState(null);
+  const [estadoFiltro, setEstadoFiltro] = useState('');
 
   // Modales
-  const [modalFormAbierto, setModalFormAbierto] = useState(false);
-  const [usuarioAEditar, setUsuarioAEditar] = useState(null);
-  const [modalEstadoAbierto, setModalEstadoAbierto] = useState(false);
-  const [usuarioCambiarEstado, setUsuarioCambiarEstado] = useState(null);
+  const [modalCrearAbierto, setModalCrearAbierto] = useState(false);
+  const [usuarioParaEditar, setUsuarioParaEditar] = useState(null);
+  const [usuarioParaCambiarEstado, setUsuarioParaCambiarEstado] = useState(null);
   const [enProcesoEstado, setEnProcesoEstado] = useState(false);
+
+  const [toasts, setToasts] = useState([]);
+
+  const puedeCrear = puede(PERMISOS.USUARIOS_CREAR);
+  const puedeEditar = puede(PERMISOS.USUARIOS_EDITAR);
+  const puedeCambiarEstado = puede(PERMISOS.USUARIOS_CAMBIAR_ESTADO);
 
   const cargarUsuarios = useCallback(async () => {
     setCargando(true);
+    setError(null);
     try {
-      const resp = await usuarioService.listar({
-        texto: busqueda,
-        rol: rolFiltro || undefined,
-        activo: activoFiltro !== '' ? activoFiltro === 'true' : undefined,
-        tamanoPagina: 50
-      });
-      if (resp.estado === 200 && resp.datos?.items) {
-        setUsuarios(resp.datos.items);
+      const resp = await usuarioService.listar({ tamanoPagina: 100 });
+      if (resp.estado === 200 && resp.datos) {
+        const items = Array.isArray(resp.datos) ? resp.datos : resp.datos.items || [];
+        setUsuarios(items);
       } else {
-        setUsuarios([]);
+        setError('No se pudo cargar el listado de usuarios corporativos.');
       }
     } catch {
-      setUsuarios([]);
+      setError('Error de conexión al cargar los usuarios.');
     } finally {
       setCargando(false);
     }
-  }, [busqueda, rolFiltro, activoFiltro]);
+  }, []);
 
   useEffect(() => {
     cargarUsuarios();
   }, [cargarUsuarios]);
 
-  const hayFiltros = Boolean(busqueda || rolFiltro || activoFiltro);
-  const limpiarFiltros = () => {
-    setBusqueda('');
-    setRolFiltro('');
-    setActivoFiltro('');
+  const agregarToast = (mensaje, tipo = 'exito') => {
+    setToasts((prev) => [...prev.slice(-2), { id: Date.now(), tipo, mensaje }]);
   };
 
-  const confirmarCambioEstado = async () => {
-    if (!usuarioCambiarEstado) return;
+  const handleExitoGuardar = (usuarioGuardado) => {
+    setModalCrearAbierto(false);
+    setUsuarioParaEditar(null);
+    agregarToast(`Usuario "${usuarioGuardado.nombreCompleto}" guardado correctamente.`);
+    cargarUsuarios();
+  };
+
+  const manejarSolicitudCambioEstado = (u) => {
+    if (u.activo) {
+      setUsuarioParaCambiarEstado(u);
+    } else {
+      ejecutarCambioEstado(u, true);
+    }
+  };
+
+  const ejecutarCambioEstado = async (u, nuevoEstado) => {
     setEnProcesoEstado(true);
     try {
-      const nuevoEstado = !usuarioCambiarEstado.activo;
-      const resp = await usuarioService.cambiarEstado(usuarioCambiarEstado.id, nuevoEstado);
+      const resp = await usuarioService.cambiarEstado(u.id, nuevoEstado);
       if (resp.estado === 200) {
+        agregarToast(`Usuario "${u.nombreCompleto}" ${nuevoEstado ? 'reactivado' : 'desactivado'} con éxito.`);
+        setUsuarioParaCambiarEstado(null);
         cargarUsuarios();
-        setToast({
-          mensaje: nuevoEstado ? 'Usuario reactivado exitosamente.' : 'Usuario deshabilitado.',
-          variante: nuevoEstado ? 'exito' : 'advertencia'
-        });
-        setModalEstadoAbierto(false);
-        setUsuarioCambiarEstado(null);
       } else {
-        setToast({
-          mensaje: resp.datos?.mensaje || 'No se pudo cambiar el estado del usuario (verifique si tiene préstamos activos - RN-09).',
-          variante: 'peligro'
-        });
+        agregarToast(resp.datos?.error || 'No se pudo actualizar el estado del usuario.', 'error');
       }
     } catch {
-      setToast({ mensaje: 'Error al actualizar el estado del usuario.', variante: 'peligro' });
+      agregarToast('Error al conectar con el servidor para cambiar estado.', 'error');
     } finally {
       setEnProcesoEstado(false);
     }
   };
 
+  // Filtrado local ágil
+  const filtrados = useMemo(() => {
+    const busqueda = normalizarTexto(textoDebounce).toLowerCase();
+    return usuarios.filter((u) => {
+      const coincideRol = !rolFiltro || u.rol === rolFiltro;
+      const coincideEst = !estadoFiltro || (estadoFiltro === 'activos' ? u.activo : !u.activo);
+      const textoCompleto = `${u.nombreCompleto || ''} ${u.nombres || ''} ${u.apellidos || ''} ${u.correo || ''} ${u.areaNombre || u.area?.nombre || ''}`.toLowerCase();
+      const coincideTxt = !busqueda || textoCompleto.includes(busqueda);
+      return coincideRol && coincideEst && coincideTxt;
+    });
+  }, [usuarios, textoDebounce, rolFiltro, estadoFiltro]);
+
   const columnas = [
     {
-      clave: 'nombreCompleto',
+      clave: 'usuario',
       encabezado: 'Usuario',
       ordenable: true,
-      render: (valor, fila) => (
-        <div>
-          <p className="font-semibold text-texto leading-snug">{valor}</p>
-          <p className="text-xs text-texto-suave font-mono">{fila.correo}</p>
+      claseEncabezado: 'min-w-[15rem] px-3',
+      claseCelda: 'min-w-[15rem] px-3',
+      render: (u) => (
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="w-8 h-8 rounded-full bg-primario-suave text-primario dark:text-primario-enlace font-bold text-xs flex items-center justify-center shrink-0">
+            {obtenerIniciales(u.nombreCompleto) || 'U'}
+          </span>
+          <div className="min-w-0 flex-1">
+            <span className="font-semibold text-texto block text-sm truncate" title={u.nombreCompleto}>
+              {u.nombreCompleto}
+            </span>
+            <span className="text-xs text-texto-suave block truncate" title={u.correo}>
+              {u.correo}
+            </span>
+          </div>
         </div>
       )
     },
     {
-      clave: 'areaNombre',
+      clave: 'area',
       encabezado: 'Área',
-      ordenable: true,
-      render: (valor) => <span className="text-xs text-texto-suave font-medium">{valor || '-'}</span>
-    },
-    {
-      clave: 'rol',
-      encabezado: 'Rol Institucional',
-      ordenable: true,
-      render: (valor) => (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-superficie-2 text-texto border border-borde">
-          {valor}
+      claseEncabezado: 'min-w-[12rem] px-3 hidden md:table-cell',
+      claseCelda: 'min-w-[12rem] px-3 hidden md:table-cell',
+      render: (u) => (
+        <span className="text-xs text-texto-suave line-clamp-1" title={u.areaNombre || u.area?.nombre || 'General'}>
+          {u.areaNombre || u.area?.nombre || 'General'}
         </span>
       )
     },
     {
-      clave: 'activo',
+      clave: 'rol',
+      encabezado: 'Rol',
+      claseEncabezado: 'w-[1%] whitespace-nowrap px-3',
+      claseCelda: 'w-[1%] whitespace-nowrap px-3',
+      render: (u) => <RolChip rol={u.rol} />
+    },
+    {
+      clave: 'estado',
       encabezado: 'Estado',
-      ordenable: true,
-      render: (valor) => (
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
-          valor ? 'bg-exito-fondo text-exito-texto' : 'bg-peligro-fondo text-peligro-texto'
-        }`}>
-          {valor ? 'Activo' : 'Inactivo'}
+      claseEncabezado: 'w-[1%] whitespace-nowrap px-3',
+      claseCelda: 'w-[1%] whitespace-nowrap px-3',
+      render: (u) => (
+        <span
+          className={`inline-flex items-center gap-1.5 h-[1.625rem] px-2.5 rounded-full text-xs font-semibold leading-none whitespace-nowrap border ${
+            u.activo
+              ? 'bg-exito-fondo text-exito-texto border-exito-borde'
+              : 'bg-peligro-fondo text-peligro-texto border-peligro-borde'
+          }`}
+        >
+          <Icono nombre={u.activo ? 'CheckCircle2' : 'XCircle'} className="w-3.5 h-3.5 shrink-0" />
+          <span>{u.activo ? 'Activo' : 'Inactivo'}</span>
         </span>
       )
     },
     {
       clave: 'acciones',
       encabezado: 'Acciones',
-      claseCelda: 'text-right',
-      render: (_, fila) => (
-        <div className="flex items-center justify-end gap-1.5">
-          <Button
-            variante="ghost"
-            tamano="sm"
-            icono="Pencil"
-            tooltip="Editar datos"
-            onClick={() => {
-              setUsuarioAEditar(fila);
-              setModalFormAbierto(true);
-            }}
-          />
-          <Button
-            variante={fila.activo ? 'danger-outline' : 'ghost'}
-            tamano="sm"
-            icono="Power"
-            tooltip={fila.activo ? 'Deshabilitar cuenta' : 'Reactivar cuenta'}
-            onClick={() => {
-              setUsuarioCambiarEstado(fila);
-              setModalEstadoAbierto(true);
-            }}
-          />
-        </div>
+      claseEncabezado: 'w-[1%] whitespace-nowrap text-right pl-3 pr-4',
+      claseCelda: 'w-[1%] whitespace-nowrap text-right pl-3 pr-4',
+      render: (u) => (
+        <AccionesFilaUsuario
+          usuario={u}
+          puedeEditar={puedeEditar}
+          puedeCambiarEstado={puedeCambiarEstado}
+          esUsuarioActual={usuarioActual?.id === u.id || usuarioActual?.correo === u.correo}
+          alEditar={setUsuarioParaEditar}
+          alCambiarEstado={manejarSolicitudCambioEstado}
+        />
       )
     }
   ];
 
+  const hayFiltrosActivos = Boolean(textoFiltro.trim() || rolFiltro || estadoFiltro);
+  const limpiarFiltros = () => {
+    setTextoFiltro('');
+    setRolFiltro('');
+    setEstadoFiltro('');
+  };
+
   return (
-    <div className="space-y-6 animate-in fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-texto">
-            Gestión de Usuarios y Accesos
-          </h1>
-          <p className="text-xs text-texto-suave mt-1">
-            Administración de cuentas corporativas, roles y asignación de áreas.
-          </p>
-        </div>
+    <div className="space-y-5 max-w-[1440px] mx-auto w-full">
+      <EncabezadoPagina
+        titulo="Usuarios"
+        descripcion="Administración de cuentas corporativas, roles y asignación de áreas."
+        accionPrimaria={
+          puedeCrear ? (
+            <Button
+              variante="primario"
+              alHacerClic={() => setModalCrearAbierto(true)}
+            >
+              <Icono nombre="Plus" className="w-4 h-4 mr-1.5 shrink-0" />
+              <span>Nuevo usuario</span>
+            </Button>
+          ) : null
+        }
+      />
 
-        <Button
-          variante="primary"
-          icono="Plus"
-          onClick={() => {
-            setUsuarioAEditar(null);
-            setModalFormAbierto(true);
-          }}
-        >
-          Nuevo Usuario
-        </Button>
-      </div>
-
-      <FilterBar
-        busqueda={busqueda}
-        alCambiarBusqueda={setBusqueda}
-        placeholderBusqueda="Buscar por nombre o correo…"
-        filtros={[
-          {
-            id: 'rolFiltro',
-            etiqueta: 'Filtrar por rol',
-            valor: rolFiltro,
-            opciones: OPCIONES_ROL_FILTRO,
-            alCambiar: setRolFiltro
-          },
-          {
-            id: 'activoFiltro',
-            etiqueta: 'Filtrar por estado',
-            valor: activoFiltro,
-            opciones: OPCIONES_ACTIVO_FILTRO,
-            alCambiar: setActivoFiltro
-          }
-        ]}
-        hayFiltrosActivos={hayFiltros}
-        alLimpiarFiltros={limpiarFiltros}
+      <FiltrosUsuarios
+        texto={textoFiltro}
+        rol={rolFiltro}
+        estado={estadoFiltro}
+        totalResultados={filtrados.length}
+        alCambiarTexto={setTextoFiltro}
+        alCambiarRol={setRolFiltro}
+        alCambiarEstado={setEstadoFiltro}
+        alLimpiar={limpiarFiltros}
       />
 
       <TableList
-        caption="Listado de usuarios registrados en el sistema"
+        caption="Directorio corporativo de cuentas de usuario y permisos"
         columnas={columnas}
-        datos={usuarios}
+        datos={filtrados}
         cargando={cargando}
-        esFiltroActivo={hayFiltros}
+        esFiltroActivo={hayFiltrosActivos}
         alLimpiarFiltros={limpiarFiltros}
-        mensajeVacio="No se encontraron usuarios registrados."
+        mensajeVacio="No hay usuarios registrados aún"
+        descripcionVacia="Puede registrar una nueva cuenta corporativa con el botón superior."
+        accionVacia={
+          puedeCrear ? (
+            <Button variante="primario" alHacerClic={() => setModalCrearAbierto(true)}>
+              <Icono nombre="Plus" className="w-4 h-4 mr-1.5 shrink-0" />
+              <span>Nuevo usuario</span>
+            </Button>
+          ) : null
+        }
       />
 
-      {/* Modal Formulario Usuario */}
-      {modalFormAbierto && (
+      {/* Modal Crear */}
+      {modalCrearAbierto && (
         <FormularioUsuario
-          abierto={modalFormAbierto}
-          usuarioAEditar={usuarioAEditar}
-          alCerrar={() => {
-            setModalFormAbierto(false);
-            setUsuarioAEditar(null);
-          }}
-          alGuardarExitoso={() => {
-            cargarUsuarios();
-            setToast({ mensaje: 'Usuario guardado exitosamente.', variante: 'exito' });
-          }}
+          abierto={modalCrearAbierto}
+          alCerrar={() => setModalCrearAbierto(false)}
+          alExito={handleExitoGuardar}
         />
       )}
 
-      {/* Modal Confirmación Desactivación / Reactivación */}
-      {modalEstadoAbierto && (
+      {/* Modal Editar */}
+      {usuarioParaEditar && (
+        <FormularioUsuario
+          abierto={Boolean(usuarioParaEditar)}
+          usuarioAEditar={usuarioParaEditar}
+          alCerrar={() => setUsuarioParaEditar(null)}
+          alExito={handleExitoGuardar}
+        />
+      )}
+
+      {/* Modal Desactivar */}
+      {usuarioParaCambiarEstado && (
         <ModalConfirmacion
-          abierto={modalEstadoAbierto}
-          titulo={usuarioCambiarEstado?.activo ? 'Deshabilitar Usuario' : 'Reactivar Usuario'}
-          mensaje={
-            usuarioCambiarEstado?.activo
-              ? `¿Está seguro de que desea deshabilitar la cuenta de ${usuarioCambiarEstado?.nombreCompleto}? El usuario no podrá iniciar sesión. (RN-09: No procederá si mantiene préstamos activos).`
-              : `¿Desea restaurar el acceso al sistema para ${usuarioCambiarEstado?.nombreCompleto}?`
-          }
-          textoConfirmar={usuarioCambiarEstado?.activo ? 'Deshabilitar' : 'Reactivar'}
-          variante={usuarioCambiarEstado?.activo ? 'peligro' : 'exito'}
+          abierto={Boolean(usuarioParaCambiarEstado)}
+          titulo="Desactivar cuenta corporativa"
+          textoConfirmar="Desactivar usuario"
+          variante="peligro"
+          icono="Power"
           enProceso={enProcesoEstado}
-          alConfirmar={confirmarCambioEstado}
-          alCancelar={() => {
-            setModalEstadoAbierto(false);
-            setUsuarioCambiarEstado(null);
-          }}
-        />
+          alConfirmar={() => ejecutarCambioEstado(usuarioParaCambiarEstado, false)}
+          alCancelar={() => setUsuarioParaCambiarEstado(null)}
+        >
+          <div className="space-y-2 text-xs">
+            <p className="text-sm font-semibold text-texto">
+              ¿Está seguro de que desea desactivar a {usuarioParaCambiarEstado.nombreCompleto}?
+            </p>
+            <p className="text-texto-suave">
+              El usuario perderá inmediatamente el acceso a la plataforma corporativa. Podrá reactivarlo en cualquier momento desde esta misma vista.
+            </p>
+          </div>
+        </ModalConfirmacion>
       )}
 
-      {toast && (
-        <Toast
-          mensaje={toast.mensaje}
-          variante={toast.variante}
-          alCerrar={() => setToast(null)}
-        />
-      )}
+      <Toast toasts={toasts} alCerrar={(id) => setToasts((prev) => prev.filter((t) => t.id !== id))} />
     </div>
   );
 }

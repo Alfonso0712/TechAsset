@@ -24,7 +24,7 @@ export default function ModalDevolverPrestamo({
   const handleDevolver = async () => {
     // RN-10: Exigencia estricta de observación técnica
     if (!observacion || observacion.trim().length < 5) {
-      setError('La observación técnica es obligatoria (RN-10). Describa la condición física y funcional del equipo.');
+      setError('La observación técnica es obligatoria. Describa la condición física y funcional del equipo.');
       return;
     }
 
@@ -88,7 +88,7 @@ export default function ModalDevolverPrestamo({
 
         <CampoFormulario
           id="observacionDevolucion"
-          etiqueta="Observación Técnica Obligatoria (RN-10)"
+          etiqueta="Observación técnica obligatoria"
           obligatorio
           ayuda="Detalle el estado del hardware, pantalla, cargador y funcionamiento tras la revisión."
         >
