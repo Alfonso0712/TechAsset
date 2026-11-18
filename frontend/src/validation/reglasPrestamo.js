@@ -14,11 +14,13 @@ export function validarSolicitudPrestamo(valores) {
   if (!esNoVacio(valores.fechaDevolucionEstimada)) {
     errores.fechaDevolucionEstimada = 'La fecha estimada de devolución es obligatoria.';
   } else if (valores.fechaPrestamo && !fechaEsPosterior(valores.fechaDevolucionEstimada, valores.fechaPrestamo)) {
-    errores.fechaDevolucionEstimada = 'La fecha de devolución estimada debe ser estrictamente posterior a la fecha de inicio.';
+    errores.fechaDevolucionEstimada = 'La fecha de devolución estimada debe ser estrictamente posterior a la fecha de inicio (RN-04).';
   }
 
   if (!esNoVacio(valores.motivo)) {
     errores.motivo = 'Debe ingresar el motivo de la solicitud del equipo.';
+  } else if (valores.motivo.length > 300) {
+    errores.motivo = 'El motivo no debe superar los 300 caracteres.';
   }
 
   return errores;

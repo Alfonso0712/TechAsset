@@ -8,6 +8,7 @@ import { equipoService } from '../../services/equipoService';
 import { interpretarRespuesta } from '../../validation/interpretarRespuesta';
 import { ESTADOS_EQUIPO } from '../../constants/estados';
 import { MENSAJES } from '../../constants/mensajes';
+import { fechaHoyLocal } from '../../utils/fechas';
 import SelectInput from '../formulario/SelectInput';
 import DateInput from '../formulario/DateInput';
 import TextAreaInput from '../formulario/TextAreaInput';
@@ -27,7 +28,7 @@ export default function FormularioSolicitarPrestamo({
   const [equiposDisponibles, setEquiposDisponibles] = useState([]);
   const [cargandoEquipos, setCargandoEquipos] = useState(false);
 
-  const hoyIso = new Date().toISOString().split('T')[0];
+  const hoyIso = fechaHoyLocal();
 
   const form = useFormulario({
     valoresIniciales: {
@@ -69,14 +70,12 @@ export default function FormularioSolicitarPrestamo({
   useEffect(() => {
     if (!abierto) return;
 
-    form.setValores({
+    form.reiniciar({
       idEquipo: equipoPreseleccionadoId || '',
       fechaPrestamo: hoyIso,
       fechaDevolucionEstimada: '',
       motivo: ''
     });
-    form.setErrores({});
-    form.setErrorGeneral('');
 
     setCargandoEquipos(true);
     equipoService.listar({ estado: ESTADOS_EQUIPO.DISPONIBLE, tamanoPagina: 100 }).then((res) => {
@@ -185,10 +184,13 @@ export default function FormularioSolicitarPrestamo({
 
           <TextAreaInput
             ref={form.registrarRef('motivo')}
+            id="motivoSolicitud"
             nombre="motivo"
-            etiqueta="Motivo del préstamo"
+            etiqueta="Motivo"
             obligatorio
-            filas={3}
+            rows={3}
+            maxLength={300}
+            contador={`${(form.valores.motivo || '').length}/300`}
             valor={form.valores.motivo}
             alCambiar={(e) => form.cambiarValor('motivo', e.target.value)}
             alSalir={() => form.manejarBlur('motivo')}

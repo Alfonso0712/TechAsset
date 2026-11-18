@@ -68,7 +68,7 @@ function ToastItem({ toast, alCerrar }) {
   );
 }
 
-export default function Toast({ toasts = [], mensaje, variante = 'exito', alCerrar, duracionMs = 4000 }) {
+export default function Toast({ toasts = [], mensaje, variante = 'exito', alCerrar, _duracionMs = 4000 }) {
   // Soporte dual: lista de toasts (toasts={toasts}) o toast único (mensaje="...")
   const listaToasts = Array.isArray(toasts) && toasts.length > 0
     ? toasts

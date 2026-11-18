@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import ModalDialog from '../ui/ModalDialog';
-import CampoFormulario from '../formulario/CampoFormulario';
 import SelectInput from '../formulario/SelectInput';
 import DateInput from '../formulario/DateInput';
 import TextAreaInput from '../formulario/TextAreaInput';
@@ -11,6 +10,7 @@ import { equipoService } from '../../services/equipoService';
 import { usuarioService } from '../../services/usuarioService';
 import { interpretarRespuestaError } from '../../validation/interpretarRespuesta';
 import { ESTADOS_EQUIPO } from '../../constants/estados';
+import { fechaHoyLocal } from '../../utils/fechas';
 
 export default function FormularioPrestamoDirecto({
   abierto = false,
@@ -23,7 +23,7 @@ export default function FormularioPrestamoDirecto({
   const [usuarios, setUsuarios] = useState([]);
   const [cargandoDatos, setCargandoDatos] = useState(false);
 
-  const hoyStr = new Date().toISOString().split('T')[0];
+  const hoyStr = fechaHoyLocal();
 
   const {
     valores,
@@ -48,8 +48,16 @@ export default function FormularioPrestamoDirecto({
       if (!vals.idUsuario) errs.idUsuario = 'Debe seleccionar al colaborador solicitante.';
       if (!vals.idEquipo) errs.idEquipo = 'Debe seleccionar un equipo disponible.';
       if (!vals.fechaPrestamo) errs.fechaPrestamo = 'La fecha de préstamo es obligatoria.';
-      if (!vals.fechaDevolucionEstimada) errs.fechaDevolucionEstimada = 'La fecha de devolución es obligatoria.';
-      if (!vals.motivo?.trim()) errs.motivo = 'El motivo del préstamo es obligatorio.';
+      if (!vals.fechaDevolucionEstimada) {
+        errs.fechaDevolucionEstimada = 'La fecha de devolución es obligatoria.';
+      } else if (vals.fechaPrestamo && vals.fechaDevolucionEstimada <= vals.fechaPrestamo) {
+        errs.fechaDevolucionEstimada = 'La fecha estimada de devolución debe ser estrictamente posterior a la fecha de préstamo (RN-04).';
+      }
+      if (!vals.motivo?.trim()) {
+        errs.motivo = 'El motivo del préstamo es obligatorio.';
+      } else if (vals.motivo.length > 300) {
+        errs.motivo = 'El motivo no debe superar los 300 caracteres.';
+      }
       return errs;
     },
     onSubmit: async (datos) => {
@@ -164,22 +172,21 @@ export default function FormularioPrestamoDirecto({
           />
         </div>
 
-        <CampoFormulario
+        <TextAreaInput
           id="motivoDirecto"
-          etiqueta="Motivo / Proyecto"
-          error={errores.motivo}
+          nombre="motivoDirecto"
+          etiqueta="Motivo"
           obligatorio
-        >
-          <TextAreaInput
-            id="motivoDirecto"
-            name="motivoDirecto"
-            placeholder="Justificación del préstamo directo…"
-            value={valores.motivo}
-            onChange={(e) => cambiarValor('motivo', e.target.value)}
-            disabled={enviando}
-            rows={2}
-          />
-        </CampoFormulario>
+          rows={3}
+          maxLength={300}
+          contador={`${(valores.motivo || '').length}/300`}
+          placeholder="Justificación del préstamo directo…"
+          valor={valores.motivo}
+          alCambiar={(e) => cambiarValor('motivo', e.target.value)}
+          alSalir={() => marcarTocado('motivo')}
+          error={errores.motivo}
+          deshabilitado={enviando}
+        />
       </form>
     </ModalDialog>
   );

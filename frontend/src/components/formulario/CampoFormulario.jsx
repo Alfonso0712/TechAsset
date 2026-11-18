@@ -3,8 +3,11 @@ import Icono from '../ui/Icono';
 
 export function construirDescribedBy(id, ayuda, error, extraId = '') {
   const ids = [];
-  if (ayuda) ids.push(`${id}-ayuda`);
-  if (error) ids.push(`${id}-error`);
+  if (error) {
+    ids.push(`${id}-error`);
+  } else if (ayuda) {
+    ids.push(`${id}-ayuda`);
+  }
   if (extraId) ids.push(extraId);
   return ids.length > 0 ? ids.join(' ') : undefined;
 }
@@ -40,17 +43,18 @@ export default function CampoFormulario({
         </label>
       )}
       {children}
-      <div className="flex flex-wrap items-center justify-between gap-1.5">
-        {ayuda && <span id={`${id}-ayuda`} className="text-xs text-texto-suave">{ayuda}</span>}
+      <div className="flex flex-wrap items-center justify-between gap-1.5 min-h-[1.25rem]">
+        {error ? (
+          <p id={`${id}-error`} role="alert" className="flex items-center gap-1.5 text-xs font-medium text-error-texto m-0">
+            <Icono nombre="AlertCircle" className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <span>{error}</span>
+          </p>
+        ) : ayuda ? (
+          <span id={`${id}-ayuda`} className="text-xs text-texto-suave">{ayuda}</span>
+        ) : null}
         {contador && <span className="text-xs text-texto-suave cifra-tabular ml-auto">{contador}</span>}
       </div>
       {avisoExtra}
-      {error && (
-        <p id={`${id}-error`} role="alert" className="flex items-center gap-1.5 text-xs font-medium text-error-texto m-0">
-          <Icono nombre="AlertCircle" className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-          <span>{error}</span>
-        </p>
-      )}
     </div>
   );
 }

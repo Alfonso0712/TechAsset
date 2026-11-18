@@ -12,8 +12,8 @@ import { interpretarRespuesta } from '../../validation/interpretarRespuesta';
 import { ROLES } from '../../constants/roles';
 
 const OPCIONES_ROL = [
-  { valor: ROLES.COLABORADOR, etiqueta: 'Colaborador (Solicitante)' },
-  { valor: ROLES.RESPONSABLE_TECNOLOGIA, etiqueta: 'Responsable de Tecnología' },
+  { valor: ROLES.COLABORADOR, etiqueta: 'Colaborador' },
+  { valor: ROLES.RESPONSABLE_TECNOLOGIA, etiqueta: 'Responsable TI' },
   { valor: ROLES.ADMINISTRADOR, etiqueta: 'Administrador' }
 ];
 
@@ -75,7 +75,7 @@ export default function FormularioUsuario({
 
   useEffect(() => {
     if (abierto) {
-      form.setValores({
+      form.reiniciar({
         nombres: targetUsuario?.nombres || '',
         apellidos: targetUsuario?.apellidos || '',
         correo: targetUsuario?.correo || '',
@@ -83,8 +83,6 @@ export default function FormularioUsuario({
         rol: targetUsuario?.rol || ROLES.COLABORADOR,
         areaId: targetUsuario?.areaId || ''
       });
-      form.setErrores({});
-      form.setErrorGeneral('');
 
       areaService.listarActivas().then((res) => {
         const resp = interpretarRespuesta(res);
@@ -169,7 +167,8 @@ export default function FormularioUsuario({
             alSalir={() => form.manejarBlur('contrasena')}
             error={form.errores.contrasena}
             obligatorio
-            ayuda="Mínimo 8 caracteres corporativos."
+            ayuda="Mínimo 8 caracteres."
+            autoComplete="new-password"
             soloLectura={form.enProceso}
           />
         )}

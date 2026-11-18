@@ -75,7 +75,7 @@ export default function FormularioEquipo({
 
   useEffect(() => {
     if (abierto) {
-      form.setValores({
+      form.reiniciar({
         codigoPatrimonial: targetEquipo?.codigoPatrimonial || '',
         nombre: targetEquipo?.nombre || '',
         categoria: targetEquipo?.categoria || '',
@@ -83,8 +83,6 @@ export default function FormularioEquipo({
         ubicacion: targetEquipo?.ubicacion || '',
         estadoInicial: targetEquipo?.estado || ESTADOS_EQUIPO.DISPONIBLE
       });
-      form.setErrores({});
-      form.setErrorGeneral('');
     }
   }, [abierto, targetEquipo]); // eslint-disable-line react-hooks/exhaustive-deps
 
