@@ -13,10 +13,12 @@ namespace TechAsset.Application.Services;
 public class ReporteService : IReporteService
 {
     private readonly IUnitOfWork _uow;
+    private readonly IRelojServicio _reloj;
 
-    public ReporteService(IUnitOfWork uow)
+    public ReporteService(IUnitOfWork uow, IRelojServicio reloj)
     {
         _uow = uow;
+        _reloj = reloj;
     }
 
     public async Task<DashboardDto> ObtenerDashboardAsync(CancellationToken ct = default)
@@ -41,8 +43,18 @@ public class ReporteService : IReporteService
             new(EstadoEquipo.Baja, "Baja", baja, totalEquipos > 0 ? Math.Round((double)baja / totalEquipos * 100, 1) : 0)
         };
 
-        var prestamosPorArea = await _uow.Prestamos.ObtenerPrestamosPorAreaAsync(6, ct);
+        var prestamosPorArea = await _uow.Prestamos.ObtenerPrestamosPorAreaAsync(6, null, null, ct);
         var solicitudesPendientes = await _uow.Prestamos.ObtenerSolicitudesPendientesRecientesAsync(5, ct);
+
+        // Métricas de actividad con reloj en hora de Lima (America/Lima)
+        var hoy = _reloj.Hoy;
+        var diaSemana = (int)hoy.DayOfWeek;
+        var diffLunes = diaSemana == 0 ? -6 : 1 - diaSemana;
+        var lunes = hoy.AddDays(diffLunes);
+        var domingo = lunes.AddDays(6);
+
+        var (prestamosHoy, devolucionesSemana, prestamosVencidos) =
+            await _uow.Prestamos.ObtenerMetricasActividadAsync(hoy, lunes, domingo, ct);
 
         return new DashboardDto(
             totalEquipos,
@@ -54,7 +66,10 @@ public class ReporteService : IReporteService
             areaMayorUso,
             distribucion,
             prestamosPorArea,
-            solicitudesPendientes.Select(p => p.ToDto()).ToList()
+            solicitudesPendientes.Select(p => p.ToDto()).ToList(),
+            prestamosHoy,
+            devolucionesSemana,
+            prestamosVencidos
         );
     }
 
@@ -73,14 +88,22 @@ public class ReporteService : IReporteService
         )).ToList();
     }
 
-    public async Task<IReadOnlyList<EquiposMasUtilizadosDto>> ObtenerEquiposMasUtilizadosAsync(int limite = 10, CancellationToken ct = default)
+    public async Task<IReadOnlyList<EquiposMasUtilizadosDto>> ObtenerEquiposMasUtilizadosAsync(
+        int limite = 10,
+        CategoriaEquipo? categoria = null,
+        DateOnly? fechaDesde = null,
+        DateOnly? fechaHasta = null,
+        CancellationToken ct = default)
     {
-        return await _uow.Prestamos.ObtenerEquiposMasUtilizadosAsync(limite, ct);
+        return await _uow.Prestamos.ObtenerEquiposMasUtilizadosAsync(limite, categoria, fechaDesde, fechaHasta, ct);
     }
 
-    public async Task<IReadOnlyList<PrestamosPorAreaDto>> ObtenerPrestamosPorAreaAsync(CancellationToken ct = default)
+    public async Task<IReadOnlyList<PrestamosPorAreaDto>> ObtenerPrestamosPorAreaAsync(
+        DateOnly? fechaDesde = null,
+        DateOnly? fechaHasta = null,
+        CancellationToken ct = default)
     {
-        return await _uow.Prestamos.ObtenerPrestamosPorAreaAsync(null, ct);
+        return await _uow.Prestamos.ObtenerPrestamosPorAreaAsync(null, fechaDesde, fechaHasta, ct);
     }
 
     public async Task<PaginadoDto<MovimientoEquipoDto>> ObtenerMovimientosAsync(ParametrosConsultaMovimientos parametros, CancellationToken ct = default)

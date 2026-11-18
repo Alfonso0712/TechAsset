@@ -125,7 +125,7 @@ public class Prestamo : AuditableEntity
     /// RN-10: Toda devolución física exige una observación no vacía.
     /// RN-04: La fecha de devolución real no puede ser anterior a la de préstamo.
     /// </summary>
-    public void RegistrarDevolucion(string observacion, DateOnly? fechaDevolucionReal = null)
+    public void RegistrarDevolucion(string observacion, DateOnly? fechaDevolucionReal = null, DateOnly? fechaReferenciaHoy = null)
     {
         if (Est_Prestamo != EstadoPrestamo.Activo)
             throw new DomainException("Solo es posible registrar la devolución de un préstamo en estado Activo.");
@@ -133,7 +133,7 @@ public class Prestamo : AuditableEntity
         if (string.IsNullOrWhiteSpace(observacion) || observacion.Trim().Length < ReglasPrestamo.MinLongitudObservacion)
             throw new DomainException(Mensajes.RN10_ObservacionDevolucionRequerida);
 
-        var fdr = fechaDevolucionReal ?? DateOnly.FromDateTime(DateTime.UtcNow);
+        var fdr = fechaDevolucionReal ?? fechaReferenciaHoy ?? DateOnly.FromDateTime(DateTime.UtcNow.AddHours(-5));
 
         if (fdr < Fpr_Prestamo)
             throw new DomainException(Mensajes.RN04_FechaDevolucionRealInvalida);

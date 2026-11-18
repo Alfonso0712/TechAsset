@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using TechAsset.Domain.Enums;
 using TechAsset.Infrastructure.Data;
 using TechAsset.Infrastructure.Security;
+using TechAsset.Infrastructure.Services;
 using Xunit;
 
 namespace TechAsset.Tests.Unit;
@@ -20,7 +21,8 @@ public class SeederTests
 
         using var context = new AppDbContext(options);
         var hasher = new PasswordHasherService();
-        var seeder = new DatabaseSeeder(context, hasher);
+        var reloj = new RelojServicio();
+        var seeder = new DatabaseSeeder(context, hasher, reloj);
 
         // Act
         await seeder.SeedAsync();

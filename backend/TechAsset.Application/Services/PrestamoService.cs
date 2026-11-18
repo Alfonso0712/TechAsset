@@ -17,13 +17,16 @@ public class PrestamoService : IPrestamoService
 {
     private readonly IUnitOfWork _uow;
     private readonly IUsuarioActual _usuarioActual;
+    private readonly IRelojServicio _reloj;
 
     public PrestamoService(
         IUnitOfWork uow,
-        IUsuarioActual usuarioActual)
+        IUsuarioActual usuarioActual,
+        IRelojServicio reloj)
     {
         _uow = uow;
         _usuarioActual = usuarioActual;
+        _reloj = reloj;
     }
 
     public async Task<PaginadoDto<PrestamoDto>> ListarAsync(ParametrosConsultaPrestamos parametros, CancellationToken ct = default)
@@ -257,7 +260,8 @@ public class PrestamoService : IPrestamoService
 
         // RN-10: Exigencia de observación obligatoria no vacía
         // RN-04: Fdr posterior o igual a Fpr
-        prestamo.RegistrarDevolucion(dto.Observacion, dto.FechaDevolucionReal);
+        var fechaDevolucion = dto.FechaDevolucionReal ?? _reloj.Hoy;
+        prestamo.RegistrarDevolucion(dto.Observacion, fechaDevolucion, _reloj.Hoy);
         equipo.MarcarComoDisponible();
 
         var movimiento = MovimientoEquipo.Registrar(

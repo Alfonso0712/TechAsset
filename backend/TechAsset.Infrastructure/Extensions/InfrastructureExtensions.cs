@@ -8,6 +8,7 @@ using TechAsset.Infrastructure.Data;
 using TechAsset.Infrastructure.Interceptors;
 using TechAsset.Infrastructure.Repositories;
 using TechAsset.Infrastructure.Security;
+using TechAsset.Infrastructure.Services;
 
 namespace TechAsset.Infrastructure.Extensions;
 
@@ -38,6 +39,9 @@ public static class InfrastructureExtensions
                 });
             }
         });
+
+        // Reloj y Zona Horaria (America/Lima)
+        services.AddSingleton<IRelojServicio, RelojServicio>();
 
         // Repositorios y Unit of Work
         services.AddScoped<IAreaRepository, AreaRepository>();

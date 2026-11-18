@@ -13,17 +13,27 @@ public class DatabaseSeeder
 {
     private readonly AppDbContext _context;
     private readonly IPasswordHasherService _hasher;
+    private readonly IRelojServicio _reloj;
 
-    public DatabaseSeeder(AppDbContext context, IPasswordHasherService hasher)
+    public DatabaseSeeder(AppDbContext context, IPasswordHasherService hasher, IRelojServicio reloj)
     {
         _context = context;
         _hasher = hasher;
+        _reloj = reloj;
     }
 
-    public async Task SeedAsync(CancellationToken ct = default)
+    public async Task SeedAsync(bool forzar = false, CancellationToken ct = default)
     {
-        if (await _context.Usuarios.AnyAsync(ct))
+        if (!forzar && await _context.MovimientosEquipo.AnyAsync(ct))
             return;
+
+        // Limpiar datos previos si forzar es true o si no había movimientos registrados
+        _context.MovimientosEquipo.RemoveRange(_context.MovimientosEquipo);
+        _context.Prestamos.RemoveRange(_context.Prestamos);
+        _context.Equipos.RemoveRange(_context.Equipos);
+        _context.Usuarios.RemoveRange(_context.Usuarios);
+        _context.Areas.RemoveRange(_context.Areas);
+        await _context.SaveChangesAsync(ct);
 
         // 1. Áreas Funcionales (6 áreas de Innovatech Solutions)
         var areaDesarrollo = Area.Crear("Desarrollo de Software");
@@ -111,48 +121,49 @@ public class DatabaseSeeder
         await _context.SaveChangesAsync(ct);
 
         // 4. Préstamos (~25 préstamos para sustentar todos los KPIs y escenarios)
-        var hoy = DateOnly.FromDateTime(DateTime.UtcNow);
+        // Zona horaria de negocio: America/Lima (UTC-5)
+        var hoy = _reloj.Hoy;
         var prestamos = new List<Prestamo>();
         var movimientos = new List<MovimientoEquipo>();
 
-        // 4.1. Préstamos Activos Vigentes (cumplen RN-01, RN-04, RN-05)
-        // MacBook Pro 16 -> Colab1 (Aprobado por RespElena)
-        var pActivo1 = Prestamo.CrearDirecto(colab1.Id_Usuario, equipos[0].Id_Equipo, respElena.Id_Usuario, hoy.AddDays(-5), hoy.AddDays(15), "Desarrollo de módulos críticos de arquitectura.");
+        // 4.1. Préstamos Activos (cumplen RN-01, RN-04, RN-05)
+        // Préstamo 1: Empieza HOY en Lima (garantiza "Hoy: 1 préstamo registrado")
+        var pActivo1 = Prestamo.CrearDirecto(colab1.Id_Usuario, equipos[0].Id_Equipo, respElena.Id_Usuario, hoy, hoy.AddDays(15), "Desarrollo de módulos críticos de arquitectura.");
         prestamos.Add(pActivo1);
         movimientos.Add(MovimientoEquipo.Registrar(equipos[0].Id_Equipo, respElena.Id_Usuario, TipoMovimientoEquipo.PrestamoAprobado, "Disponible", "Prestado", "Préstamo activo aprobado para colaborador 1."));
 
-        // Dell XPS 15 -> Colab3 (Aprobado por RespElena)
-        var pActivo2 = Prestamo.CrearDirecto(colab3.Id_Usuario, equipos[2].Id_Equipo, respElena.Id_Usuario, hoy.AddDays(-3), hoy.AddDays(10), "Pruebas de carga e integración continua.");
+        // Préstamo 2: Activo vigente
+        var pActivo2 = Prestamo.CrearDirecto(colab3.Id_Usuario, equipos[2].Id_Equipo, respElena.Id_Usuario, hoy.AddDays(-4), hoy.AddDays(10), "Pruebas de carga e integración continua.");
         prestamos.Add(pActivo2);
         movimientos.Add(MovimientoEquipo.Registrar(equipos[2].Id_Equipo, respElena.Id_Usuario, TipoMovimientoEquipo.PrestamoAprobado, "Disponible", "Prestado", "Préstamo activo aprobado para colaborador 3."));
 
-        // MacBook Air 15 -> Colab4 (Aprobado por RespElena)
-        var pActivo3 = Prestamo.CrearDirecto(colab4.Id_Usuario, equipos[4].Id_Equipo, respElena.Id_Usuario, hoy.AddDays(-2), hoy.AddDays(8), "Diseño de wireframes y prototipos interactivos.");
+        // Préstamo 3: Activo vigente
+        var pActivo3 = Prestamo.CrearDirecto(colab4.Id_Usuario, equipos[4].Id_Equipo, respElena.Id_Usuario, hoy.AddDays(-3), hoy.AddDays(8), "Diseño de wireframes y prototipos interactivos.");
         prestamos.Add(pActivo3);
         movimientos.Add(MovimientoEquipo.Registrar(equipos[4].Id_Equipo, respElena.Id_Usuario, TipoMovimientoEquipo.PrestamoAprobado, "Disponible", "Prestado", "Préstamo activo aprobado para colaborador 4."));
 
-        // Dell OptiPlex -> Colab5 (Aprobado por RespMiguel)
-        var pActivo4 = Prestamo.CrearDirecto(colab5.Id_Usuario, equipos[11].Id_Equipo, respMiguel.Id_Usuario, hoy.AddDays(-4), hoy.AddDays(12), "Ambiente de pruebas de backend distribuido.");
+        // Préstamo 4: VENCIDO (Activo con devolución estimada < hoy Lima)
+        var pActivo4 = Prestamo.CrearDirecto(colab5.Id_Usuario, equipos[11].Id_Equipo, respMiguel.Id_Usuario, hoy.AddDays(-10), hoy.AddDays(-2), "Ambiente de pruebas de backend distribuido (periodo vencido pendiente de retorno).");
         prestamos.Add(pActivo4);
-        movimientos.Add(MovimientoEquipo.Registrar(equipos[11].Id_Equipo, respMiguel.Id_Usuario, TipoMovimientoEquipo.PrestamoAprobado, "Disponible", "Prestado", "Préstamo activo asignado a colaborador 5."));
+        movimientos.Add(MovimientoEquipo.Registrar(equipos[11].Id_Equipo, respMiguel.Id_Usuario, TipoMovimientoEquipo.PrestamoAprobado, "Disponible", "Prestado", "Préstamo activo asignado a colaborador 5 (vencido)."));
 
-        // Dell UltraSharp 32 -> Colab1 (Aprobado por RespElena)
+        // Préstamo 5: Activo vigente
         var pActivo5 = Prestamo.CrearDirecto(colab1.Id_Usuario, equipos[15].Id_Equipo, respElena.Id_Usuario, hoy.AddDays(-5), hoy.AddDays(15), "Monitor secundario para estación de desarrollo.");
         prestamos.Add(pActivo5);
         movimientos.Add(MovimientoEquipo.Registrar(equipos[15].Id_Equipo, respElena.Id_Usuario, TipoMovimientoEquipo.PrestamoAprobado, "Disponible", "Prestado", "Préstamo de monitor aprobado."));
 
-        // BenQ PD3220U -> Colab4 (Aprobado por RespElena)
+        // Préstamo 6: Activo vigente
         var pActivo6 = Prestamo.CrearDirecto(colab4.Id_Usuario, equipos[17].Id_Equipo, respElena.Id_Usuario, hoy.AddDays(-2), hoy.AddDays(8), "Monitor de alta fidelidad de color para UI.");
         prestamos.Add(pActivo6);
         movimientos.Add(MovimientoEquipo.Registrar(equipos[17].Id_Equipo, respElena.Id_Usuario, TipoMovimientoEquipo.PrestamoAprobado, "Disponible", "Prestado", "Monitor de diseño asignado."));
 
-        // iPad Pro 12.9 -> Colab2 (Aprobado por RespElena)
-        var pActivo7 = Prestamo.CrearDirecto(colab2.Id_Usuario, equipos[23].Id_Equipo, respElena.Id_Usuario, hoy.AddDays(-1), hoy.AddDays(6), "Pruebas de compatibilidad móvil en iPadOS.");
+        // Préstamo 7: Vence ESTA SEMANA (en +2 días)
+        var pActivo7 = Prestamo.CrearDirecto(colab2.Id_Usuario, equipos[23].Id_Equipo, respElena.Id_Usuario, hoy.AddDays(-3), hoy.AddDays(2), "Pruebas de compatibilidad móvil en iPadOS.");
         prestamos.Add(pActivo7);
         movimientos.Add(MovimientoEquipo.Registrar(equipos[23].Id_Equipo, respElena.Id_Usuario, TipoMovimientoEquipo.PrestamoAprobado, "Disponible", "Prestado", "Tablet asignada para testing QA."));
 
-        // Proyector Optoma -> Colab6 (Aprobado por RespMiguel)
-        var pActivo8 = Prestamo.CrearDirecto(colab6.Id_Usuario, equipos[27].Id_Equipo, respMiguel.Id_Usuario, hoy.AddDays(-1), hoy.AddDays(3), "Reunión de demostración mensual de avance.");
+        // Préstamo 8: Vence ESTA SEMANA (en +4 días)
+        var pActivo8 = Prestamo.CrearDirecto(colab6.Id_Usuario, equipos[27].Id_Equipo, respMiguel.Id_Usuario, hoy.AddDays(-2), hoy.AddDays(4), "Reunión de demostración mensual de avance.");
         prestamos.Add(pActivo8);
         movimientos.Add(MovimientoEquipo.Registrar(equipos[27].Id_Equipo, respMiguel.Id_Usuario, TipoMovimientoEquipo.PrestamoAprobado, "Disponible", "Prestado", "Proyector asignado a gestión."));
 
