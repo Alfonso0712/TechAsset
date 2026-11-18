@@ -3,23 +3,25 @@ import Icono from './Icono';
 
 const VARIANTES_BASE = {
   primary: 'bg-primario text-sobre-primario hover:bg-primario-hover border border-transparent font-medium shadow-sm',
+  exito: 'bg-[var(--btn-success-bg)] text-[var(--btn-success-fg)] border border-[var(--btn-success-border)] hover:bg-[var(--btn-success-hover-bg)] font-semibold shadow-sm',
+  peligro: 'bg-[var(--btn-danger-bg)] text-[var(--btn-danger-fg)] border border-[var(--btn-danger-border)] hover:bg-[var(--btn-danger-hover-bg)] font-semibold shadow-sm',
+  'peligro-contorno': 'bg-transparent text-peligro-texto border border-peligro-borde hover:bg-peligro-fondo font-semibold',
+  advertencia: 'bg-[var(--btn-warning-bg)] text-[var(--btn-warning-fg)] border border-[var(--btn-warning-border)] hover:bg-[var(--btn-warning-hover-bg)] font-medium shadow-sm',
+  secundario: 'bg-superficie text-texto border border-borde-control hover:bg-superficie-2 font-medium',
+  fantasma: 'bg-transparent text-primario-enlace border border-transparent hover:bg-superficie-2 font-medium',
   'neutral-info': 'bg-superficie-2 text-primario border border-borde hover:bg-primario-suave font-medium',
-  success: 'bg-[var(--btn-success-bg)] text-white border border-[var(--btn-success-border)] hover:bg-[var(--btn-success-hover-bg)] font-semibold shadow-sm',
-  danger: 'bg-[var(--btn-danger-bg)] text-white border border-[var(--btn-danger-border)] hover:bg-[var(--btn-danger-hover-bg)] font-semibold shadow-sm',
-  'danger-outline': 'bg-superficie text-[var(--btn-danger-bg)] border border-[var(--btn-danger-border)] hover:bg-error-fondo font-semibold',
-  warning: 'bg-[var(--btn-warning-bg)] text-white border border-[var(--btn-warning-border)] hover:bg-[var(--btn-warning-hover-bg)] font-medium',
-  secondary: 'bg-superficie text-texto border border-borde hover:bg-superficie-2 hover:border-borde-control font-medium',
-  ghost: 'bg-transparent text-texto border border-transparent hover:bg-superficie-2 font-medium',
   'icon-only': 'bg-superficie text-texto border border-borde hover:bg-superficie-2 font-medium'
 };
 
 const ALIAS_VARIANTES = {
   primario: 'primary',
-  info: 'neutral-info',
-  peligro: 'danger',
-  advertencia: 'warning',
-  secundario: 'secondary',
-  fantasma: 'ghost'
+  success: 'exito',
+  danger: 'peligro',
+  'danger-outline': 'peligro-contorno',
+  warning: 'advertencia',
+  secondary: 'secundario',
+  ghost: 'fantasma',
+  info: 'neutral-info'
 };
 
 const Button = forwardRef(function Button(

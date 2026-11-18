@@ -62,7 +62,27 @@ export default {
         'aprobada-texto': 'var(--aprobada-texto)',
         'aprobada-fondo': 'var(--aprobada-fondo)',
         'cancelada-texto': 'var(--cancelada-texto)',
-        'cancelada-fondo': 'var(--cancelada-fondo)'
+        'cancelada-fondo': 'var(--cancelada-fondo)',
+
+        'marca-oscuro': 'var(--marca-oscuro)',
+        'grafico-disponible': 'var(--grafico-disponible)',
+        'grafico-prestado': 'var(--grafico-prestado)',
+        'grafico-mantenimiento': 'var(--grafico-mantenimiento)',
+        'grafico-baja': 'var(--grafico-baja)',
+        'grafico-marca': 'var(--grafico-marca)',
+
+        'ib-editar-fondo': 'var(--ib-editar-fondo)',
+        'ib-editar-borde': 'var(--ib-editar-borde)',
+        'ib-editar-texto': 'var(--ib-editar-texto)',
+        'ib-cambiar-fondo': 'var(--ib-cambiar-fondo)',
+        'ib-cambiar-borde': 'var(--ib-cambiar-borde)',
+        'ib-cambiar-texto': 'var(--ib-cambiar-texto)',
+        'ib-deshabilitar-fondo': 'var(--ib-deshabilitar-fondo)',
+        'ib-deshabilitar-borde': 'var(--ib-deshabilitar-borde)',
+        'ib-deshabilitar-texto': 'var(--ib-deshabilitar-texto)',
+        'ib-habilitar-fondo': 'var(--ib-habilitar-fondo)',
+        'ib-habilitar-borde': 'var(--ib-habilitar-borde)',
+        'ib-habilitar-texto': 'var(--ib-habilitar-texto)'
       },
       fontFamily: {
         sans: ['"Montserrat Variable"', '"Segoe UI"', 'system-ui', 'Arial', 'sans-serif']

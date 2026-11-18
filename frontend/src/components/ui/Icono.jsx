@@ -5,7 +5,8 @@ import {
   Plus, Check, Loader2, HelpCircle, Wrench, Pencil, ArrowLeft,
   MoreHorizontal, Power, Laptop, Printer, Tablet, Wifi, Cpu,
   ClipboardList, BarChart3, Filter, RotateCcw, CheckCircle2, XCircle,
-  FileText, ShieldCheck, History
+  FileText, ShieldCheck, History, UserCheck, PackageCheck, RefreshCw,
+  Building2, Network, Tv, Download, ArrowRight
 } from 'lucide-react';
 
 const ICONOS = {
@@ -15,7 +16,8 @@ const ICONOS = {
   Plus, Check, Loader2, HelpCircle, Wrench, Pencil, ArrowLeft,
   MoreHorizontal, Power, Laptop, Printer, Tablet, Wifi, Cpu,
   ClipboardList, BarChart3, Filter, RotateCcw, CheckCircle2, XCircle,
-  FileText, ShieldCheck, History
+  FileText, ShieldCheck, History, UserCheck, PackageCheck, RefreshCw,
+  Building2, Network, Tv, Download, ArrowRight
 };
 
 export default function Icono({

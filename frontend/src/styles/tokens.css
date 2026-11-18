@@ -9,12 +9,13 @@
   --texto: #0F172A;
   --texto-suave: #4A5568;
 
-  /* Colores de Marca Primarios (Botones azul marino institucional) */
-  --primario: #091E3E;
-  --primario-hover: #12335F;
+  /* Colores de Marca Primarios (TechAsset WCAG 2.2 AA) */
+  --primario: #0369A1;
+  --primario-hover: #075985;
   --primario-enlace: #0369A1;
   --primario-suave: #EBF0F8;
   --sobre-primario: #FFFFFF;
+  --marca-oscuro: #091E3E;
 
   /* Acento decorativo (subrayados, iconos, resaltados; nunca botón con blanco ni texto sobre blanco) */
   --acento: #06A3DA;
@@ -98,11 +99,32 @@
   --btn-danger-hover-bg: #991B1B;
   --btn-danger-hover-fg: #FFFFFF;
 
-  --btn-warning-bg: #FFF1CC;
-  --btn-warning-border: #FCD34D;
-  --btn-warning-fg: #6B3F00;
-  --btn-warning-hover-bg: #B45309;
+  --btn-warning-bg: #B45309;
+  --btn-warning-border: #B45309;
+  --btn-warning-fg: #FFFFFF;
+  --btn-warning-hover-bg: #92400E;
   --btn-warning-hover-fg: #FFFFFF;
+
+  /* Paleta de Gráficos (Tokens grafico-*) */
+  --grafico-disponible: #16A34A;
+  --grafico-prestado: #6366F1;
+  --grafico-mantenimiento: #D97706;
+  --grafico-baja: #DC2626;
+  --grafico-marca: #0369A1;
+
+  /* Tokens IconButton WCAG AA */
+  --ib-editar-fondo: #E0F2FE;
+  --ib-editar-borde: #BAE6FD;
+  --ib-editar-texto: #075985;
+  --ib-cambiar-fondo: #FFF1CC;
+  --ib-cambiar-borde: #FCD34D;
+  --ib-cambiar-texto: #6B3F00;
+  --ib-deshabilitar-fondo: #FDE2E2;
+  --ib-deshabilitar-borde: #FCA5A5;
+  --ib-deshabilitar-texto: #991B1B;
+  --ib-habilitar-fondo: #DAF4E5;
+  --ib-habilitar-borde: #86EFAC;
+  --ib-habilitar-texto: #14532D;
 
   /* Gradiente de fondo login TechAsset (#091E3E -> #12335F con transparencia) */
   --superposicion-marca-inicio: rgba(9, 30, 62, 0.92);
@@ -196,6 +218,48 @@
     --cancelada-texto: #A9B8D4;
     --cancelada-fondo: #263554;
 
+    --marca-oscuro: #091E3E;
+
+    /* Botones de acción semánticos (Modo Oscuro) */
+    --btn-success-bg: #4ADE80;
+    --btn-success-border: #4ADE80;
+    --btn-success-fg: #052E16;
+    --btn-success-hover-bg: #86EFAC;
+    --btn-success-hover-fg: #052E16;
+
+    --btn-danger-bg: #F87171;
+    --btn-danger-border: #F87171;
+    --btn-danger-fg: #450A0A;
+    --btn-danger-hover-bg: #FCA5A5;
+    --btn-danger-hover-fg: #450A0A;
+
+    --btn-warning-bg: #FBBF24;
+    --btn-warning-border: #FBBF24;
+    --btn-warning-fg: #451A03;
+    --btn-warning-hover-bg: #FDE68A;
+    --btn-warning-hover-fg: #451A03;
+
+    /* Paleta de Gráficos (Tokens grafico-* Modo Oscuro) */
+    --grafico-disponible: #4ADE80;
+    --grafico-prestado: #A5B4FC;
+    --grafico-mantenimiento: #FBBF24;
+    --grafico-baja: #F87171;
+    --grafico-marca: #38BDF0;
+
+    /* Tokens IconButton WCAG AA Modo Oscuro */
+    --ib-editar-fondo: rgba(3, 105, 161, 0.22);
+    --ib-editar-borde: #0284C7;
+    --ib-editar-texto: #38BDF0;
+    --ib-cambiar-fondo: rgba(180, 83, 9, 0.22);
+    --ib-cambiar-borde: #D97706;
+    --ib-cambiar-texto: #FDE68A;
+    --ib-deshabilitar-fondo: rgba(185, 28, 28, 0.22);
+    --ib-deshabilitar-borde: #DC2626;
+    --ib-deshabilitar-texto: #FECACA;
+    --ib-habilitar-fondo: rgba(21, 128, 61, 0.22);
+    --ib-habilitar-borde: #16A34A;
+    --ib-habilitar-texto: #BBF7D0;
+
     --superposicion-marca-inicio: rgba(8, 16, 31, 0.95);
     --superposicion-marca-fin: rgba(18, 51, 95, 0.35);
   }
@@ -276,6 +340,48 @@ html[data-tema="oscuro"] {
   --rechazada-fondo: var(--peligro-fondo);
   --cancelada-texto: #A9B8D4;
   --cancelada-fondo: #263554;
+
+  --marca-oscuro: #091E3E;
+
+  /* Botones de acción semánticos (Modo Oscuro) */
+  --btn-success-bg: #4ADE80;
+  --btn-success-border: #4ADE80;
+  --btn-success-fg: #052E16;
+  --btn-success-hover-bg: #86EFAC;
+  --btn-success-hover-fg: #052E16;
+
+  --btn-danger-bg: #F87171;
+  --btn-danger-border: #F87171;
+  --btn-danger-fg: #450A0A;
+  --btn-danger-hover-bg: #FCA5A5;
+  --btn-danger-hover-fg: #450A0A;
+
+  --btn-warning-bg: #FBBF24;
+  --btn-warning-border: #FBBF24;
+  --btn-warning-fg: #451A03;
+  --btn-warning-hover-bg: #FDE68A;
+  --btn-warning-hover-fg: #451A03;
+
+  /* Paleta de Gráficos (Tokens grafico-* Modo Oscuro) */
+  --grafico-disponible: #4ADE80;
+  --grafico-prestado: #A5B4FC;
+  --grafico-mantenimiento: #FBBF24;
+  --grafico-baja: #F87171;
+  --grafico-marca: #38BDF0;
+
+  /* Tokens IconButton WCAG AA Modo Oscuro */
+  --ib-editar-fondo: rgba(3, 105, 161, 0.22);
+  --ib-editar-borde: #0284C7;
+  --ib-editar-texto: #38BDF0;
+  --ib-cambiar-fondo: rgba(180, 83, 9, 0.22);
+  --ib-cambiar-borde: #D97706;
+  --ib-cambiar-texto: #FDE68A;
+  --ib-deshabilitar-fondo: rgba(185, 28, 28, 0.22);
+  --ib-deshabilitar-borde: #DC2626;
+  --ib-deshabilitar-texto: #FECACA;
+  --ib-habilitar-fondo: rgba(21, 128, 61, 0.22);
+  --ib-habilitar-borde: #16A34A;
+  --ib-habilitar-texto: #BBF7D0;
 
   --superposicion-marca-inicio: rgba(8, 16, 31, 0.95);
   --superposicion-marca-fin: rgba(18, 51, 95, 0.35);
