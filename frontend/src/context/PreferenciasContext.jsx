@@ -2,8 +2,8 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo } 
 import { useAuth } from '../hooks/useAuth';
 import { useSincronizarPreferencias } from '../hooks/useSincronizarPreferencias';
 import {
-  TEMA_DEFECTO, TAMANO_DEFECTO, ESCALAS_FUENTE, MAPA_LETRA_A_PCT,
-  MAPA_PCT_A_LETRA, aplicarPreferenciasAlDom, obtenerPrefAlmacenadas,
+  TEMA_DEFECTO, TAMANO_DEFECTO, ESCALAS_FUENTE, normalizarTamanoLetra,
+  aplicarPreferenciasAlDom, obtenerPrefAlmacenadas,
   guardarPrefAlmacenadas, limpiarPrefActiva
 } from '../utils/preferencias';
 import AlertMessage from '../components/ui/AlertMessage';
@@ -14,7 +14,7 @@ function resolverInicial(u) {
   if (!u) return { t: TEMA_DEFECTO, f: TAMANO_DEFECTO };
   const g = obtenerPrefAlmacenadas(u.id);
   const t = g?.tema || u.tema || TEMA_DEFECTO;
-  const f = g?.tamanoFuente || MAPA_LETRA_A_PCT[u.tamanoLetra] || TAMANO_DEFECTO;
+  const f = normalizarTamanoLetra(g?.tamanoLetra || g?.tamanoFuente || u.tamanoLetra || TAMANO_DEFECTO);
   aplicarPreferenciasAlDom(t, f);
   return { t, f };
 }
@@ -34,7 +34,7 @@ export function PreferenciasProvider({ children }) {
       return;
     }
     const { t, f } = resolverInicial(usuario);
-    guardarPrefAlmacenadas(usuario.id, { tema: t, tamanoFuente: f });
+    guardarPrefAlmacenadas(usuario.id, { tema: t, tamanoLetra: f, tamanoFuente: f });
     setTema(t);
     setTamanoFuente(f);
   }, [usuario]);
@@ -43,18 +43,18 @@ export function PreferenciasProvider({ children }) {
     const res = (typeof nuevo === 'function' ? nuevo(tema) : nuevo) === 'oscuro' ? 'oscuro' : 'claro';
     setTema(res);
     aplicarPreferenciasAlDom(res, tamanoFuente);
-    guardarPrefAlmacenadas(usuario?.id, { tema: res, tamanoFuente });
+    guardarPrefAlmacenadas(usuario?.id, { tema: res, tamanoLetra: tamanoFuente, tamanoFuente });
     sincronizar(res, tamanoFuente);
   }, [tema, tamanoFuente, usuario?.id, sincronizar]);
 
   const alternarTema = useCallback(() => cambiarTema(tema === 'oscuro' ? 'claro' : 'oscuro'), [cambiarTema, tema]);
 
   const cambiarTamano = useCallback((nuevo) => {
-    if (!MAPA_PCT_A_LETRA[nuevo]) return;
-    setTamanoFuente(nuevo);
-    aplicarPreferenciasAlDom(tema, nuevo);
-    guardarPrefAlmacenadas(usuario?.id, { tema, tamanoFuente: nuevo });
-    sincronizar(tema, nuevo);
+    const norm = normalizarTamanoLetra(nuevo);
+    setTamanoFuente(norm);
+    aplicarPreferenciasAlDom(tema, norm);
+    guardarPrefAlmacenadas(usuario?.id, { tema, tamanoLetra: norm, tamanoFuente: norm });
+    sincronizar(tema, norm);
   }, [tema, usuario?.id, sincronizar]);
 
   const valor = useMemo(() => ({

@@ -21,7 +21,7 @@ export default function LayoutAutenticacion({ children }) {
       <SaltarAlContenido />
       <aside
         aria-label="Identidad corporativa"
-        className="hidden lg:flex relative lg:w-[68%] lg:h-full p-6 sm:p-8 lg:p-10 flex-col justify-between text-sobre-primario bg-cover border-b lg:border-b-0 lg:border-r border-borde shrink-0"
+        className="hidden lg:flex relative lg:w-[68%] lg:h-full p-6 sm:p-8 lg:p-10 flex-col justify-between text-white bg-cover border-b lg:border-b-0 lg:border-r border-borde shrink-0"
         style={{ backgroundImage: `url(${RUTA_IMAGEN_FONDO_LOGIN})`, backgroundPosition: 'right center' }}
       >
         <div className="absolute inset-0 capa-superposicion-login pointer-events-none" aria-hidden="true" />
@@ -29,39 +29,39 @@ export default function LayoutAutenticacion({ children }) {
         <div className="relative z-10 flex items-center justify-between gap-4 flex-wrap">
           <Link
             to="/"
-            className="flex items-center gap-3 no-underline group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento-sobre-oscuro rounded"
+            className="flex items-center gap-3 no-underline group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF0] rounded"
             aria-label="Ir a la página principal de TechAsset"
           >
-            <LogoTechAsset variante="marca" />
+            <LogoTechAsset tamano="panel" alt="" />
             <div>
-              <p className="text-base font-bold text-sobre-primario leading-tight group-hover:text-acento-sobre-oscuro transition-colors">
+              <p className="text-base font-bold text-white leading-tight group-hover:text-[#38BDF0] transition-colors">
                 Innovatech Solutions S.A.C.
               </p>
-              <p className="text-sm text-lateral-texto">Gestión inteligente de activos tecnológicos</p>
+              <p className="text-sm text-[#D3E3F2]">Gestión inteligente de activos tecnológicos</p>
             </div>
           </Link>
         </div>
 
         <div className="relative z-10 max-w-[340px] my-auto py-4 space-y-4">
-          <div>
-            <span className="inline-block px-3 py-1 mb-2.5 rounded-pill bg-lateral-activo-fondo text-xs font-semibold text-sobre-primario">
+          <div className="flex flex-col items-start">
+            <span className="inline-flex items-center px-3 py-1 mb-3 rounded-pill bg-white/[0.12] border border-white/25 text-xs font-semibold text-white">
               Sistema corporativo
             </span>
             <Link
               to="/"
-              className="inline-block text-2xl sm:text-3xl font-bold text-sobre-primario mb-2 no-underline hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acento-sobre-oscuro rounded"
+              className="block text-2xl sm:text-3xl font-bold text-white mb-2 no-underline hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF0] rounded"
               aria-label="Ir a la página principal de TechAsset"
             >
-              Tech<span className="text-acento-sobre-oscuro">Asset</span>
+              Tech<span className="text-[#38BDF0]">Asset</span>
             </Link>
-            <p className="text-sm text-lateral-texto leading-relaxed">
+            <p className="text-sm text-[#D3E3F2] leading-relaxed">
               Plataforma corporativa para la gestión del inventario y el control de préstamos de equipos tecnológicos con trazabilidad en tiempo real.
             </p>
           </div>
-          <ul className="space-y-2.5 pt-1 text-xs sm:text-sm text-lateral-texto list-none p-0 m-0">
+          <ul className="space-y-2.5 pt-1 text-xs sm:text-sm text-[#D3E3F2] list-none p-0 m-0">
             {BENEFICIOS.map((b) => (
               <li key={b.texto} className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-full bg-white/10 border border-white/20 flex items-center justify-center shrink-0 text-acento-sobre-oscuro">
+                <div className="w-6 h-6 rounded-full bg-white/10 border border-white/20 flex items-center justify-center shrink-0 text-[#38BDF0]">
                   <Icono nombre={b.icono} className="w-3.5 h-3.5" />
                 </div>
                 <span className="leading-snug">{b.texto}</span>

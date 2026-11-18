@@ -39,23 +39,27 @@ export default function BarraNavegacion({ alAlternarMenu }) {
 
       {/* Controles de accesibilidad y usuario */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Selector de escala de fuente A-/A/A+ */}
+        {/* Selector de escala de fuente A / A+ / A++ */}
         <div className="flex items-center border border-borde rounded-lg overflow-hidden bg-superficie-2/50 p-0.5">
-          {escalas.map((esc) => (
-            <button
-              key={esc.clave}
-              type="button"
-              onClick={() => cambiarTamanoFuente(esc.valor)}
-              aria-label={`Tamaño de letra ${esc.etiqueta}`}
-              className={`h-7 px-2 text-xs font-bold rounded transition-colors ${
-                tamanoFuente === esc.valor
-                  ? 'bg-primario text-white shadow-xs'
-                  : 'text-texto-suave hover:text-texto'
-              }`}
-            >
-              {esc.etiqueta}
-            </button>
-          ))}
+          {escalas.map((esc) => {
+            const activo = tamanoFuente === esc.id || tamanoFuente === esc.porcentaje;
+            return (
+              <button
+                key={esc.id}
+                type="button"
+                onClick={() => cambiarTamanoFuente(esc.id)}
+                aria-label={esc.descripcion}
+                aria-pressed={activo}
+                className={`h-7 px-2 text-xs font-bold rounded transition-colors ${
+                  activo
+                    ? 'bg-primario text-sobre-primario shadow-xs'
+                    : 'text-texto-suave hover:text-texto'
+                }`}
+              >
+                {esc.etiqueta}
+              </button>
+            );
+          })}
         </div>
 
         {/* Alternador de tema Claro/Oscuro */}

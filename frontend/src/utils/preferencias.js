@@ -1,23 +1,43 @@
 // Utilidades de mapeo y persistencia de preferencias · TechAsset
 export const TEMA_DEFECTO = 'claro';
-export const TAMANO_DEFECTO = '100%';
+export const TAMANO_DEFECTO = 'normal';
 
 export const ESCALAS_FUENTE = [
-  { id: 'normal', etiqueta: 'A−', porcentaje: '87.5%', descripcion: 'Tamaño de fuente estándar (87.5 %)' },
-  { id: 'grande', etiqueta: 'A', porcentaje: '100%', descripcion: 'Tamaño de fuente mediano (100 %)' },
-  { id: 'extra', etiqueta: 'A+', porcentaje: '112.5%', descripcion: 'Tamaño de fuente grande (112.5 %)' }
+  { id: 'normal', etiqueta: 'A', porcentaje: '100%', descripcion: 'Tamaño de letra 100%' },
+  { id: 'grande', etiqueta: 'A+', porcentaje: '112.5%', descripcion: 'Tamaño de letra 112%' },
+  { id: 'extragrande', etiqueta: 'A++', porcentaje: '125%', descripcion: 'Tamaño de letra 125%' }
 ];
 
-export const MAPA_LETRA_A_PCT = { Pequena: '87.5%', Normal: '100%', Grande: '112.5%' };
-export const MAPA_PCT_A_LETRA = { '87.5%': 'Pequena', '100%': 'Normal', '112.5%': 'Grande' };
+export const MAPA_LETRA_A_PCT = {
+  normal: '100%',
+  grande: '112.5%',
+  extragrande: '125%'
+};
 
-export function aplicarPreferenciasAlDom(tema, tamanoFuente) {
+export const MAPA_PCT_A_LETRA = {
+  '100%': 'normal',
+  '112.5%': 'grande',
+  '125%': 'extragrande'
+};
+
+export function normalizarTamanoLetra(valor) {
+  if (!valor) return 'normal';
+  const v = valor.toString().trim().toLowerCase();
+  if (v === 'extragrande' || v === '125%' || v === 'a++') return 'extragrande';
+  if (v === 'grande' || v === '112.5%' || v === 'a+') return 'grande';
+  return 'normal';
+}
+
+export function aplicarPreferenciasAlDom(tema, tamanoLetra) {
   if (typeof document === 'undefined') return;
   const t = tema === 'oscuro' ? 'oscuro' : 'claro';
-  const f = MAPA_PCT_A_LETRA[tamanoFuente] ? tamanoFuente : '100%';
+  const normalizado = normalizarTamanoLetra(tamanoLetra);
+  const porcentaje = MAPA_LETRA_A_PCT[normalizado] || '100%';
+
   document.documentElement.setAttribute('data-tema', t);
-  document.documentElement.setAttribute('data-tamano-fuente', f);
-  document.documentElement.style.fontSize = f;
+  document.documentElement.setAttribute('data-tamano', normalizado);
+  document.documentElement.setAttribute('data-tamano-fuente', porcentaje);
+  document.documentElement.style.fontSize = porcentaje;
 }
 
 export function obtenerPrefAlmacenadas(usuarioId) {
@@ -39,6 +59,7 @@ export function guardarPrefAlmacenadas(usuarioId, datos) {
     }
     if (datos.tema) localStorage.setItem('techasset_tema', datos.tema);
     if (datos.tamanoFuente) localStorage.setItem('techasset_tamano_fuente', datos.tamanoFuente);
+    if (datos.tamanoLetra) localStorage.setItem('techasset_tamano_letra', datos.tamanoLetra);
   } catch {
     // Almacenamiento restringido
   }

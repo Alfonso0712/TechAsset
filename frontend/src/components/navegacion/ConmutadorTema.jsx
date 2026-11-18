@@ -9,8 +9,9 @@ export default function ConmutadorTema({ tema: temaProp, alAlternar, className =
   const esOscuro = temaActual === 'oscuro';
   const etiqueta = esOscuro ? 'Modo claro' : 'Modo oscuro';
   const ariaLabel = esOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+
   const estiloFondo = mimetizado
-    ? 'border-white/20 bg-white/10 backdrop-blur-md text-sobre-primario hover:bg-white/20'
+    ? 'border-white/25 bg-white/10 backdrop-blur-md text-[#D3E3F2] hover:text-white hover:bg-white/15'
     : 'border-borde bg-superficie text-texto hover:bg-superficie-2';
 
   return (
@@ -20,7 +21,7 @@ export default function ConmutadorTema({ tema: temaProp, alAlternar, className =
       onClick={manejarAlternar}
       className={`h-[38px] inline-flex items-center gap-1.5 px-3 rounded-pill border ${estiloFondo} text-xs font-semibold transition-colors cursor-pointer ${className}`.trim()}
     >
-      <Icono nombre={esOscuro ? 'Sun' : 'Moon'} className="w-3.5 h-3.5" />
+      <Icono nombre={esOscuro ? 'Sun' : 'Moon'} className="w-3.5 h-3.5 text-[#38BDF0]" />
       <span>{etiqueta}</span>
     </button>
   );
