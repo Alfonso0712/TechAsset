@@ -17,6 +17,7 @@ import TableList from '../components/ui/TableList';
 import Button from '../components/ui/Button';
 import Icono from '../components/ui/Icono';
 import Toast from '../components/ui/Toast';
+import AlertMessage from '../components/ui/AlertMessage';
 
 const ESTILOS_ROL_CHIP = {
   Administrador: 'bg-primario-suave text-primario dark:text-primario-enlace border border-primario/25',
@@ -242,6 +243,12 @@ export default function Usuarios() {
         alCambiarEstado={setEstadoFiltro}
         alLimpiar={limpiarFiltros}
       />
+
+      {error && (
+        <div className="mb-4">
+          <AlertMessage variante="error" mensaje={error} />
+        </div>
+      )}
 
       <TableList
         caption="Directorio corporativo de cuentas de usuario y permisos"

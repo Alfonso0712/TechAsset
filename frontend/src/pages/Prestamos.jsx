@@ -19,12 +19,15 @@ import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Icono from '../components/ui/Icono';
 import Toast from '../components/ui/Toast';
+import AlertMessage from '../components/ui/AlertMessage';
 
 import ModalDetallePrestamo from '../components/prestamos/ModalDetallePrestamo';
 import ModalAprobarPrestamo from '../components/prestamos/ModalAprobarPrestamo';
 import ModalRechazarPrestamo from '../components/prestamos/ModalRechazarPrestamo';
 import ModalDevolverPrestamo from '../components/prestamos/ModalDevolverPrestamo';
 import FormularioSolicitarPrestamo from '../components/prestamos/FormularioSolicitarPrestamo';
+import FormularioPrestamoDirecto from '../components/prestamos/FormularioPrestamoDirecto';
+import { esPrestamoVencido } from '../utils/fechas';
 
 export default function Prestamos() {
   const { usuario, puede } = useAuth();
@@ -48,6 +51,7 @@ export default function Prestamos() {
   const [prestamoParaRechazar, setPrestamoParaRechazar] = useState(null);
   const [prestamoParaDevolver, setPrestamoParaDevolver] = useState(null);
   const [modalSolicitarAbierto, setModalSolicitarAbierto] = useState(false);
+  const [modalDirectoAbierto, setModalDirectoAbierto] = useState(false);
 
   const puedeGestionar = puede(PERMISOS.PRESTAMOS_APROBAR_RECHAZAR);
   const puedeSolicitar = puede(PERMISOS.PRESTAMOS_SOLICITAR);
@@ -134,6 +138,15 @@ export default function Prestamos() {
     const busqueda = normalizarTexto(textoDebounce).toLowerCase();
 
     return prestamos.filter((p) => {
+      if (esColaborador && usuario) {
+        const esMio =
+          p.colaboradorId === usuario.id ||
+          p.solicitanteId === usuario.id ||
+          p.solicitante?.id === usuario.id ||
+          (usuario.correo && p.solicitanteCorreo?.toLowerCase() === usuario.correo.toLowerCase());
+        if (!esMio) return false;
+      }
+
       if (estadoFiltro) {
         if (estadoFiltro === ESTADOS_PRESTAMO.ACTIVO && p.estado !== 'Activo' && p.estado !== 'Prestado') return false;
         if (estadoFiltro !== ESTADOS_PRESTAMO.ACTIVO && p.estado !== estadoFiltro) return false;
@@ -152,7 +165,7 @@ export default function Prestamos() {
       if (esPendA !== esPendB) return esPendA - esPendB;
       return (b.fechaPrestamo || '').localeCompare(a.fechaPrestamo || '');
     });
-  }, [prestamos, estadoFiltro, textoDebounce, fechaDesde, fechaHasta]);
+  }, [prestamos, estadoFiltro, textoDebounce, fechaDesde, fechaHasta, esColaborador, usuario]);
 
   const columnas = [
     {
@@ -227,11 +240,34 @@ export default function Prestamos() {
       )
     },
     {
+      clave: 'responsable',
+      encabezado: 'Responsable',
+      claseEncabezado: 'min-w-[8rem] max-w-[11rem] px-2.5 hidden md:table-cell',
+      claseCelda: 'min-w-[8rem] max-w-[11rem] px-2.5 hidden md:table-cell text-xs',
+      render: (p) => (
+        <span className="text-texto-suave truncate block">
+          {p.estado === 'Pendiente' ? '—' : (p.responsableNombre || p.responsable?.nombreCompleto || '—')}
+        </span>
+      )
+    },
+    {
       clave: 'estado',
       encabezado: 'Estado',
       claseEncabezado: 'w-[1%] whitespace-nowrap px-2.5',
       claseCelda: 'w-[1%] whitespace-nowrap px-2.5',
-      render: (p) => <Badge estado={p.estado} />
+      render: (p) => {
+        const estaVencido = (p.estado === 'Activo' || p.estado === 'Prestado') && esPrestamoVencido(p);
+        return (
+          <div className="inline-flex items-center gap-1.5">
+            <Badge estado={p.estado} />
+            {estaVencido && (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-peligro-fondo text-peligro-texto border border-peligro-borde uppercase">
+                Vencido
+              </span>
+            )}
+          </div>
+        );
+      }
     },
     {
       clave: 'acciones',
@@ -270,7 +306,15 @@ export default function Prestamos() {
         titulo={tituloPagina}
         descripcion={descPagina}
         accionPrimaria={
-          puedeSolicitar ? (
+          puedeGestionar ? (
+            <Button
+              variante="primario"
+              alHacerClic={() => setModalDirectoAbierto(true)}
+            >
+              <Icono nombre="Plus" className="w-4 h-4 mr-1.5 shrink-0" />
+              <span>Registrar préstamo</span>
+            </Button>
+          ) : esColaborador && puedeSolicitar ? (
             <Button
               variante="primario"
               alHacerClic={() => setModalSolicitarAbierto(true)}
@@ -305,6 +349,12 @@ export default function Prestamos() {
         conteos={conteos}
         alSeleccionar={(e) => actualizarParametro('estado', e)}
       />
+
+      {error && (
+        <div className="mb-4">
+          <AlertMessage variante="error" mensaje={error} />
+        </div>
+      )}
 
       <TableList
         caption="Listado de solicitudes y custodia de equipos tecnológicos"
@@ -363,6 +413,14 @@ export default function Prestamos() {
           abierto={modalSolicitarAbierto}
           alCerrar={() => setModalSolicitarAbierto(false)}
           alExito={() => handleExitoAccion('Solicitud de préstamo enviada para revisión.')}
+        />
+      )}
+
+      {modalDirectoAbierto && (
+        <FormularioPrestamoDirecto
+          abierto={modalDirectoAbierto}
+          alCerrar={() => setModalDirectoAbierto(false)}
+          alExito={() => handleExitoAccion('Préstamo directo registrado exitosamente.')}
         />
       )}
 

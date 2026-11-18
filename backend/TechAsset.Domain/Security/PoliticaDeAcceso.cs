@@ -22,8 +22,7 @@ public static class PoliticaDeAcceso
             Permisos.EquiposCrear,
             Permisos.EquiposEditar,
             Permisos.EquiposCambiarEstado,
-            Permisos.PrestamosVer,
-            Permisos.PrestamosSolicitar
+            Permisos.PrestamosVer
         },
         [RolUsuario.ResponsableTecnologia] = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {

@@ -1,4 +1,6 @@
-// Botones icon-only con tooltip dinámico y prevención de estados inválidos · ISO 9241-110 · TechAsset
+// Botones con IconButton y accesibilidad WCAG 2.2 AA · TechAsset (RF-05..RF-08)
+import { Link } from 'react-router-dom';
+import IconButton from '../ui/IconButton';
 import Button from '../ui/Button';
 import Icono from '../ui/Icono';
 
@@ -21,38 +23,38 @@ export default function AccionesFilaEquipo({
     return (
       <div className="inline-flex items-center justify-end gap-1.5">
         {puedeEditar && (
-          <Button
-            variante="ghost"
-            tamano="sm"
-            aria-label={`Editar ${equipo.nombre}`}
-            title="Editar equipo"
+          <IconButton
+            variante="editar"
+            etiqueta={`Editar ${equipo.nombre}`}
+            tooltip="Editar equipo"
             alHacerClic={() => alEditar?.(equipo)}
-          >
-            <Icono nombre="Pencil" className="w-4 h-4 text-texto-suave hover:text-texto" />
-          </Button>
+          />
         )}
 
         {puedeCambiarEstado && (
-          <div className="relative group inline-block">
-            <Button
-              variante="ghost"
-              tamano="sm"
-              deshabilitado={tienePrestamoActivo}
-              aria-label={tooltipCambiarEstado}
-              title={tooltipCambiarEstado}
-              alHacerClic={() => !tienePrestamoActivo && alCambiarEstado?.(equipo)}
-            >
-              <Icono
-                nombre="RefreshCw"
-                className={`w-4 h-4 ${
-                  tienePrestamoActivo
-                    ? 'text-texto-suave/40 cursor-not-allowed'
-                    : 'text-advertencia-texto hover:text-texto'
-                }`}
-              />
-            </Button>
-          </div>
+          <IconButton
+            variante="cambiar-estado"
+            icono="RefreshCw"
+            etiqueta={tooltipCambiarEstado}
+            tooltip={tooltipCambiarEstado}
+            disabled={tienePrestamoActivo}
+            deshabilitado={tienePrestamoActivo}
+            alHacerClic={() => !tienePrestamoActivo && alCambiarEstado?.(equipo)}
+          />
         )}
+
+        <Link
+          to={`/reportes?equipoId=${equipo.id}`}
+          aria-label={`Ver historial de movimientos de ${equipo.nombre}`}
+          title="Ver historial de movimientos"
+        >
+          <IconButton
+            variante="historial"
+            icono="History"
+            etiqueta={`Historial de ${equipo.nombre}`}
+            tooltip="Ver historial de movimientos"
+          />
+        </Link>
       </div>
     );
   }
@@ -61,7 +63,7 @@ export default function AccionesFilaEquipo({
     if (equipo.estado === 'Disponible') {
       return (
         <Button
-          variante="primary"
+          variante="primario"
           tamano="sm"
           alHacerClic={() => alSolicitar?.(equipo.id)}
         >

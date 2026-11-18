@@ -6,6 +6,7 @@ import TextAreaInput from '../formulario/TextAreaInput';
 import AlertMessage from '../ui/AlertMessage';
 import { prestamoService } from '../../services/prestamoService';
 import { interpretarRespuestaError } from '../../validation/interpretarRespuesta';
+import { fechaHoyLima } from '../../utils/fechas';
 
 export default function ModalDevolverPrestamo({
   abierto = false,
@@ -13,18 +14,31 @@ export default function ModalDevolverPrestamo({
   alCerrar,
   alExito
 }) {
-  const hoyStr = new Date().toISOString().split('T')[0];
+  const hoyStr = fechaHoyLima();
   const [fechaDevolucionReal, setFechaDevolucionReal] = useState(hoyStr);
   const [observacion, setObservacion] = useState('');
+  const [confirmarDevolucion, setConfirmarDevolucion] = useState(false);
   const [enProceso, setEnProceso] = useState(false);
   const [error, setError] = useState(null);
 
   if (!prestamo) return null;
 
+  const longitud = (observacion || '').trim().length;
+
   const handleDevolver = async () => {
-    // RN-10: Exigencia estricta de observación técnica
-    if (!observacion || observacion.trim().length < 5) {
-      setError('La observación técnica es obligatoria. Describa la condición física y funcional del equipo.');
+    // RN-10: Exigencia estricta de observación técnica entre 10 y 500 caracteres
+    if (longitud < 10 || longitud > 500) {
+      setError('La observación técnica es obligatoria (entre 10 y 500 caracteres). Describa la condición física y funcional del equipo.');
+      return;
+    }
+
+    if (fechaDevolucionReal < prestamo.fechaPrestamo) {
+      setError('La fecha de devolución real no puede ser anterior a la fecha de inicio del préstamo.');
+      return;
+    }
+
+    if (!confirmarDevolucion) {
+      setError('Debe confirmar la recepción del equipo tecnológico.');
       return;
     }
 
@@ -33,7 +47,7 @@ export default function ModalDevolverPrestamo({
     try {
       const resp = await prestamoService.registrarDevolucion(
         prestamo.id,
-        observacion,
+        observacion.trim(),
         fechaDevolucionReal
       );
       if (resp.estado === 200) {
@@ -54,11 +68,12 @@ export default function ModalDevolverPrestamo({
       abierto={abierto}
       alCerrar={alCerrar}
       titulo="Registrar Devolución de Equipo"
-      subtitulo={`Equipo: ${prestamo.equipoCodigo} - ${prestamo.equipoNombre}`}
+      subtitulo={`Equipo: ${prestamo.equipoCodigo || ''} - ${prestamo.equipoNombre || ''}`}
       textoPrimario="Registrar Devolución"
       textoSecundario="Cancelar"
-      variantePrimaria="success"
+      variantePrimaria="exito"
       enProceso={enProceso}
+      deshabilitado={!confirmarDevolucion || longitud < 10 || longitud > 500}
       alConfirmar={handleDevolver}
       tamano="md"
     >
@@ -84,9 +99,9 @@ export default function ModalDevolverPrestamo({
 
         <CampoFormulario
           id="observacionDevolucion"
-          etiqueta="Observación técnica obligatoria"
+          etiqueta={`Observación técnica obligatoria (${longitud}/500)`}
           obligatorio
-          ayuda="Detalle el estado del hardware, pantalla, cargador y funcionamiento tras la revisión."
+          ayuda="Detalle el estado del hardware, pantalla, cargador y funcionamiento tras la revisión técnica (mín. 10, máx. 500 caracteres)."
         >
           <TextAreaInput
             id="observacionDevolucion"
@@ -97,10 +112,26 @@ export default function ModalDevolverPrestamo({
               setObservacion(e.target.value);
               setError(null);
             }}
+            filas={4}
             disabled={enProceso}
-            rows={4}
+            maxLength={500}
           />
         </CampoFormulario>
+
+        <div className="p-3 rounded-control bg-superficie-2 border border-borde">
+          <label className="flex items-start gap-2 text-xs text-texto font-medium cursor-pointer">
+            <input
+              type="checkbox"
+              checked={confirmarDevolucion}
+              onChange={(e) => {
+                setConfirmarDevolucion(e.target.checked);
+                setError(null);
+              }}
+              className="mt-0.5 rounded text-primario focus:ring-anillo-foco"
+            />
+            <span>Confirmo que he recibido y verificado técnicamente el equipo tecnológico devuelto (el equipo retornará al estado Disponible).</span>
+          </label>
+        </div>
       </div>
     </ModalDialog>
   );

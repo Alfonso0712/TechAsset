@@ -19,6 +19,7 @@ import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import Icono from '../components/ui/Icono';
 import Toast from '../components/ui/Toast';
+import AlertMessage from '../components/ui/AlertMessage';
 
 export default function Equipos() {
   const { puede } = useAuth();
@@ -211,6 +212,46 @@ export default function Equipos() {
         alCambiarEstado={setEstadoFiltro}
         alLimpiar={limpiarFiltros}
       />
+
+      {/* Chips de estado con conteo (Fidelidad ReservaUPLA / RF-05..RF-08) */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1" role="region" aria-label="Filtro rápido por estado">
+        {[
+          { clave: '', etiqueta: 'Todos', cant: equipos.length },
+          { clave: 'Disponible', etiqueta: 'Disponibles', cant: equipos.filter((e) => e.estado === 'Disponible').length },
+          { clave: 'Prestado', etiqueta: 'Prestados', cant: equipos.filter((e) => e.estado === 'Prestado').length },
+          { clave: 'Mantenimiento', etiqueta: 'Mantenimiento', cant: equipos.filter((e) => e.estado === 'Mantenimiento').length },
+          { clave: 'Baja', etiqueta: 'Baja', cant: equipos.filter((e) => e.estado === 'Baja').length }
+        ].map((chip) => {
+          const esActivo = estadoFiltro === chip.clave;
+          return (
+            <button
+              key={chip.clave}
+              type="button"
+              onClick={() => setEstadoFiltro(chip.clave)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-pill text-xs font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
+                esActivo
+                  ? 'bg-primario text-sobre-primario border-primario shadow-xs'
+                  : 'bg-superficie text-texto-suave border-borde hover:bg-superficie-2 hover:text-texto'
+              }`}
+            >
+              <span>{chip.etiqueta}</span>
+              <span
+                className={`px-1.5 py-0.2 rounded-full text-[10px] cifra-tabular font-bold ${
+                  esActivo ? 'bg-white/20 text-white' : 'bg-superficie-2 text-texto-suave'
+                }`}
+              >
+                {chip.cant}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {error && (
+        <div className="mb-4">
+          <AlertMessage variante="error" mensaje={error} />
+        </div>
+      )}
 
       <TableList
         caption="Inventario corporativo de activos tecnológicos"
