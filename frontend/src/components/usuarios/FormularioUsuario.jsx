@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import ModalDialog from '../ui/ModalDialog';
-import CampoFormulario from '../formulario/CampoFormulario';
 import TextInput from '../formulario/TextInput';
 import PasswordInput from '../formulario/PasswordInput';
 import SelectInput from '../formulario/SelectInput';
@@ -20,27 +19,31 @@ const OPCIONES_ROL = [
 
 export default function FormularioUsuario({
   abierto = false,
+  usuario = null,
   usuarioAEditar = null,
   alCerrar,
+  alExito,
   alGuardarExitoso
 }) {
-  const esEdicion = Boolean(usuarioAEditar);
+  const targetUsuario = usuarioAEditar || usuario;
+  const esEdicion = Boolean(targetUsuario);
+  const callbackExito = alExito || alGuardarExitoso;
   const [areas, setAreas] = useState([]);
 
   const form = useFormulario({
     valoresIniciales: {
-      nombres: usuarioAEditar?.nombres || '',
-      apellidos: usuarioAEditar?.apellidos || '',
-      correo: usuarioAEditar?.correo || '',
+      nombres: targetUsuario?.nombres || '',
+      apellidos: targetUsuario?.apellidos || '',
+      correo: targetUsuario?.correo || '',
       contrasena: '',
-      rol: usuarioAEditar?.rol || ROLES.COLABORADOR,
-      areaId: usuarioAEditar?.areaId || ''
+      rol: targetUsuario?.rol || ROLES.COLABORADOR,
+      areaId: targetUsuario?.areaId || ''
     },
     validar: (vals) => validarUsuario(vals, esEdicion),
     alEnviar: async (datos, { setErrores, setErrorGeneral, enfocarPrimerError }) => {
       let resp;
       if (esEdicion) {
-        resp = await usuarioService.actualizar(usuarioAEditar.id, {
+        resp = await usuarioService.actualizar(targetUsuario.id, {
           nombres: datos.nombres,
           apellidos: datos.apellidos,
           areaId: datos.areaId,
@@ -52,8 +55,11 @@ export default function FormularioUsuario({
 
       const res = interpretarRespuesta(resp);
       if (res.ok) {
-        alGuardarExitoso?.(esEdicion ? 'Usuario actualizado con éxito.' : 'Usuario registrado con éxito.', res.datos);
-        alCerrar();
+        const itemGuardado = (res.datos && typeof res.datos === 'object')
+          ? res.datos
+          : { ...datos, id: targetUsuario?.id, nombreCompleto: `${datos.nombres} ${datos.apellidos}` };
+        callbackExito?.(itemGuardado, esEdicion ? 'Usuario actualizado con éxito.' : 'Usuario registrado con éxito.');
+        alCerrar?.();
         return;
       }
 
@@ -70,12 +76,12 @@ export default function FormularioUsuario({
   useEffect(() => {
     if (abierto) {
       form.setValores({
-        nombres: usuarioAEditar?.nombres || '',
-        apellidos: usuarioAEditar?.apellidos || '',
-        correo: usuarioAEditar?.correo || '',
+        nombres: targetUsuario?.nombres || '',
+        apellidos: targetUsuario?.apellidos || '',
+        correo: targetUsuario?.correo || '',
         contrasena: '',
-        rol: usuarioAEditar?.rol || ROLES.COLABORADOR,
-        areaId: usuarioAEditar?.areaId || ''
+        rol: targetUsuario?.rol || ROLES.COLABORADOR,
+        areaId: targetUsuario?.areaId || ''
       });
       form.setErrores({});
       form.setErrorGeneral('');
@@ -87,14 +93,14 @@ export default function FormularioUsuario({
         }
       });
     }
-  }, [abierto, usuarioAEditar]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [abierto, targetUsuario]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <ModalDialog
       abierto={abierto}
       alCerrar={alCerrar}
       titulo={esEdicion ? 'Editar usuario' : 'Nuevo usuario'}
-      subtitulo={esEdicion ? `Actualice los datos de ${usuarioAEditar.nombreCompleto}` : 'Alta de cuenta corporativa'}
+      subtitulo={esEdicion ? `Actualice los datos de ${targetUsuario?.nombreCompleto || 'usuario'}` : 'Alta de cuenta corporativa'}
       textoPrimario={esEdicion ? 'Guardar cambios' : 'Crear usuario'}
       textoSecundario="Cancelar"
       variantePrimaria="primary"
@@ -106,128 +112,98 @@ export default function FormularioUsuario({
         {form.errorGeneral && <AlertMessage variante="error" rol="alert" mensaje={form.errorGeneral} />}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <CampoFormulario
+          <TextInput
+            ref={form.registrarRef('nombres')}
             id="nombres"
+            nombre="nombres"
             etiqueta="Nombres"
+            placeholder="Juan Carlos"
+            valor={form.valores.nombres}
+            alCambiar={(e) => form.cambiarValor('nombres', e.target.value)}
+            alSalir={() => form.manejarBlur('nombres')}
             error={form.errores.nombres}
             obligatorio
-          >
-            <TextInput
-              ref={form.registrarRef('nombres')}
-              id="nombres"
-              nombre="nombres"
-              placeholder="Juan Carlos"
-              valor={form.valores.nombres}
-              alCambiar={(e) => form.cambiarValor('nombres', e.target.value)}
-              alSalir={() => form.manejarBlur('nombres')}
-              error={form.errores.nombres}
-              soloLectura={form.enProceso}
-            />
-          </CampoFormulario>
+            soloLectura={form.enProceso}
+          />
 
-          <CampoFormulario
+          <TextInput
+            ref={form.registrarRef('apellidos')}
             id="apellidos"
+            nombre="apellidos"
             etiqueta="Apellidos"
+            placeholder="Pérez García"
+            valor={form.valores.apellidos}
+            alCambiar={(e) => form.cambiarValor('apellidos', e.target.value)}
+            alSalir={() => form.manejarBlur('apellidos')}
             error={form.errores.apellidos}
             obligatorio
-          >
-            <TextInput
-              ref={form.registrarRef('apellidos')}
-              id="apellidos"
-              nombre="apellidos"
-              placeholder="Pérez García"
-              valor={form.valores.apellidos}
-              alCambiar={(e) => form.cambiarValor('apellidos', e.target.value)}
-              alSalir={() => form.manejarBlur('apellidos')}
-              error={form.errores.apellidos}
-              soloLectura={form.enProceso}
-            />
-          </CampoFormulario>
+            soloLectura={form.enProceso}
+          />
         </div>
 
-        <CampoFormulario
+        <TextInput
+          ref={form.registrarRef('correo')}
           id="correoUsuario"
+          nombre="correo"
+          type="email"
           etiqueta="Correo corporativo"
+          placeholder="usuario@innovatech.com"
+          valor={form.valores.correo}
+          alCambiar={(e) => form.cambiarValor('correo', e.target.value)}
+          alSalir={() => form.manejarBlur('correo')}
           error={form.errores.correo}
           obligatorio={!esEdicion}
           ayuda={esEdicion ? 'El correo corporativo no puede modificarse.' : 'Debe ser único en la organización.'}
-        >
-          <TextInput
-            ref={form.registrarRef('correo')}
-            id="correoUsuario"
-            nombre="correo"
-            type="email"
-            placeholder="usuario@innovatech.com"
-            valor={form.valores.correo}
-            alCambiar={(e) => form.cambiarValor('correo', e.target.value)}
-            alSalir={() => form.manejarBlur('correo')}
-            error={form.errores.correo}
-            soloLectura={esEdicion || form.enProceso}
-          />
-        </CampoFormulario>
+          soloLectura={esEdicion || form.enProceso}
+        />
 
         {!esEdicion && (
-          <CampoFormulario
+          <PasswordInput
+            ref={form.registrarRef('contrasena')}
             id="contrasenaUsuario"
+            nombre="contrasena"
             etiqueta="Contraseña temporal"
+            placeholder="••••••••"
+            valor={form.valores.contrasena}
+            alCambiar={(e) => form.cambiarValor('contrasena', e.target.value)}
+            alSalir={() => form.manejarBlur('contrasena')}
             error={form.errores.contrasena}
             obligatorio
             ayuda="Mínimo 8 caracteres corporativos."
-          >
-            <PasswordInput
-              ref={form.registrarRef('contrasena')}
-              id="contrasenaUsuario"
-              nombre="contrasena"
-              placeholder="••••••••"
-              valor={form.valores.contrasena}
-              alCambiar={(e) => form.cambiarValor('contrasena', e.target.value)}
-              alSalir={() => form.manejarBlur('contrasena')}
-              error={form.errores.contrasena}
-              soloLectura={form.enProceso}
-            />
-          </CampoFormulario>
+            soloLectura={form.enProceso}
+          />
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <CampoFormulario
+          <SelectInput
+            ref={form.registrarRef('areaId')}
             id="areaId"
+            nombre="areaId"
             etiqueta="Área corporativa"
+            placeholder="Seleccione el área"
+            opciones={areas}
+            valor={form.valores.areaId}
+            alCambiar={(e) => form.cambiarValor('areaId', e.target.value)}
+            alSalir={() => form.manejarBlur('areaId')}
             error={form.errores.areaId}
             obligatorio
-          >
-            <SelectInput
-              ref={form.registrarRef('areaId')}
-              id="areaId"
-              nombre="areaId"
-              placeholder="Seleccione el área"
-              opciones={areas}
-              valor={form.valores.areaId}
-              alCambiar={(e) => form.cambiarValor('areaId', e.target.value)}
-              alSalir={() => form.manejarBlur('areaId')}
-              error={form.errores.areaId}
-              soloLectura={form.enProceso}
-            />
-          </CampoFormulario>
+            soloLectura={form.enProceso}
+          />
 
-          <CampoFormulario
+          <SelectInput
+            ref={form.registrarRef('rol')}
             id="rol"
+            nombre="rol"
             etiqueta="Rol del usuario"
+            placeholder="Seleccione el rol"
+            opciones={OPCIONES_ROL}
+            valor={form.valores.rol}
+            alCambiar={(e) => form.cambiarValor('rol', e.target.value)}
+            alSalir={() => form.manejarBlur('rol')}
             error={form.errores.rol}
             obligatorio
-          >
-            <SelectInput
-              ref={form.registrarRef('rol')}
-              id="rol"
-              nombre="rol"
-              placeholder="Seleccione el rol"
-              opciones={OPCIONES_ROL}
-              valor={form.valores.rol}
-              alCambiar={(e) => form.cambiarValor('rol', e.target.value)}
-              alSalir={() => form.manejarBlur('rol')}
-              error={form.errores.rol}
-              soloLectura={form.enProceso}
-            />
-          </CampoFormulario>
+            soloLectura={form.enProceso}
+          />
         </div>
       </form>
     </ModalDialog>

@@ -19,9 +19,11 @@ export default function FormularioSolicitarPrestamo({
   abierto = false,
   equipoPreseleccionadoId = '',
   alCerrar,
+  alExito,
   alGuardarExitoso
 }) {
   const idTitulo = useId();
+  const callbackExito = alExito || alGuardarExitoso;
   const [equiposDisponibles, setEquiposDisponibles] = useState([]);
   const [cargandoEquipos, setCargandoEquipos] = useState(false);
 
@@ -45,8 +47,8 @@ export default function FormularioSolicitarPrestamo({
 
       const res = interpretarRespuesta(resp);
       if (res.ok) {
-        alGuardarExitoso?.(MENSAJES.PRESTAMO_REGISTRADO_EXITO || 'Solicitud de préstamo enviada exitosamente', res.datos);
-        alCerrar();
+        callbackExito?.(res.datos || vals, MENSAJES.PRESTAMO_REGISTRADO_EXITO || 'Solicitud de préstamo enviada exitosamente');
+        alCerrar?.();
         return;
       }
 

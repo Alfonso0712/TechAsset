@@ -75,24 +75,20 @@ export default function ModalCambiarEstadoEquipo({
           <span className="font-semibold text-texto">Estado actual:</span> {equipo.estado}
         </div>
 
-        <CampoFormulario
+        <SelectInput
           id="nuevoEstado"
+          nombre="nuevoEstado"
           etiqueta="Nuevo Estado"
           obligatorio
-        >
-          <SelectInput
-            id="nuevoEstado"
-            name="nuevoEstado"
-            placeholder="Seleccione el nuevo estado"
-            opciones={opcionesEstado}
-            value={nuevoEstado}
-            onChange={(e) => {
-              setNuevoEstado(e.target.value);
-              setError(null);
-            }}
-            disabled={enProceso}
-          />
-        </CampoFormulario>
+          placeholder="Seleccione el nuevo estado"
+          opciones={opcionesEstado}
+          valor={nuevoEstado}
+          alCambiar={(e) => {
+            setNuevoEstado(e.target.value);
+            setError(null);
+          }}
+          disabled={enProceso}
+        />
 
         <CampoFormulario
           id="motivoEstado"

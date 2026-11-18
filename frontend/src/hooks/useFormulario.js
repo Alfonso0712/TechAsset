@@ -42,6 +42,14 @@ export function useFormulario({ valoresIniciales, validar, alEnviar, onSubmit })
     setResumenEstado('');
   }, []);
 
+  const reiniciar = useCallback((nuevosValores = valoresIniciales) => {
+    setValores(nuevosValores);
+    setErrores({});
+    setTocados({});
+    setErrorGeneral('');
+    setResumenEstado('');
+  }, [valoresIniciales]);
+
   const marcarTocado = useCallback((nombre) => {
     setTocados((prev) => ({ ...prev, [nombre]: true }));
   }, []);
@@ -113,6 +121,8 @@ export function useFormulario({ valoresIniciales, validar, alEnviar, onSubmit })
     manejarBlur,
     manejarEnvio,
     registrarRef,
-    camposRef
+    camposRef,
+    reiniciar,
+    reset: reiniciar
   };
 }

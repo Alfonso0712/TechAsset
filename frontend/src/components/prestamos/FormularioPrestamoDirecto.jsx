@@ -15,8 +15,10 @@ import { ESTADOS_EQUIPO } from '../../constants/estados';
 export default function FormularioPrestamoDirecto({
   abierto = false,
   alCerrar,
+  alExito,
   alGuardarExitoso
 }) {
+  const callbackExito = alExito || alGuardarExitoso;
   const [equipos, setEquipos] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [cargandoDatos, setCargandoDatos] = useState(false);
@@ -53,7 +55,7 @@ export default function FormularioPrestamoDirecto({
     onSubmit: async (datos) => {
       const resp = await prestamoService.crearDirecto(datos);
       if (resp.estado === 201 || resp.estado === 200) {
-        alGuardarExitoso?.(resp.datos);
+        callbackExito?.(resp.datos);
         alCerrar();
       } else {
         setMensajeGeneral(interpretarRespuestaError(resp.estado, resp.datos));
@@ -109,75 +111,57 @@ export default function FormularioPrestamoDirecto({
       <form onSubmit={manejarEnvio} className="space-y-4" noValidate>
         {mensajeGeneral && <AlertMessage variante="peligro" mensaje={mensajeGeneral} />}
 
-        <CampoFormulario
+        <SelectInput
           id="idUsuario"
+          nombre="idUsuario"
           etiqueta="Colaborador Beneficiario"
+          placeholder={cargandoDatos ? 'Cargando usuarios…' : 'Seleccione al colaborador'}
+          opciones={usuarios}
+          valor={valores.idUsuario}
+          alCambiar={(e) => cambiarValor('idUsuario', e.target.value)}
+          alSalir={() => marcarTocado('idUsuario')}
           error={errores.idUsuario}
           obligatorio
-        >
-          <SelectInput
-            id="idUsuario"
-            name="idUsuario"
-            placeholder={cargandoDatos ? 'Cargando usuarios…' : 'Seleccione al colaborador'}
-            opciones={usuarios}
-            value={valores.idUsuario}
-            onChange={(e) => cambiarValor('idUsuario', e.target.value)}
-            onBlur={() => marcarTocado('idUsuario')}
-            error={Boolean(errores.idUsuario)}
-            disabled={enviando || cargandoDatos}
-          />
-        </CampoFormulario>
+          deshabilitado={enviando || cargandoDatos}
+        />
 
-        <CampoFormulario
+        <SelectInput
           id="idEquipoDirecto"
+          nombre="idEquipoDirecto"
           etiqueta="Equipo Tecnológico Disponible"
+          placeholder={cargandoDatos ? 'Cargando equipos…' : 'Seleccione el equipo'}
+          opciones={equipos}
+          valor={valores.idEquipo}
+          alCambiar={(e) => cambiarValor('idEquipo', e.target.value)}
+          alSalir={() => marcarTocado('idEquipo')}
           error={errores.idEquipo}
           obligatorio
-        >
-          <SelectInput
-            id="idEquipoDirecto"
-            name="idEquipoDirecto"
-            placeholder={cargandoDatos ? 'Cargando equipos…' : 'Seleccione el equipo'}
-            opciones={equipos}
-            value={valores.idEquipo}
-            onChange={(e) => cambiarValor('idEquipo', e.target.value)}
-            onBlur={() => marcarTocado('idEquipo')}
-            error={Boolean(errores.idEquipo)}
-            disabled={enviando || cargandoDatos}
-          />
-        </CampoFormulario>
+          deshabilitado={enviando || cargandoDatos}
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <CampoFormulario
+          <DateInput
             id="fechaPrestamoDirecto"
+            nombre="fechaPrestamoDirecto"
             etiqueta="Fecha de Préstamo"
+            valor={valores.fechaPrestamo}
+            alCambiar={(e) => cambiarValor('fechaPrestamo', e.target.value)}
             error={errores.fechaPrestamo}
             obligatorio
-          >
-            <DateInput
-              id="fechaPrestamoDirecto"
-              name="fechaPrestamoDirecto"
-              value={valores.fechaPrestamo}
-              onChange={(e) => cambiarValor('fechaPrestamo', e.target.value)}
-              disabled={enviando}
-            />
-          </CampoFormulario>
+            deshabilitado={enviando}
+          />
 
-          <CampoFormulario
+          <DateInput
             id="fechaDevolucionDirecto"
+            nombre="fechaDevolucionDirecto"
             etiqueta="Fecha Estimada Devolución"
+            valor={valores.fechaDevolucionEstimada}
+            alCambiar={(e) => cambiarValor('fechaDevolucionEstimada', e.target.value)}
             error={errores.fechaDevolucionEstimada}
             obligatorio
-          >
-            <DateInput
-              id="fechaDevolucionDirecto"
-              name="fechaDevolucionDirecto"
-              value={valores.fechaDevolucionEstimada}
-              onChange={(e) => cambiarValor('fechaDevolucionEstimada', e.target.value)}
-              disabled={enviando}
-              min={valores.fechaPrestamo || hoyStr}
-            />
-          </CampoFormulario>
+            deshabilitado={enviando}
+            min={valores.fechaPrestamo || hoyStr}
+          />
         </div>
 
         <CampoFormulario

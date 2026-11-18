@@ -71,20 +71,16 @@ export default function ModalDevolverPrestamo({
           <p><span className="font-semibold text-texto">Devolución estimada:</span> {prestamo.fechaDevolucionEstimada}</p>
         </div>
 
-        <CampoFormulario
+        <DateInput
           id="fechaDevolucionReal"
+          nombre="fechaDevolucionReal"
           etiqueta="Fecha de Devolución Real"
           obligatorio
-        >
-          <DateInput
-            id="fechaDevolucionReal"
-            name="fechaDevolucionReal"
-            value={fechaDevolucionReal}
-            onChange={(e) => setFechaDevolucionReal(e.target.value)}
-            disabled={enProceso}
-            min={prestamo.fechaPrestamo}
-          />
-        </CampoFormulario>
+          valor={fechaDevolucionReal}
+          alCambiar={(e) => setFechaDevolucionReal(e.target.value)}
+          deshabilitado={enProceso}
+          min={prestamo.fechaPrestamo}
+        />
 
         <CampoFormulario
           id="observacionDevolucion"
