@@ -142,45 +142,57 @@ public class PrestamoRepository : IPrestamoRepository
 
     public async Task<string?> ObtenerAreaConMayorUsoAsync(CancellationToken ct = default)
     {
-        var areaLider = await _context.Prestamos
+        var areas = await _context.Prestamos
             .AsNoTracking()
-            .Include(p => p.Solicitante)
-                .ThenInclude(u => u!.Area)
             .Where(p => p.Solicitante != null && p.Solicitante.Area != null)
-            .GroupBy(p => p.Solicitante!.Area!.Nom_Area)
+            .Select(p => p.Solicitante!.Area!.Nom_Area)
+            .ToListAsync(ct);
+
+        return areas
+            .GroupBy(a => a)
             .Select(g => new { Area = g.Key, Total = g.Count() })
             .OrderByDescending(x => x.Total)
-            .FirstOrDefaultAsync(ct);
-
-        return areaLider?.Area;
+            .Select(x => x.Area)
+            .FirstOrDefault();
     }
 
     public async Task<IReadOnlyList<PrestamosPorAreaDto>> ObtenerPrestamosPorAreaAsync(int? limite = null, CancellationToken ct = default)
     {
-        var query = _context.Prestamos
+        var areas = await _context.Prestamos
             .AsNoTracking()
-            .Include(p => p.Solicitante)
-                .ThenInclude(u => u!.Area)
             .Where(p => p.Solicitante != null && p.Solicitante.Area != null)
-            .GroupBy(p => p.Solicitante!.Area!.Nom_Area)
+            .Select(p => p.Solicitante!.Area!.Nom_Area)
+            .ToListAsync(ct);
+
+        var query = areas
+            .GroupBy(a => a)
             .Select(g => new PrestamosPorAreaDto(g.Key, g.Count()))
             .OrderByDescending(x => x.TotalPrestamos);
 
         if (limite.HasValue)
         {
-            return await query.Take(limite.Value).ToListAsync(ct);
+            return query.Take(limite.Value).ToList();
         }
 
-        return await query.ToListAsync(ct);
+        return query.ToList();
     }
 
     public async Task<IReadOnlyList<EquiposMasUtilizadosDto>> ObtenerEquiposMasUtilizadosAsync(int limite = 10, CancellationToken ct = default)
     {
-        return await _context.Prestamos
+        var datos = await _context.Prestamos
             .AsNoTracking()
-            .Include(p => p.Equipo)
             .Where(p => p.Equipo != null)
-            .GroupBy(p => new { p.Ide_Prestamo, p.Equipo!.Cop_Equipo, p.Equipo.Nom_Equipo, p.Equipo.Cat_Equipo })
+            .Select(p => new
+            {
+                p.Ide_Prestamo,
+                p.Equipo!.Cop_Equipo,
+                p.Equipo.Nom_Equipo,
+                p.Equipo.Cat_Equipo
+            })
+            .ToListAsync(ct);
+
+        return datos
+            .GroupBy(p => new { p.Ide_Prestamo, p.Cop_Equipo, p.Nom_Equipo, p.Cat_Equipo })
             .Select(g => new EquiposMasUtilizadosDto(
                 g.Key.Ide_Prestamo,
                 g.Key.Cop_Equipo,
@@ -190,7 +202,7 @@ public class PrestamoRepository : IPrestamoRepository
             ))
             .OrderByDescending(x => x.TotalPrestamos)
             .Take(limite)
-            .ToListAsync(ct);
+            .ToList();
     }
 
     public async Task<IReadOnlyList<Prestamo>> ObtenerSolicitudesPendientesRecientesAsync(int limite = 5, CancellationToken ct = default)
