@@ -54,7 +54,7 @@ export default function RedParticulas({ className = '' }) {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(45, 212, 191, ${0.28 * (1 - dist / 120)})`;
+            ctx.strokeStyle = `rgba(56, 189, 240, ${0.28 * (1 - dist / 120)})`;
             ctx.lineWidth = 0.8;
             ctx.stroke();
           }

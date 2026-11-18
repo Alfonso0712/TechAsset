@@ -9,7 +9,7 @@ export default function LogoTechAsset({ className = 'h-8', variante = 'marca' })
       <LogoTechAssetUi variante="compacto" />
       <div className="flex flex-col leading-none">
         <span className="font-extrabold text-base tracking-tight text-texto">
-          Tech<span className="text-primario">Asset</span>
+          Tech<span className="text-[#06A3DA]">Asset</span>
         </span>
         <span className="text-[0.625rem] font-medium tracking-wider uppercase text-texto-suave">
           Innovatech Solutions

@@ -28,9 +28,9 @@ export default function ModalConfirmacion({
     >
       <div className="flex items-start gap-4 py-2">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-          variante === 'peligro' ? 'bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-400' :
-          variante === 'exito' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400' :
-          'bg-teal-100 text-teal-600 dark:bg-teal-950/50 dark:text-teal-400'
+          variante === 'peligro' ? 'bg-peligro-fondo text-peligro-texto' :
+          variante === 'exito' ? 'bg-exito-fondo text-exito-texto' :
+          'bg-primario-suave text-primario'
         }`}>
           <Icono nombre={icono} className="w-5 h-5" />
         </div>

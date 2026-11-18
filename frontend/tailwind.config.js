@@ -15,12 +15,23 @@ export default {
         'primario-enlace': 'var(--primario-enlace)',
         'primario-suave': 'var(--primario-suave)',
         'sobre-primario': 'var(--sobre-primario)',
+        acento: 'var(--acento)',
+        'acento-sobre-oscuro': 'var(--acento-sobre-oscuro)',
         'lateral-fondo': 'var(--lateral-fondo)',
         'lateral-texto': 'var(--lateral-texto)',
         'lateral-activo-fondo': 'var(--lateral-activo-fondo)',
         'lateral-hover': 'var(--lateral-hover)',
-        'acento-sobre-oscuro': 'var(--acento-sobre-oscuro)',
         'anillo-foco': 'var(--anillo-foco)',
+
+        'exito-texto': 'var(--exito-texto)',
+        'exito-fondo': 'var(--exito-fondo)',
+        'info-texto': 'var(--info-texto)',
+        'info-fondo': 'var(--info-fondo)',
+        'advertencia-texto': 'var(--advertencia-texto)',
+        'advertencia-fondo': 'var(--advertencia-fondo)',
+        'peligro-texto': 'var(--peligro-texto)',
+        'peligro-fondo': 'var(--peligro-fondo)',
+
         'disponible-texto': 'var(--disponible-texto)',
         'disponible-fondo': 'var(--disponible-fondo)',
         'prestado-texto': 'var(--prestado-texto)',
@@ -41,12 +52,8 @@ export default {
         'rechazada-fondo': 'var(--rechazada-fondo)',
         'aprobada-texto': 'var(--aprobada-texto)',
         'aprobada-fondo': 'var(--aprobada-fondo)',
-        'peligro-texto': 'var(--peligro-texto)',
-        'peligro-fondo': 'var(--peligro-fondo)',
-        'exito-texto': 'var(--exito-texto)',
-        'exito-fondo': 'var(--exito-fondo)',
-        'advertencia-texto': 'var(--advertencia-texto)',
-        'advertencia-fondo': 'var(--advertencia-fondo)'
+        'cancelada-texto': 'var(--cancelada-texto)',
+        'cancelada-fondo': 'var(--cancelada-fondo)'
       },
       fontFamily: {
         sans: ['"Montserrat Variable"', '"Segoe UI"', 'system-ui', 'Arial', 'sans-serif']
