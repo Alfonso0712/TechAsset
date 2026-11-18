@@ -9,10 +9,12 @@ import { MENSAJES } from '../constants/mensajes';
 import { RUTAS } from '../constants/rutas';
 import TextInput from '../components/formulario/TextInput';
 import PasswordInput from '../components/formulario/PasswordInput';
+import InterruptorSwitch from '../components/formulario/InterruptorSwitch';
 import PanelAyuda from '../components/formulario/PanelAyuda';
 import Button from '../components/ui/Button';
 import AlertMessage from '../components/ui/AlertMessage';
 import LogoTechAsset from '../components/ui/LogoTechAsset';
+import Icono from '../components/ui/Icono';
 
 export default function Ingresar() {
   const navegar = useNavigate();
@@ -107,20 +109,13 @@ export default function Ingresar() {
           enterKeyHint="done"
           soloLectura={form.enProceso}
         />
-        <div className="flex items-center justify-between text-xs pt-0.5">
-          <label className="flex items-center gap-2 cursor-pointer select-none text-texto-suave hover:text-texto">
-            <input
-              type="checkbox"
-              checked={recordar}
-              onChange={(e) => setRecordar(e.target.checked)}
-              className="w-4 h-4 rounded border-borde-control text-primario focus:ring-anillo-foco"
-            />
-            <span>Recordar correo</span>
-          </label>
-          <span className="text-primario-enlace dark:text-[#7DD3FC] font-medium select-none">
-            ¿Olvidó su contraseña?
-          </span>
-        </div>
+        <InterruptorSwitch
+          id="recordar-correo"
+          etiqueta="Recordar correo en este equipo"
+          activo={recordar}
+          alCambiar={setRecordar}
+          disabled={form.enProceso}
+        />
         <Button
           tipo="submit"
           variante="primario"
@@ -130,6 +125,10 @@ export default function Ingresar() {
         >
           Iniciar sesión
         </Button>
+        <p className="flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold text-primario-enlace dark:text-[#7DD3FC] select-none pt-1 m-0">
+          <Icono nombre="KeyRound" className="w-4 h-4 shrink-0" aria-hidden="true" />
+          <span>¿Olvidaste tu contraseña? Pruébalo aquí</span>
+        </p>
       </form>
       <PanelAyuda
         deshabilitado={form.enProceso}

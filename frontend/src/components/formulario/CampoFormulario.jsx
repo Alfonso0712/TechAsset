@@ -1,4 +1,6 @@
 // Nielsen 4 · Nielsen 6 · Nielsen 9 · WCAG 2.2 AA · E-26
+import Icono from '../ui/Icono';
+
 export function construirDescribedBy(id, ayuda, error, extraId = '') {
   const ids = [];
   if (ayuda) ids.push(`${id}-ayuda`);
@@ -28,7 +30,10 @@ export default function CampoFormulario({
         <label htmlFor={id} className="text-sm font-semibold text-texto">
           <span>{etiqueta}</span>
           {obligatorio ? (
-            <span className="ml-1 text-xs font-normal text-texto-suave" title="Campo obligatorio">(*)</span>
+            <>
+              <span className="ml-1 text-xs font-semibold text-error-texto" aria-hidden="true">(*)</span>
+              <span className="sr-only"> (obligatorio)</span>
+            </>
           ) : mostrarOpcional ? (
             <span className="ml-1 text-xs font-normal text-texto-suave" title="Campo opcional">(opcional)</span>
           ) : null}
@@ -40,7 +45,12 @@ export default function CampoFormulario({
         {contador && <span className="text-xs text-texto-suave cifra-tabular ml-auto">{contador}</span>}
       </div>
       {avisoExtra}
-      {error && <p id={`${id}-error`} role="alert" className="text-xs font-semibold text-error-texto m-0">{error}</p>}
+      {error && (
+        <p id={`${id}-error`} role="alert" className="flex items-center gap-1.5 text-xs font-medium text-error-texto m-0">
+          <Icono nombre="AlertCircle" className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+          <span>{error}</span>
+        </p>
+      )}
     </div>
   );
 }

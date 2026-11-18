@@ -17,7 +17,7 @@ const TextAreaInput = forwardRef(function TextAreaInput(
   ref
 ) {
   const bordeClase = error
-    ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+    ? 'border-2 border-error-borde focus:ring-2 focus:ring-error-borde/20 focus:border-error-borde'
     : 'border-borde focus:ring-anillo-foco focus:border-primario';
 
   return (
