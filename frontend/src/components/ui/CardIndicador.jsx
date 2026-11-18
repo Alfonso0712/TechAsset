@@ -65,7 +65,14 @@ export default function CardIndicador({
             <Icono nombre={icono} className="w-4 h-4 shrink-0" />
           </span>
         </div>
-        <div className="mt-3 text-2xl sm:text-3xl font-bold text-texto leading-none cifra-tabular truncate" title={String(valor)}>
+        <div
+          className={`mt-3 font-bold text-texto leading-snug ${
+            esNumero
+              ? 'text-2xl sm:text-3xl leading-none cifra-tabular truncate'
+              : 'text-base sm:text-lg line-clamp-2 break-words'
+          }`}
+          title={String(valor)}
+        >
           {valor}
         </div>
         {txtDescripcion && (

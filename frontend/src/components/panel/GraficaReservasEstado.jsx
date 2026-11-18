@@ -2,10 +2,10 @@
 import Icono from '../ui/Icono';
 
 const CONFIG_ESTADOS = [
-  { clave: 'Disponible', label: 'Disponible', varColor: 'var(--color-exito-texto)', icono: 'CheckCircle2' },
-  { clave: 'Prestado', label: 'Prestado', varColor: 'var(--color-info-texto)', icono: 'PackageCheck' },
-  { clave: 'Mantenimiento', label: 'En mantenimiento', varColor: 'var(--color-advertencia-texto)', icono: 'AlertTriangle' },
-  { clave: 'Baja', label: 'Baja técnica', varColor: 'var(--color-peligro-texto)', icono: 'XCircle' }
+  { clave: 'Disponible', label: 'Disponible', varColor: 'var(--exito-texto)', icono: 'CheckCircle2' },
+  { clave: 'Prestado', label: 'Prestado', varColor: 'var(--info-texto)', icono: 'PackageCheck' },
+  { clave: 'Mantenimiento', label: 'En mantenimiento', varColor: 'var(--advertencia-texto)', icono: 'AlertTriangle' },
+  { clave: 'Baja', label: 'Baja técnica', varColor: 'var(--peligro-texto)', icono: 'XCircle' }
 ];
 
 export default function GraficaReservasEstado({ dashboard }) {

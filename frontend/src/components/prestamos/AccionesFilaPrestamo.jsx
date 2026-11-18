@@ -39,8 +39,8 @@ export default function AccionesFilaPrestamo({
             title="Aprobar préstamo"
             alHacerClic={() => alAprobar?.(prestamo)}
           >
-            <Icono nombre="Check" className="w-3.5 h-3.5 sm:mr-1 shrink-0" />
-            <span className="hidden sm:inline">Aprobar</span>
+            <Icono nombre="Check" className="w-3.5 h-3.5 2xl:mr-1 shrink-0" />
+            <span className="hidden 2xl:inline">Aprobar</span>
           </Button>
           <Button
             variante="danger"
@@ -50,8 +50,8 @@ export default function AccionesFilaPrestamo({
             title="Rechazar solicitud"
             alHacerClic={() => alRechazar?.(prestamo)}
           >
-            <Icono nombre="X" className="w-3.5 h-3.5 sm:mr-1 shrink-0" />
-            <span className="hidden sm:inline">Rechazar</span>
+            <Icono nombre="X" className="w-3.5 h-3.5 2xl:mr-1 shrink-0" />
+            <span className="hidden 2xl:inline">Rechazar</span>
           </Button>
         </>
       )}
@@ -66,8 +66,8 @@ export default function AccionesFilaPrestamo({
           title="Registrar devolución"
           alHacerClic={() => alDevolver?.(prestamo)}
         >
-          <Icono nombre="PackageCheck" className="w-3.5 h-3.5 sm:mr-1 shrink-0" />
-          <span className="hidden sm:inline">Devolver</span>
+          <Icono nombre="PackageCheck" className="w-3.5 h-3.5 2xl:mr-1 shrink-0" />
+          <span className="hidden 2xl:inline">Devolver</span>
         </Button>
       )}
     </div>

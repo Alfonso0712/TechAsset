@@ -159,14 +159,14 @@ export default function Prestamos() {
       clave: 'solicitante',
       encabezado: 'Solicitante',
       ordenable: true,
-      claseEncabezado: 'min-w-[14rem] px-3',
-      claseCelda: 'min-w-[14rem] px-3',
+      claseEncabezado: 'min-w-[9.5rem] max-w-[12.5rem] px-2.5',
+      claseCelda: 'min-w-[9.5rem] max-w-[12.5rem] px-2.5',
       render: (p) => {
         const nombre = p.solicitanteNombre || p.solicitante?.nombreCompleto || 'Colaborador';
         const correo = p.solicitanteCorreo || p.solicitante?.correo || '';
         const area = p.solicitanteArea || p.solicitante?.areaNombre || '';
         return (
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
             <span className="w-8 h-8 rounded-full bg-primario-suave text-primario dark:text-primario-enlace font-bold text-xs flex items-center justify-center shrink-0">
               {obtenerIniciales(nombre) || 'U'}
             </span>
@@ -174,7 +174,7 @@ export default function Prestamos() {
               <button
                 type="button"
                 onClick={() => setPrestamoDetalle(p)}
-                className="font-semibold text-texto hover:text-primario-enlace hover:underline line-clamp-1 block text-sm text-left"
+                className="font-semibold text-texto hover:text-primario-enlace hover:underline line-clamp-1 block text-sm text-left truncate"
                 title={nombre}
               >
                 {nombre}
@@ -190,14 +190,14 @@ export default function Prestamos() {
     {
       clave: 'equipo',
       encabezado: 'Equipo',
-      claseEncabezado: 'min-w-[13rem] px-3',
-      claseCelda: 'min-w-[13rem] px-3',
+      claseEncabezado: 'min-w-[8.5rem] max-w-[11.5rem] px-2.5',
+      claseCelda: 'min-w-[8.5rem] max-w-[11.5rem] px-2.5',
       render: (p) => {
         const nombre = p.equipoNombre || p.equipo?.nombre || 'Equipo';
         const codigo = p.equipoCodigo || p.equipo?.codigoPatrimonial || '';
         return (
           <div className="min-w-0">
-            <p className="font-semibold text-texto line-clamp-1 block text-sm" title={nombre}>
+            <p className="font-semibold text-texto line-clamp-1 block text-sm truncate" title={nombre}>
               {nombre}
             </p>
             {codigo && (
@@ -213,8 +213,8 @@ export default function Prestamos() {
       clave: 'periodo',
       encabezado: 'Período',
       ordenable: true,
-      claseEncabezado: 'w-[1%] whitespace-nowrap px-3',
-      claseCelda: 'w-[1%] whitespace-nowrap px-3 cifra-tabular',
+      claseEncabezado: 'w-[1%] whitespace-nowrap px-2.5',
+      claseCelda: 'w-[1%] whitespace-nowrap px-2.5 cifra-tabular',
       render: (p) => (
         <div className="min-w-0">
           <span className="font-semibold text-texto block text-sm leading-snug">
@@ -229,26 +229,15 @@ export default function Prestamos() {
     {
       clave: 'estado',
       encabezado: 'Estado',
-      claseEncabezado: 'w-[1%] whitespace-nowrap px-3',
-      claseCelda: 'w-[1%] whitespace-nowrap px-3',
+      claseEncabezado: 'w-[1%] whitespace-nowrap px-2.5',
+      claseCelda: 'w-[1%] whitespace-nowrap px-2.5',
       render: (p) => <Badge estado={p.estado} />
-    },
-    {
-      clave: 'motivo',
-      encabezado: 'Motivo / Detalle',
-      claseEncabezado: 'min-w-[12rem] px-3 hidden xl:table-cell',
-      claseCelda: 'min-w-[12rem] px-3 hidden xl:table-cell',
-      render: (p) => (
-        <p className="text-xs text-texto-suave line-clamp-2 leading-relaxed" title={p.motivo}>
-          {p.motivo || 'Sin motivo especificado'}
-        </p>
-      )
     },
     {
       clave: 'acciones',
       encabezado: 'Acciones',
-      claseEncabezado: 'w-[1%] whitespace-nowrap text-right pl-3 pr-4',
-      claseCelda: 'w-[1%] whitespace-nowrap text-right pl-3 pr-4',
+      claseEncabezado: 'w-[1%] whitespace-nowrap text-right pl-2 pr-3',
+      claseCelda: 'w-[1%] whitespace-nowrap text-right pl-2 pr-3',
       render: (p) => (
         <AccionesFilaPrestamo
           prestamo={p}

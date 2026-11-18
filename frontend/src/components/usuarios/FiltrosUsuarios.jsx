@@ -60,7 +60,7 @@ export default function FiltrosUsuarios({
             placeholder="Todos los roles"
           />
         </div>
-        <div className="w-full sm:w-44 shrink-0">
+        <div className="w-full sm:w-48 shrink-0">
           <SelectInput
             id="filtro-estado-usuarios"
             nombre="filtro-estado-usuarios"

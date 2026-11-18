@@ -34,11 +34,13 @@ const Button = forwardRef(function Button(
     icono = null,
     className = '',
     disabled = false,
+    deshabilitado = false,
     iconOnly = false,
     tooltip = '',
     alineacionTooltip = 'centro',
     'aria-label': ariaLabelProp,
     onClick,
+    alHacerClic,
     ...props
   },
   ref
@@ -46,7 +48,8 @@ const Button = forwardRef(function Button(
   const tieneChildren = children !== undefined && children !== null && children !== false && children !== '';
   const esIconOnly = iconOnly || variante === 'icon-only';
   const tipoBoton = tipo || type || 'button';
-  const bloqueado = disabled || enProceso;
+  const bloqueado = Boolean(disabled || deshabilitado || enProceso);
+  const manejadorClick = alHacerClic || onClick;
   const clave = ALIAS_VARIANTES[variante] || variante;
   const clasesVariante = VARIANTES_BASE[clave] || VARIANTES_BASE.primary;
   const tamanoIcono = tamano === 'sm' ? 'w-4 h-4' : 'w-[18px] h-[18px]';
@@ -69,7 +72,7 @@ const Button = forwardRef(function Button(
           e.preventDefault();
           return;
         }
-        onClick?.(e);
+        manejadorClick?.(e);
       }}
       className={`group relative inline-flex items-center justify-center ${esIconOnly ? 'rounded-full' : 'rounded-md'} whitespace-nowrap font-medium transition-colors cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-anillo-foco disabled:opacity-50 disabled:cursor-not-allowed ${clasesTamano} ${clasesVariante} ${className}`.trim()}
       {...props}

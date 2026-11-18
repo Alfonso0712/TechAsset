@@ -119,8 +119,8 @@ export default function Equipos() {
       clave: 'nombre',
       encabezado: 'Equipo',
       ordenable: true,
-      claseEncabezado: 'min-w-[14rem] px-3',
-      claseCelda: 'min-w-[14rem] px-3',
+      claseEncabezado: 'min-w-[11rem] px-3',
+      claseCelda: 'min-w-[11rem] px-3',
       render: (e) => (
         <div>
           <span className="font-semibold text-texto line-clamp-1 block" title={e.nombre}>
@@ -142,8 +142,8 @@ export default function Equipos() {
     {
       clave: 'ubicacion',
       encabezado: 'Ubicación',
-      claseEncabezado: 'min-w-[10rem] px-3 hidden lg:table-cell',
-      claseCelda: 'min-w-[10rem] px-3 hidden lg:table-cell',
+      claseEncabezado: 'min-w-[8rem] max-w-[12rem] px-3 hidden lg:table-cell',
+      claseCelda: 'min-w-[8rem] max-w-[12rem] px-3 hidden lg:table-cell',
       render: (e) => (
         <span className="text-xs text-texto-suave line-clamp-1" title={e.ubicacion}>
           {e.ubicacion || 'Almacén Central'}

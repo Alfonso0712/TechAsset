@@ -61,7 +61,7 @@ export default function FiltrosEquipos({
           />
         </div>
 
-        <div className="w-full sm:w-44 shrink-0">
+        <div className="w-full sm:w-48 shrink-0">
           <SelectInput
             id="filtro-estado-equipos"
             nombre="filtro-estado-equipos"
