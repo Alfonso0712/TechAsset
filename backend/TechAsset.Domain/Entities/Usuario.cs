@@ -102,10 +102,9 @@ public class Usuario : AuditableEntity
 
         if (tamanoLetra != null)
         {
-            var tl = tamanoLetra.Trim();
-            // Permite 'pequeno', 'normal', 'grande', 'A-', 'A', 'A+'
-            if (tl != "pequeno" && tl != "normal" && tl != "grande" && tl != "A-" && tl != "A" && tl != "A+")
-                throw new DomainException("El tamaño de fuente no es válido.");
+            var tl = tamanoLetra.Trim().ToLowerInvariant();
+            if (tl != "normal" && tl != "grande" && tl != "extragrande")
+                throw new DomainException("El tamaño de fuente debe ser 'normal', 'grande' o 'extragrande'.");
             Tamano_Letra = tl;
         }
     }

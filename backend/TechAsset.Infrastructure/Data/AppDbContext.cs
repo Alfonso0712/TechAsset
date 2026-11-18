@@ -54,7 +54,7 @@ public class AppDbContext : DbContext
             b.ToTable("usuarios", t =>
             {
                 t.HasCheckConstraint("CK_usuarios_tema", "tema IN ('claro', 'oscuro')");
-                t.HasCheckConstraint("CK_usuarios_tamano_letra", "tamano_letra IN ('pequeno', 'normal', 'grande', 'A-', 'A', 'A+')");
+                t.HasCheckConstraint("CK_usuarios_tamano_letra", "tamano_letra IN ('normal', 'grande', 'extragrande')");
             });
 
             b.HasKey(u => u.Id_Usuario);

@@ -381,7 +381,7 @@ namespace TechAsset.Infrastructure.Migrations
 
                     b.ToTable("usuarios", null, t =>
                         {
-                            t.HasCheckConstraint("CK_usuarios_tamano_letra", "tamano_letra IN ('pequeno', 'normal', 'grande', 'A-', 'A', 'A+')");
+                            t.HasCheckConstraint("CK_usuarios_tamano_letra", "tamano_letra IN ('normal', 'grande', 'extragrande')");
 
                             t.HasCheckConstraint("CK_usuarios_tema", "tema IN ('claro', 'oscuro')");
                         });

@@ -71,7 +71,7 @@ namespace TechAsset.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_usuarios", x => x.id_usuario);
-                    table.CheckConstraint("CK_usuarios_tamano_letra", "tamano_letra IN ('pequeno', 'normal', 'grande', 'A-', 'A', 'A+')");
+                    table.CheckConstraint("CK_usuarios_tamano_letra", "tamano_letra IN ('normal', 'grande', 'extragrande')");
                     table.CheckConstraint("CK_usuarios_tema", "tema IN ('claro', 'oscuro')");
                     table.ForeignKey(
                         name: "FK_usuarios_areas_ida_usuario",
