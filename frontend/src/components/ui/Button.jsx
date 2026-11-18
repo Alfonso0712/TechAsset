@@ -6,7 +6,7 @@ const VARIANTES_BASE = {
   'neutral-info': 'bg-superficie-2 text-primario border border-borde hover:bg-primario-suave font-medium',
   success: 'bg-[var(--btn-success-bg)] text-white border border-[var(--btn-success-border)] hover:bg-[var(--btn-success-hover-bg)] font-semibold shadow-sm',
   danger: 'bg-[var(--btn-danger-bg)] text-white border border-[var(--btn-danger-border)] hover:bg-[var(--btn-danger-hover-bg)] font-semibold shadow-sm',
-  'danger-outline': 'bg-superficie text-[var(--btn-danger-bg)] border border-[var(--btn-danger-border)] hover:bg-red-50 font-semibold',
+  'danger-outline': 'bg-superficie text-[var(--btn-danger-bg)] border border-[var(--btn-danger-border)] hover:bg-error-fondo font-semibold',
   warning: 'bg-[var(--btn-warning-bg)] text-white border border-[var(--btn-warning-border)] hover:bg-[var(--btn-warning-hover-bg)] font-medium',
   secondary: 'bg-superficie text-texto border border-borde hover:bg-superficie-2 hover:border-borde-control font-medium',
   ghost: 'bg-transparent text-texto border border-transparent hover:bg-superficie-2 font-medium',

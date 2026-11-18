@@ -53,9 +53,9 @@ export default function ModalAprobarPrestamo({
           <p><span className="font-semibold text-texto">Devolución estimada:</span> {prestamo.fechaDevolucionEstimada}</p>
         </div>
         <p className="text-texto-suave">
-          El equipo pasará automáticamente al estado <strong className="text-blue-600">Prestado</strong> y usted quedará registrado como el Responsable de Tecnología asignado (RN-05).
+          El equipo pasará automáticamente al estado <strong className="text-prestado-texto">Prestado</strong> y usted quedará registrado como el Responsable de Tecnología asignado (RN-05).
         </p>
-        {error && <p className="text-red-600 font-medium">{error}</p>}
+        {error && <p className="text-error-texto font-medium">{error}</p>}
       </div>
     </ModalConfirmacion>
   );

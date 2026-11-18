@@ -2,10 +2,10 @@ import Icono from './Icono';
 
 const VARIANTES = {
   primario: 'bg-primario-suave text-primario dark:text-primario-hover',
-  exito: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400',
-  advertencia: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400',
-  peligro: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400',
-  informacion: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400'
+  exito: 'bg-exito-fondo text-exito-texto',
+  advertencia: 'bg-advertencia-fondo text-advertencia-texto',
+  peligro: 'bg-peligro-fondo text-peligro-texto',
+  informacion: 'bg-info-fondo text-info-texto'
 };
 
 export default function CardIndicador({

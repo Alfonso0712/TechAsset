@@ -115,7 +115,7 @@ export default function Prestamos() {
         <div className="max-w-xs text-xs">
           <p className="text-texto line-clamp-1">{valor}</p>
           {fila.observacion && (
-            <p className="text-emerald-700 dark:text-emerald-400 italic line-clamp-1 mt-0.5">
+            <p className="text-exito-texto italic line-clamp-1 mt-0.5">
               Obs: {fila.observacion}
             </p>
           )}

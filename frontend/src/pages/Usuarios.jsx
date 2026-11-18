@@ -129,7 +129,7 @@ export default function Usuarios() {
       ordenable: true,
       render: (valor) => (
         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
-          valor ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300'
+          valor ? 'bg-exito-fondo text-exito-texto' : 'bg-peligro-fondo text-peligro-texto'
         }`}>
           {valor ? 'Activo' : 'Inactivo'}
         </span>

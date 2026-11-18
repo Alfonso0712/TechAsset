@@ -165,7 +165,7 @@ export default function Panel() {
                 Equipos solicitados que requieren evaluación y entrega técnica (RN-05)
               </p>
             </div>
-            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-advertencia-fondo text-advertencia-texto">
               {dashboard?.solicitudesPendientes?.length || 0} pendientes
             </span>
           </div>

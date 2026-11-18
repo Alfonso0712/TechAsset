@@ -31,10 +31,13 @@
 
   /* Estados Semánticos (Modo Claro) */
   --exito-texto: #14532D;
+  --exito-borde: #15803D;
   --exito-fondo: #DAF4E5;
-  --info-texto: #312E81;
-  --info-fondo: #E0E7FF;
+  --info-texto: #1E40AF;
+  --info-borde: #2563EB;
+  --info-fondo: #EFF6FF;
   --advertencia-texto: #6B3F00;
+  --advertencia-borde: #D97706;
   --advertencia-fondo: #FFF1CC;
   --peligro-texto: #7F1D1D;
   --peligro-fondo: #FDE2E2;
@@ -140,11 +143,14 @@
     --anillo-foco: #7DD3FC;
 
     /* Estados Semánticos (Modo Oscuro con Contraste AA >= 4.5:1) */
-    --exito-texto: #8AE6B0;
-    --exito-fondo: #0A2E1D;
-    --info-texto: #C7D2FE;
-    --info-fondo: #171F4D;
+    --exito-texto: #BBF7D0;
+    --exito-borde: #4ADE80;
+    --exito-fondo: #0F3323;
+    --info-texto: #93C5FD;
+    --info-borde: #60A5FA;
+    --info-fondo: #172554;
     --advertencia-texto: #FDE68A;
+    --advertencia-borde: #F59E0B;
     --advertencia-fondo: #382306;
     --peligro-texto: #FECACA;
     --peligro-fondo: #341113;
@@ -214,11 +220,14 @@ html[data-tema="oscuro"] {
   --anillo-foco: #7DD3FC;
 
   /* Estados Semánticos (Modo Oscuro con Contraste AA >= 4.5:1) */
-  --exito-texto: #8AE6B0;
-  --exito-fondo: #0A2E1D;
-  --info-texto: #C7D2FE;
-  --info-fondo: #171F4D;
+  --exito-texto: #BBF7D0;
+  --exito-borde: #4ADE80;
+  --exito-fondo: #0F3323;
+  --info-texto: #93C5FD;
+  --info-borde: #60A5FA;
+  --info-fondo: #172554;
   --advertencia-texto: #FDE68A;
+  --advertencia-borde: #F59E0B;
   --advertencia-fondo: #382306;
   --peligro-texto: #FECACA;
   --peligro-fondo: #341113;

@@ -24,10 +24,13 @@ export default {
         'anillo-foco': 'var(--anillo-foco)',
 
         'exito-texto': 'var(--exito-texto)',
+        'exito-borde': 'var(--exito-borde)',
         'exito-fondo': 'var(--exito-fondo)',
         'info-texto': 'var(--info-texto)',
+        'info-borde': 'var(--info-borde)',
         'info-fondo': 'var(--info-fondo)',
         'advertencia-texto': 'var(--advertencia-texto)',
+        'advertencia-borde': 'var(--advertencia-borde)',
         'advertencia-fondo': 'var(--advertencia-fondo)',
         'peligro-texto': 'var(--peligro-texto)',
         'peligro-fondo': 'var(--peligro-fondo)',

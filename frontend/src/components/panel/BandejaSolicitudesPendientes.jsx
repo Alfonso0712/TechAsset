@@ -8,7 +8,7 @@ export default function BandejaSolicitudesPendientes({ solicitudes = [], onAprob
   if (!solicitudes || solicitudes.length === 0) {
     return (
       <div className="p-6 text-center text-xs text-texto-suave">
-        <Icono nombre="CheckCircle2" className="w-8 h-8 text-emerald-500 mx-auto mb-2 opacity-80" />
+        <Icono nombre="CheckCircle2" className="w-8 h-8 text-exito-borde mx-auto mb-2 opacity-80" />
         No hay solicitudes de préstamo pendientes de revisión técnica.
       </div>
     );

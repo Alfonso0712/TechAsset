@@ -3,11 +3,11 @@ import { forwardRef, useEffect, useRef } from 'react';
 import Icono from './Icono';
 
 const CONFIG_VARIANTE = {
-  error: { clases: 'bg-error-fondo text-error-banner-texto border-error-borde', claseIcono: 'text-error-texto', icono: 'CircleX', rolDefecto: 'alert' },
-  peligro: { clases: 'bg-error-fondo text-error-banner-texto border-error-borde', claseIcono: 'text-error-texto', icono: 'CircleX', rolDefecto: 'alert' },
-  exito: { clases: 'bg-exito-fondo text-exito-texto border-exito-texto/30', claseIcono: 'text-exito-texto', icono: 'CircleCheck', rolDefecto: 'status' },
-  advertencia: { clases: 'bg-advertencia-fondo text-advertencia-texto border-advertencia-texto/30', claseIcono: 'text-advertencia-texto', icono: 'Clock', rolDefecto: 'status' },
-  info: { clases: 'bg-info-fondo text-info-texto border-info-texto/30', claseIcono: 'text-info-texto', icono: 'Info', rolDefecto: 'status' }
+  error: { clases: 'bg-error-fondo text-error-banner-texto border-error-borde font-medium', claseIcono: 'text-error-texto', icono: 'AlertCircle', rolDefecto: 'alert' },
+  peligro: { clases: 'bg-error-fondo text-error-banner-texto border-error-borde font-medium', claseIcono: 'text-error-texto', icono: 'AlertCircle', rolDefecto: 'alert' },
+  exito: { clases: 'bg-exito-fondo text-exito-texto border-exito-borde font-medium', claseIcono: 'text-exito-borde', icono: 'CheckCircle2', rolDefecto: 'status' },
+  advertencia: { clases: 'bg-advertencia-fondo text-advertencia-texto border-advertencia-borde font-medium', claseIcono: 'text-advertencia-borde', icono: 'AlertTriangle', rolDefecto: 'status' },
+  info: { clases: 'bg-info-fondo text-info-texto border-info-borde font-medium', claseIcono: 'text-info-borde', icono: 'Info', rolDefecto: 'status' }
 };
 
 const AlertMessage = forwardRef(function AlertMessage(
@@ -42,11 +42,11 @@ const AlertMessage = forwardRef(function AlertMessage(
   const config = CONFIG_VARIANTE[variante] || CONFIG_VARIANTE.error;
   const rolFinal = rol || role || config.rolDefecto;
   const estiloBase = _modoToast
-    ? 'flex items-center justify-between gap-3 p-3 sm:p-3.5 rounded-control border border-borde bg-superficie shadow-lg text-sm text-texto max-w-md w-full transition-all'
+    ? `flex items-center justify-between gap-3 p-3 sm:p-3.5 rounded-control border shadow-lg text-sm max-w-md w-full transition-all ${config.clases}`
     : `flex flex-wrap items-start justify-between ${
         compacto ? 'gap-2 p-2 sm:p-2.5 text-xs sm:text-sm' : 'gap-3 py-3 px-4 text-base'
       } rounded-control border outline-none ${config.clases}`;
-  const estiloIcono = _modoToast ? (variante === 'error' || variante === 'peligro' ? 'text-rechazada-texto' : 'text-aprobada-texto') : '';
+  const estiloIcono = config.claseIcono || '';
 
   return (
     <div
