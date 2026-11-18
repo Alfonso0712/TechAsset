@@ -3,11 +3,11 @@ import { forwardRef, useEffect, useRef } from 'react';
 import Icono from './Icono';
 
 const CONFIG_VARIANTE = {
-  error: { clases: 'bg-rechazada-fondo text-rechazada-texto border-rechazada-texto', icono: 'CircleX', rolDefecto: 'alert' },
-  peligro: { clases: 'bg-rechazada-fondo text-rechazada-texto border-rechazada-texto', icono: 'CircleX', rolDefecto: 'alert' },
-  exito: { clases: 'bg-aprobada-fondo text-aprobada-texto border-aprobada-texto', icono: 'CircleCheck', rolDefecto: 'status' },
-  advertencia: { clases: 'bg-pendiente-fondo text-pendiente-texto border-pendiente-texto', icono: 'Clock', rolDefecto: 'status' },
-  info: { clases: 'bg-primario-suave text-texto border-primario', icono: 'Info', rolDefecto: 'status' }
+  error: { clases: 'bg-error-fondo text-error-banner-texto border-error-borde', claseIcono: 'text-error-texto', icono: 'CircleX', rolDefecto: 'alert' },
+  peligro: { clases: 'bg-error-fondo text-error-banner-texto border-error-borde', claseIcono: 'text-error-texto', icono: 'CircleX', rolDefecto: 'alert' },
+  exito: { clases: 'bg-exito-fondo text-exito-texto border-exito-texto/30', claseIcono: 'text-exito-texto', icono: 'CircleCheck', rolDefecto: 'status' },
+  advertencia: { clases: 'bg-advertencia-fondo text-advertencia-texto border-advertencia-texto/30', claseIcono: 'text-advertencia-texto', icono: 'Clock', rolDefecto: 'status' },
+  info: { clases: 'bg-info-fondo text-info-texto border-info-texto/30', claseIcono: 'text-info-texto', icono: 'Info', rolDefecto: 'status' }
 };
 
 const AlertMessage = forwardRef(function AlertMessage(
@@ -61,7 +61,7 @@ const AlertMessage = forwardRef(function AlertMessage(
       {...props}
     >
       <div className={`flex items-${_modoToast ? 'center' : 'start'} ${compacto || _modoToast ? 'gap-2.5' : 'gap-3'} min-w-0`}>
-        <Icono nombre={config.icono} className={`${compacto ? 'w-4 h-4' : 'w-5 h-5'} ${estiloIcono} mt-0.5 shrink-0`} />
+        <Icono nombre={config.icono} className={`${compacto ? 'w-4 h-4' : 'w-5 h-5'} ${config.claseIcono || estiloIcono} mt-0.5 shrink-0`} />
         <div className={compacto || _modoToast ? 'text-xs sm:text-sm leading-snug' : 'text-base leading-relaxed'}>
           {titulo && <strong className="block font-semibold">{titulo}</strong>}
           {textoContenido && <div>{textoContenido}</div>}

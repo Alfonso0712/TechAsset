@@ -17,7 +17,7 @@ import LogoTechAsset from '../components/ui/LogoTechAsset';
 export default function Ingresar() {
   const navegar = useNavigate();
   const { iniciarSesion } = useAuth();
-  const { correoInicial, guardarCorreo } = useCorreoRecordado();
+  const { correoInicial, recordar, setRecordar, guardarCorreo } = useCorreoRecordado();
   const [enfocarAlerta, setEnfocarAlerta] = useState(false);
 
   const form = useFormulario({
@@ -27,7 +27,7 @@ export default function Ingresar() {
       const { correoNormalizado } = validarLogin(valores);
       const res = await iniciarSesion({ correo: correoNormalizado, contrasena: valores.contrasena });
       if (res.ok) {
-        guardarCorreo(correoNormalizado, true);
+        guardarCorreo(correoNormalizado, recordar);
         navegar(RUTAS.PANEL, { replace: true });
         return;
       }
@@ -46,7 +46,7 @@ export default function Ingresar() {
   });
 
   useEffect(() => {
-    document.title = 'TechAsset — Iniciar sesión';
+    document.title = 'TechAsset';
     form.camposRef.current.correo?.focus();
   }, [form.camposRef]);
 
@@ -58,7 +58,7 @@ export default function Ingresar() {
           className="flex flex-col items-center gap-0.5 mb-1 no-underline group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primario rounded"
           aria-label="Ir a la página principal de TechAsset"
         >
-          <LogoTechAsset variante="libre" className="w-10 h-10 group-hover:scale-105 transition-transform" />
+          <LogoTechAsset tamano="tarjeta" className="group-hover:scale-105 transition-transform" />
           <span className="text-xs font-bold tracking-wider text-primario">TECHASSET</span>
         </Link>
         <h1 className="text-xl sm:text-2xl font-bold text-texto tracking-tight">Iniciar sesión</h1>
@@ -107,6 +107,20 @@ export default function Ingresar() {
           enterKeyHint="done"
           soloLectura={form.enProceso}
         />
+        <div className="flex items-center justify-between text-xs pt-0.5">
+          <label className="flex items-center gap-2 cursor-pointer select-none text-texto-suave hover:text-texto">
+            <input
+              type="checkbox"
+              checked={recordar}
+              onChange={(e) => setRecordar(e.target.checked)}
+              className="w-4 h-4 rounded border-borde-control text-primario focus:ring-anillo-foco"
+            />
+            <span>Recordar correo</span>
+          </label>
+          <span className="text-primario-enlace dark:text-[#7DD3FC] font-medium select-none">
+            ¿Olvidó su contraseña?
+          </span>
+        </div>
         <Button
           tipo="submit"
           variante="primario"
@@ -117,9 +131,6 @@ export default function Ingresar() {
           Iniciar sesión
         </Button>
       </form>
-      <p className="text-xs sm:text-sm text-texto-suave text-center">
-        ¿No tiene acceso? <span className="font-semibold text-texto">Solicítelo al Administrador del sistema.</span>
-      </p>
       <PanelAyuda
         deshabilitado={form.enProceso}
         alRellenarDemo={(c) => {

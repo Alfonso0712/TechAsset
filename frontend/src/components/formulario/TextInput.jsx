@@ -79,10 +79,10 @@ const TextInput = forwardRef(function TextInput(
           maxLength={maxLength}
           aria-invalid={tieneError}
           aria-describedby={describedBy}
-          className={`w-full ${altura} ${iconoVisible ? 'pl-9 pr-3.5' : 'px-3.5'} py-2 rounded-control border transition-colors duration-150 read-only:bg-superficie-2 read-only:cursor-not-allowed ${
+          className={`w-full ${altura} ${iconoVisible ? 'pl-9 pr-3.5' : 'px-3.5'} py-2 rounded-control transition-colors duration-150 read-only:bg-superficie-2 read-only:cursor-not-allowed ${
             tieneError
-              ? 'border-rechazada-texto bg-superficie text-texto focus:border-rechazada-texto focus:ring-2 focus:ring-rechazada-texto/20 focus:outline-none'
-              : 'border-borde bg-superficie text-texto hover:border-borde-control focus:bg-superficie focus:border-primario-enlace focus:ring-2 focus:ring-primario/20 focus:outline-none'
+              ? 'border-2 border-error-borde bg-superficie text-texto focus:border-error-borde focus:ring-2 focus:ring-error-borde/20 focus:outline-none'
+              : 'border border-borde bg-superficie text-texto hover:border-borde-control focus:bg-superficie focus:border-primario-enlace focus:ring-2 focus:ring-primario/20 focus:outline-none'
           } ${claseInput}`.trim()}
           {...props}
         />

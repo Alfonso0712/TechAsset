@@ -40,7 +40,7 @@ export default function CampoFormulario({
         {contador && <span className="text-xs text-texto-suave cifra-tabular ml-auto">{contador}</span>}
       </div>
       {avisoExtra}
-      {error && <p id={`${id}-error`} role="alert" className="text-xs font-semibold text-rechazada-texto m-0">{error}</p>}
+      {error && <p id={`${id}-error`} role="alert" className="text-xs font-semibold text-error-texto m-0">{error}</p>}
     </div>
   );
 }
