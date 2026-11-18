@@ -1,42 +1,62 @@
+// Panel principal de métricas y control de inventario y préstamos · TechAsset · WCAG 2.2 AA
 import { useState, useEffect, useCallback } from 'react';
-import CardIndicador from '../components/ui/CardIndicador';
-import Cargando from '../components/ui/Cargando';
-import AlertMessage from '../components/ui/AlertMessage';
-import Button from '../components/ui/Button';
-import Toast from '../components/ui/Toast';
-import GraficoDonaSVG from '../components/panel/GraficoDonaSVG';
+import { useAuth } from '../hooks/useAuth';
+import { PERMISOS } from '../constants/permisos';
+import { reporteService } from '../services/reporteService';
+import { prestamoService } from '../services/prestamoService';
+
+import EncabezadoPanel from '../components/panel/EncabezadoPanel';
+import KpisPanel from '../components/panel/KpisPanel';
+import ResumenOcupacion from '../components/panel/ResumenOcupacion';
+import RequiereAtencion from '../components/panel/RequiereAtencion';
+import GraficaReservasEstado from '../components/panel/GraficaReservasEstado';
 import RankingAreas from '../components/panel/RankingAreas';
-import BandejaSolicitudesPendientes from '../components/panel/BandejaSolicitudesPendientes';
+import ProximosPrestamos from '../components/panel/ProximosPrestamos';
+
 import ModalAprobarPrestamo from '../components/prestamos/ModalAprobarPrestamo';
 import ModalRechazarPrestamo from '../components/prestamos/ModalRechazarPrestamo';
 import FormularioSolicitarPrestamo from '../components/prestamos/FormularioSolicitarPrestamo';
-import { reporteService } from '../services/reporteService';
-import { useAuth } from '../hooks/useAuth';
-import { PERMISOS } from '../constants/permisos';
+
+import AlertMessage from '../components/ui/AlertMessage';
+import Button from '../components/ui/Button';
+import Cargando from '../components/ui/Cargando';
+import Toast from '../components/ui/Toast';
 
 export default function Panel() {
   const { usuario, puede } = useAuth();
   const [dashboard, setDashboard] = useState(null);
+  const [prestamos, setPrestamos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
-  const [toast, setToast] = useState(null);
+  const [toasts, setToasts] = useState([]);
 
-  // Modales
+  // Modales de acciones
   const [modalAprobar, setModalAprobar] = useState(null);
   const [modalRechazar, setModalRechazar] = useState(null);
   const [modalSolicitar, setModalSolicitar] = useState(false);
 
-  const puedeGestionar = puede(PERMISOS.PRESTAMOS_APROBAR_RECHAZAR);
+  const puedeAprobar = puede(PERMISOS.PRESTAMOS_APROBAR_RECHAZAR);
+  const puedeSolicitar = puede(PERMISOS.PRESTAMOS_SOLICITAR);
 
-  const cargarDashboard = useCallback(async () => {
+  const cargarDatos = useCallback(async () => {
     setCargando(true);
     setError(null);
     try {
-      const resp = await reporteService.obtenerDashboard();
-      if (resp.estado === 200 && resp.datos) {
-        setDashboard(resp.datos);
+      const [resDash, resPrestamos] = await Promise.allSettled([
+        reporteService.obtenerDashboard(),
+        prestamoService.listar({ tamanoPagina: 50 })
+      ]);
+
+      if (resDash.status === 'fulfilled' && resDash.value.estado === 200) {
+        setDashboard(resDash.value.datos);
       } else {
         setError('No se pudo cargar la información del panel.');
+      }
+
+      if (resPrestamos.status === 'fulfilled' && resPrestamos.value.estado === 200) {
+        const datos = resPrestamos.value.datos;
+        const lista = Array.isArray(datos) ? datos : datos.items || [];
+        setPrestamos(lista);
       }
     } catch {
       setError('Error al conectar con el servidor.');
@@ -46,148 +66,83 @@ export default function Panel() {
   }, []);
 
   useEffect(() => {
-    cargarDashboard();
-  }, [cargarDashboard]);
+    cargarDatos();
+  }, [cargarDatos]);
 
-  if (cargando) {
-    return <Cargando mensaje="Cargando métricas institucionales…" className="py-24" />;
-  }
+  const agregarToast = (mensaje, tipo = 'exito') => {
+    setToasts((prev) => [...prev.slice(-3), { id: Date.now(), tipo, mensaje }]);
+  };
+
+  const handleExitoAprobar = (prestamoActualizado) => {
+    agregarToast(`Solicitud de préstamo aprobada exitosamente.`);
+    cargarDatos();
+  };
+
+  const handleExitoRechazar = (prestamoActualizado) => {
+    agregarToast(`Solicitud de préstamo rechazada.`);
+    cargarDatos();
+  };
+
+  const handleExitoSolicitar = () => {
+    setModalSolicitar(false);
+    agregarToast('Solicitud de préstamo enviada para revisión.');
+    cargarDatos();
+  };
+
+  // Solicitudes pendientes de atención: tomadas del dashboard o de préstamos
+  const solicitudesPendientes = dashboard?.solicitudesPendientes && dashboard.solicitudesPendientes.length > 0
+    ? dashboard.solicitudesPendientes
+    : prestamos.filter((p) => p.estado === 'Pendiente');
 
   return (
-    <div className="space-y-6 animate-in fade-in">
-      {/* Cabecera */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-texto">
-            Bienvenido, {usuario?.nombres || 'Usuario'}
-          </h1>
-          <p className="text-xs text-texto-suave mt-1">
-            Resumen operativo y métricas de inventario y préstamos institucionales.
-          </p>
-        </div>
+    <div className="space-y-5 max-w-[1440px] mx-auto w-full">
+      <EncabezadoPanel
+        puedeSolicitar={puedeSolicitar}
+        alSolicitarPrestamo={() => setModalSolicitar(true)}
+      />
 
-        <div>
-          <Button
-            variante="primary"
-            icono="Plus"
-            onClick={() => setModalSolicitar(true)}
-          >
-            Solicitar Préstamo
+      {error && (
+        <div className="flex items-center justify-between p-4 rounded-control bg-peligro-fondo text-peligro-texto border border-peligro-borde text-sm">
+          <span>{error}</span>
+          <Button variante="secondary" tamano="sm" alHacerClic={cargarDatos}>
+            Reintentar
           </Button>
-        </div>
-      </div>
-
-      {error && <AlertMessage variante="peligro" mensaje={error} />}
-
-      {/* 6 Tarjetas de Indicadores */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
-        <CardIndicador
-          titulo="Total Equipos"
-          valor={dashboard?.totalEquipos ?? 0}
-          icono="Laptop"
-          variante="primario"
-        />
-        <CardIndicador
-          titulo="Disponibles"
-          valor={dashboard?.equiposDisponibles ?? 0}
-          icono="CheckCircle2"
-          variante="exito"
-        />
-        <CardIndicador
-          titulo="Prestados"
-          valor={dashboard?.equiposPrestados ?? 0}
-          icono="Clock"
-          variante="informacion"
-        />
-        <CardIndicador
-          titulo="Mantenimiento"
-          valor={dashboard?.equiposMantenimiento ?? 0}
-          icono="Wrench"
-          variante="advertencia"
-        />
-        <CardIndicador
-          titulo="Baja"
-          valor={dashboard?.equiposBaja ?? 0}
-          icono="Ban"
-          variante="peligro"
-        />
-        <CardIndicador
-          titulo="Préstamos"
-          valor={dashboard?.totalPrestamos ?? 0}
-          icono="ClipboardList"
-          variante="primario"
-        />
-      </div>
-
-      {/* Grilla Central: Gráfico de Dona + Áreas con Mayor Uso */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Distribución por Estado (SVG Donut) */}
-        <div className="lg:col-span-6 rounded-xl border border-borde bg-superficie p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4 pb-2 border-b border-borde">
-            <div>
-              <h3 className="text-base font-bold text-texto">
-                Distribución de Equipos
-              </h3>
-              <p className="text-xs text-texto-suave">Estado operativo actual del inventario</p>
-            </div>
-          </div>
-          <GraficoDonaSVG
-            datos={dashboard?.distribucionPorEstado || []}
-            total={dashboard?.totalEquipos || 0}
-          />
-        </div>
-
-        {/* Áreas con Mayor Uso */}
-        <div className="lg:col-span-6 rounded-xl border border-borde bg-superficie p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4 pb-2 border-b border-borde">
-            <div>
-              <h3 className="text-base font-bold text-texto">
-                Demanda por Áreas
-              </h3>
-              <p className="text-xs text-texto-suave">
-                Área líder: <strong className="text-primario">{dashboard?.areaMayorUso || '-'}</strong>
-              </p>
-            </div>
-          </div>
-          <RankingAreas areas={dashboard?.prestamosPorArea || []} />
-        </div>
-      </div>
-
-      {/* Bandeja de Solicitudes Pendientes (para Responsables y Admin) */}
-      {puedeGestionar && (
-        <div className="rounded-xl border border-borde bg-superficie shadow-sm overflow-hidden">
-          <div className="p-4 sm:p-5 border-b border-borde bg-superficie-2/40 flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-bold text-texto">
-                Bandeja de Solicitudes Pendientes
-              </h3>
-              <p className="text-xs text-texto-suave">
-                Equipos solicitados que requieren evaluación y entrega técnica (RN-05)
-              </p>
-            </div>
-            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-advertencia-fondo text-advertencia-texto">
-              {dashboard?.solicitudesPendientes?.length || 0} pendientes
-            </span>
-          </div>
-
-          <BandejaSolicitudesPendientes
-            solicitudes={dashboard?.solicitudesPendientes || []}
-            onAprobar={(p) => setModalAprobar(p)}
-            onRechazar={(p) => setModalRechazar(p)}
-          />
         </div>
       )}
 
-      {/* Modales de Aprobación / Rechazo / Solicitud */}
+      {cargando ? (
+        <Cargando mensaje="Cargando información del panel…" className="py-20" />
+      ) : (
+        <>
+          <KpisPanel dashboard={dashboard} />
+
+          <ResumenOcupacion prestamos={prestamos} />
+
+          {puedeAprobar && (
+            <RequiereAtencion
+              solicitudes={solicitudesPendientes}
+              puedeGestionar={puedeAprobar}
+              alAprobar={(p) => setModalAprobar(p)}
+              alRechazar={(p) => setModalRechazar(p)}
+            />
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <GraficaReservasEstado dashboard={dashboard} />
+            <RankingAreas areas={dashboard?.prestamosPorArea} prestamos={prestamos} />
+          </div>
+
+          <ProximosPrestamos prestamos={prestamos} />
+        </>
+      )}
+
+      {/* Modales de Gestión de Préstamos */}
       {modalAprobar && (
         <ModalAprobarPrestamo
           abierto={Boolean(modalAprobar)}
           prestamo={modalAprobar}
           alCerrar={() => setModalAprobar(null)}
-          alExito={() => {
-            cargarDashboard();
-            setToast({ mensaje: 'Préstamo aprobado exitosamente.', variante: 'exito' });
-          }}
+          alExito={handleExitoAprobar}
         />
       )}
 
@@ -196,10 +151,7 @@ export default function Panel() {
           abierto={Boolean(modalRechazar)}
           prestamo={modalRechazar}
           alCerrar={() => setModalRechazar(null)}
-          alExito={() => {
-            cargarDashboard();
-            setToast({ mensaje: 'Solicitud rechazada.', variante: 'peligro' });
-          }}
+          alExito={handleExitoRechazar}
         />
       )}
 
@@ -207,20 +159,11 @@ export default function Panel() {
         <FormularioSolicitarPrestamo
           abierto={modalSolicitar}
           alCerrar={() => setModalSolicitar(false)}
-          alGuardarExitoso={() => {
-            cargarDashboard();
-            setToast({ mensaje: 'Solicitud enviada exitosamente.', variante: 'exito' });
-          }}
+          alExito={handleExitoSolicitar}
         />
       )}
 
-      {toast && (
-        <Toast
-          mensaje={toast.mensaje}
-          variante={toast.variante}
-          alCerrar={() => setToast(null)}
-        />
-      )}
+      <Toast toasts={toasts} alCerrar={(id) => setToasts((prev) => prev.filter((t) => t.id !== id))} />
     </div>
   );
 }
