@@ -9,12 +9,25 @@ export const reporteService = {
     return solicitarApi('/api/reportes/equipos-por-estado', { metodo: 'GET', signal });
   },
 
-  async obtenerEquiposMasUtilizados(limite = 10, signal) {
-    return solicitarApi(`/api/reportes/equipos-mas-utilizados?limite=${limite}`, { metodo: 'GET', signal });
+  async obtenerEquiposMasUtilizados(parametros = {}, signal) {
+    const qs = new URLSearchParams();
+    const limite = parametros.limite || (typeof parametros === 'number' ? parametros : 10);
+    qs.append('limite', limite);
+    if (parametros.categoria) qs.append('categoria', parametros.categoria);
+    if (parametros.fechaDesde) qs.append('fechaDesde', parametros.fechaDesde);
+    if (parametros.fechaHasta) qs.append('fechaHasta', parametros.fechaHasta);
+
+    const query = qs.toString() ? `?${qs.toString()}` : '';
+    return solicitarApi(`/api/reportes/equipos-mas-utilizados${query}`, { metodo: 'GET', signal });
   },
 
-  async obtenerPrestamosPorArea(signal) {
-    return solicitarApi('/api/reportes/prestamos-por-area', { metodo: 'GET', signal });
+  async obtenerPrestamosPorArea(parametros = {}, signal) {
+    const qs = new URLSearchParams();
+    if (parametros.fechaDesde) qs.append('fechaDesde', parametros.fechaDesde);
+    if (parametros.fechaHasta) qs.append('fechaHasta', parametros.fechaHasta);
+
+    const query = qs.toString() ? `?${qs.toString()}` : '';
+    return solicitarApi(`/api/reportes/prestamos-por-area${query}`, { metodo: 'GET', signal });
   },
 
   async obtenerMovimientos(parametros = {}, signal) {

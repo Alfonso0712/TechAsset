@@ -115,8 +115,37 @@ let movimientosMock = [
     tipo: TIPOS_MOVIMIENTO.PRESTAMO_APROBADO,
     estadoAnterior: 'Disponible',
     estadoNuevo: 'Prestado',
-    detalle: 'Préstamo aprobado en mock',
-    fecha: '2026-11-10T10:00:00Z'
+    detalle: 'Préstamo aprobado para sprint de desarrollo.',
+    fechaHora: '2026-11-17T15:30:00Z',
+    fechaMovimiento: '2026-11-17T15:30:00Z'
+  },
+  {
+    id: 'm0000000-0000-0000-0000-000000000002',
+    equipoId: equiposMock[0].id,
+    equipoCodigo: equiposMock[0].codigoPatrimonial,
+    equipoNombre: equiposMock[0].nombre,
+    usuarioId: usuariosMock[0].id,
+    usuarioNombre: usuariosMock[0].nombreCompleto,
+    tipo: TIPOS_MOVIMIENTO.REGISTRO,
+    estadoAnterior: '-',
+    estadoNuevo: 'Disponible',
+    detalle: 'Alta de equipo en inventario corporativo.',
+    fechaHora: '2026-11-16T10:00:00Z',
+    fechaMovimiento: '2026-11-16T10:00:00Z'
+  },
+  {
+    id: 'm0000000-0000-0000-0000-000000000003',
+    equipoId: equiposMock[2].id,
+    equipoCodigo: equiposMock[2].codigoPatrimonial,
+    equipoNombre: equiposMock[2].nombre,
+    usuarioId: usuariosMock[1].id,
+    usuarioNombre: usuariosMock[1].nombreCompleto,
+    tipo: TIPOS_MOVIMIENTO.DEVOLUCION,
+    estadoAnterior: 'Prestado',
+    estadoNuevo: 'Disponible',
+    detalle: 'Devolución conforme. Equipo en perfecto estado.',
+    fechaHora: '2026-11-15T18:00:00Z',
+    fechaMovimiento: '2026-11-15T18:00:00Z'
   }
 ];
 

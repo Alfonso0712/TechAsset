@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using TechAsset.Application.DTOs;
 using TechAsset.Application.Interfaces;
 using TechAsset.Domain.Constants;
+using TechAsset.Domain.Enums;
 
 namespace TechAsset.Api.Controllers;
 
@@ -41,17 +42,23 @@ public class ReportesController : ControllerBase
     [Authorize(Policy = Permisos.ReportesVer)]
     public async Task<ActionResult<IReadOnlyList<EquiposMasUtilizadosDto>>> ObtenerEquiposMasUtilizados(
         [FromQuery] int limite = 10,
+        [FromQuery] CategoriaEquipo? categoria = null,
+        [FromQuery] DateOnly? fechaDesde = null,
+        [FromQuery] DateOnly? fechaHasta = null,
         CancellationToken ct = default)
     {
-        var resultado = await _reporteService.ObtenerEquiposMasUtilizadosAsync(limite, ct);
+        var resultado = await _reporteService.ObtenerEquiposMasUtilizadosAsync(limite, categoria, fechaDesde, fechaHasta, ct);
         return Ok(resultado);
     }
 
     [HttpGet("prestamos-por-area")]
     [Authorize(Policy = Permisos.ReportesVer)]
-    public async Task<ActionResult<IReadOnlyList<PrestamosPorAreaDto>>> ObtenerPrestamosPorArea(CancellationToken ct)
+    public async Task<ActionResult<IReadOnlyList<PrestamosPorAreaDto>>> ObtenerPrestamosPorArea(
+        [FromQuery] DateOnly? fechaDesde = null,
+        [FromQuery] DateOnly? fechaHasta = null,
+        CancellationToken ct = default)
     {
-        var resultado = await _reporteService.ObtenerPrestamosPorAreaAsync(ct);
+        var resultado = await _reporteService.ObtenerPrestamosPorAreaAsync(fechaDesde, fechaHasta, ct);
         return Ok(resultado);
     }
 

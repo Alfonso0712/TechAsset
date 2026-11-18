@@ -156,53 +156,136 @@ public class PrestamoRepository : IPrestamoRepository
             .FirstOrDefault();
     }
 
-    public async Task<IReadOnlyList<PrestamosPorAreaDto>> ObtenerPrestamosPorAreaAsync(int? limite = null, CancellationToken ct = default)
+    public async Task<IReadOnlyList<PrestamosPorAreaDto>> ObtenerPrestamosPorAreaAsync(
+        int? limite = null,
+        DateOnly? fechaDesde = null,
+        DateOnly? fechaHasta = null,
+        CancellationToken ct = default)
     {
-        var areas = await _context.Prestamos
+        var areas = await _context.Areas
             .AsNoTracking()
-            .Where(p => p.Solicitante != null && p.Solicitante.Area != null)
-            .Select(p => p.Solicitante!.Area!.Nom_Area)
+            .Where(a => a.Act_Area)
+            .OrderBy(a => a.Nom_Area)
             .ToListAsync(ct);
 
-        var query = areas
-            .GroupBy(a => a)
-            .Select(g => new PrestamosPorAreaDto(g.Key, g.Count()))
-            .OrderByDescending(x => x.TotalPrestamos);
+        var queryPrestamos = _context.Prestamos
+            .AsNoTracking()
+            .Where(p => p.Solicitante != null && p.Solicitante.Area != null);
+
+        if (fechaDesde.HasValue)
+            queryPrestamos = queryPrestamos.Where(p => p.Fpr_Prestamo >= fechaDesde.Value);
+
+        if (fechaHasta.HasValue)
+            queryPrestamos = queryPrestamos.Where(p => p.Fpr_Prestamo <= fechaHasta.Value);
+
+        var datosPrestamos = await queryPrestamos
+            .Select(p => new
+            {
+                IdArea = p.Solicitante!.Ida_Usuario,
+                Estado = p.Est_Prestamo
+            })
+            .ToListAsync(ct);
+
+        var totalGeneral = datosPrestamos.Count;
+
+        var resultado = areas.Select(a =>
+        {
+            var delArea = datosPrestamos.Where(p => p.IdArea == a.Id_Area).ToList();
+            var total = delArea.Count;
+            var activos = delArea.Count(p => p.Estado == EstadoPrestamo.Activo);
+            var devueltos = delArea.Count(p => p.Estado == EstadoPrestamo.Devuelto);
+            var pendientes = delArea.Count(p => p.Estado == EstadoPrestamo.Pendiente);
+            var porcentaje = totalGeneral > 0 ? Math.Round((double)total / totalGeneral * 100, 1) : 0.0;
+
+            return new PrestamosPorAreaDto(
+                a.Nom_Area,
+                total,
+                activos,
+                devueltos,
+                pendientes,
+                porcentaje
+            );
+        })
+        .OrderByDescending(x => x.TotalPrestamos)
+        .ThenBy(x => x.AreaNombre);
 
         if (limite.HasValue)
         {
-            return query.Take(limite.Value).ToList();
+            return resultado.Take(limite.Value).ToList();
         }
 
-        return query.ToList();
+        return resultado.ToList();
     }
 
-    public async Task<IReadOnlyList<EquiposMasUtilizadosDto>> ObtenerEquiposMasUtilizadosAsync(int limite = 10, CancellationToken ct = default)
+    public async Task<IReadOnlyList<EquiposMasUtilizadosDto>> ObtenerEquiposMasUtilizadosAsync(
+        int limite = 10,
+        CategoriaEquipo? categoria = null,
+        DateOnly? fechaDesde = null,
+        DateOnly? fechaHasta = null,
+        CancellationToken ct = default)
     {
-        var datos = await _context.Prestamos
+        var query = _context.Prestamos
             .AsNoTracking()
-            .Where(p => p.Equipo != null)
+            .Where(p => p.Equipo != null);
+
+        if (categoria.HasValue)
+            query = query.Where(p => p.Equipo!.Cat_Equipo == categoria.Value);
+
+        if (fechaDesde.HasValue)
+            query = query.Where(p => p.Fpr_Prestamo >= fechaDesde.Value);
+
+        if (fechaHasta.HasValue)
+            query = query.Where(p => p.Fpr_Prestamo <= fechaHasta.Value);
+
+        var datos = await query
             .Select(p => new
             {
                 p.Ide_Prestamo,
                 p.Equipo!.Cop_Equipo,
                 p.Equipo.Nom_Equipo,
-                p.Equipo.Cat_Equipo
+                p.Equipo.Cat_Equipo,
+                p.Equipo.Mar_Equipo,
+                p.Fpr_Prestamo
             })
             .ToListAsync(ct);
 
         return datos
-            .GroupBy(p => new { p.Ide_Prestamo, p.Cop_Equipo, p.Nom_Equipo, p.Cat_Equipo })
+            .GroupBy(p => new { p.Ide_Prestamo, p.Cop_Equipo, p.Nom_Equipo, p.Cat_Equipo, p.Mar_Equipo })
             .Select(g => new EquiposMasUtilizadosDto(
                 g.Key.Ide_Prestamo,
                 g.Key.Cop_Equipo,
                 g.Key.Nom_Equipo,
                 g.Key.Cat_Equipo,
-                g.Count()
+                g.Count(),
+                g.Key.Mar_Equipo,
+                g.Max(x => x.Fpr_Prestamo)
             ))
             .OrderByDescending(x => x.TotalPrestamos)
             .Take(limite)
             .ToList();
+    }
+
+    public async Task<(int Hoy, int EstaSemana, int Vencidos)> ObtenerMetricasActividadAsync(
+        DateOnly hoy,
+        DateOnly lunes,
+        DateOnly domingo,
+        CancellationToken ct = default)
+    {
+        var datos = await _context.Prestamos
+            .AsNoTracking()
+            .Select(p => new
+            {
+                p.Fpr_Prestamo,
+                p.Fde_Prestamo,
+                p.Est_Prestamo
+            })
+            .ToListAsync(ct);
+
+        var prestamosHoy = datos.Count(p => p.Fpr_Prestamo == hoy);
+        var devolucionesSemana = datos.Count(p => p.Est_Prestamo == EstadoPrestamo.Activo && p.Fde_Prestamo >= lunes && p.Fde_Prestamo <= domingo);
+        var vencidos = datos.Count(p => p.Est_Prestamo == EstadoPrestamo.Activo && p.Fde_Prestamo < hoy);
+
+        return (prestamosHoy, devolucionesSemana, vencidos);
     }
 
     public async Task<IReadOnlyList<Prestamo>> ObtenerSolicitudesPendientesRecientesAsync(int limite = 5, CancellationToken ct = default)

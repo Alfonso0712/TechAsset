@@ -15,7 +15,7 @@ export const MAPA_CATEGORIAS_EQUIPO = ETIQUETAS_CATEGORIA;
 
 export const ICONOS_CATEGORIA = Object.freeze({
   Laptop: 'Laptop',
-  ComputadoraEscritorio: 'Monitor',
+  ComputadoraEscritorio: 'Cpu',
   Monitor: 'Monitor',
   Proyector: 'Tv',
   Impresora: 'Printer',
@@ -38,9 +38,19 @@ export const ETIQUETAS_ESTADO_PRESTAMO = Object.freeze({
   Rechazado: 'Rechazado'
 });
 
+export const ETIQUETAS_TIPO_MOVIMIENTO = Object.freeze({
+  Registro: 'Alta de equipo',
+  CambioEstado: 'Cambio de estado',
+  PrestamoSolicitado: 'Solicitud ingresada',
+  PrestamoAprobado: 'Préstamo aprobado',
+  PrestamoRechazado: 'Solicitud rechazada',
+  Devolucion: 'Devolución conforme',
+  Edicion: 'Edición de datos'
+});
+
 export const ETIQUETAS_ROL = Object.freeze({
   Administrador: 'Administrador',
-  ResponsableTecnologia: 'Responsable de Tecnología',
+  ResponsableTecnologia: 'Responsable TI',
   Colaborador: 'Colaborador'
 });
 
@@ -54,6 +64,10 @@ export function obtenerEtiquetaEstadoEquipo(estado) {
 
 export function obtenerEtiquetaEstadoPrestamo(estado) {
   return ETIQUETAS_ESTADO_PRESTAMO[estado] || estado || 'Desconocido';
+}
+
+export function obtenerEtiquetaTipoMovimiento(tipo) {
+  return ETIQUETAS_TIPO_MOVIMIENTO[tipo] || tipo || 'Movimiento';
 }
 
 export function obtenerEtiquetaRol(rol) {

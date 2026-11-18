@@ -23,7 +23,21 @@ public interface IPrestamoRepository
         CancellationToken ct = default);
     Task<int> ContarTotalAsync(CancellationToken ct = default);
     Task<string?> ObtenerAreaConMayorUsoAsync(CancellationToken ct = default);
-    Task<IReadOnlyList<PrestamosPorAreaDto>> ObtenerPrestamosPorAreaAsync(int? limite = null, CancellationToken ct = default);
-    Task<IReadOnlyList<EquiposMasUtilizadosDto>> ObtenerEquiposMasUtilizadosAsync(int limite = 10, CancellationToken ct = default);
+    Task<IReadOnlyList<PrestamosPorAreaDto>> ObtenerPrestamosPorAreaAsync(
+        int? limite = null,
+        DateOnly? fechaDesde = null,
+        DateOnly? fechaHasta = null,
+        CancellationToken ct = default);
+    Task<IReadOnlyList<EquiposMasUtilizadosDto>> ObtenerEquiposMasUtilizadosAsync(
+        int limite = 10,
+        CategoriaEquipo? categoria = null,
+        DateOnly? fechaDesde = null,
+        DateOnly? fechaHasta = null,
+        CancellationToken ct = default);
     Task<IReadOnlyList<Prestamo>> ObtenerSolicitudesPendientesRecientesAsync(int limite = 5, CancellationToken ct = default);
+    Task<(int Hoy, int EstaSemana, int Vencidos)> ObtenerMetricasActividadAsync(
+        DateOnly hoy,
+        DateOnly lunes,
+        DateOnly domingo,
+        CancellationToken ct = default);
 }

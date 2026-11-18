@@ -152,14 +152,14 @@ export default function TableList({
                           : 'px-4'
                       } ${col.claseCelda || ''}`.trim()}
                     >
-                      {col.render ? col.render(fila) : fila[col.clave]}
+                      {col.render ? col.render(fila, indice) : fila[col.clave]}
                     </td>
                   ))}
                 </tr>
               ))}
         </tbody>
       </table>
-      {paginacion && !cargando && (
+      {paginacion && !cargando && datos.length > tamano && (
         <PaginacionTabla
           paginaActual={paginaSegura}
           totalPaginas={totalPaginas}
