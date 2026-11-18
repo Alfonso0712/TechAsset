@@ -1,3 +1,8 @@
+// Punto único de exportación de reglas de validación puras
+export * from './reglasUsuario';
+export * from './reglasEquipo';
+export * from './reglasPrestamo';
+
 export function esNoVacio(valor) {
   return typeof valor === 'string' && valor.trim().length > 0;
 }

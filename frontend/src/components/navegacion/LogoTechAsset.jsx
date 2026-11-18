@@ -1,9 +1,12 @@
-export default function LogoTechAsset({ className = 'h-8' }) {
+import LogoTechAssetUi from '../ui/LogoTechAsset';
+
+export default function LogoTechAsset({ className = 'h-8', variante = 'marca' }) {
+  if (variante === 'libre') {
+    return <LogoTechAssetUi variante="libre" className={className} />;
+  }
   return (
     <div className={`inline-flex items-center gap-2.5 ${className}`}>
-      <div className="w-8 h-8 rounded-lg bg-primario flex items-center justify-center text-white shadow-sm font-bold text-base tracking-wider">
-        TA
-      </div>
+      <LogoTechAssetUi variante="compacto" />
       <div className="flex flex-col leading-none">
         <span className="font-extrabold text-base tracking-tight text-texto">
           Tech<span className="text-primario">Asset</span>

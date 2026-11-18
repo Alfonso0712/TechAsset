@@ -24,6 +24,25 @@
   --acento-sobre-oscuro: #2DD4BF;
   --anillo-foco: #0D9488;
 
+  /* Estados y Alertas (ReservaUPLA exact tokens + semánticos) */
+  --rechazada-texto: #7F1D1D;
+  --rechazada-fondo: #FEF2F2;
+  --aprobada-texto: #065F46;
+  --aprobada-fondo: #ECFDF5;
+  --pendiente-texto: #78350F;
+  --pendiente-fondo: #FFFBEB;
+  --cancelada-texto: #334155;
+  --cancelada-fondo: #F1F5F9;
+
+  --peligro-texto: var(--rechazada-texto);
+  --peligro-fondo: var(--rechazada-fondo);
+  --exito-texto: var(--aprobada-texto);
+  --exito-fondo: var(--aprobada-fondo);
+  --advertencia-texto: var(--pendiente-texto);
+  --advertencia-fondo: var(--pendiente-fondo);
+  --info-texto: #115E59;
+  --info-fondo: #F0FDFA;
+
   /* Estados de Equipos */
   --disponible-texto: #065F46;
   --disponible-fondo: #D1FAE5;
@@ -31,18 +50,20 @@
   --prestado-fondo: #DBEAFE;
   --mantenimiento-texto: #9A3412;
   --mantenimiento-fondo: #FFEDD5;
-  --baja-texto: #991B1B;
-  --baja-fondo: #FEE2E2;
+  --baja-texto: #7F1D1D;
+  --baja-fondo: #FEF2F2;
 
   /* Estados de Préstamos */
-  --pendiente-texto: #92400E;
-  --pendiente-fondo: #FEF3C7;
   --activo-texto: #1E40AF;
   --activo-fondo: #DBEAFE;
   --devuelto-texto: #065F46;
   --devuelto-fondo: #D1FAE5;
-  --rechazado-texto: #991B1B;
-  --rechazado-fondo: #FEE2E2;
+  --rechazado-texto: #7F1D1D;
+  --rechazado-fondo: #FEF2F2;
+
+  /* Gradiente de fondo login TechAsset (#0B2A2E -> #0F766E transparente) */
+  --superposicion-marca-inicio: rgba(11, 42, 46, 0.90);
+  --superposicion-marca-fin: rgba(15, 118, 110, 0.20);
 
   /* Botones de acción semánticos */
   --btn-success-bg: #059669;
@@ -98,6 +119,27 @@
     --acento-sobre-oscuro: #2DD4BF;
     --anillo-foco: #2DD4BF;
 
+    --rechazada-texto: #FECACA;
+    --rechazada-fondo: #2A1012;
+    --aprobada-texto: #A7F3D0;
+    --aprobada-fondo: #062A20;
+    --pendiente-texto: #FDE68A;
+    --pendiente-fondo: #2E1C05;
+    --cancelada-texto: #CBD5E1;
+    --cancelada-fondo: #1E293B;
+
+    --peligro-texto: var(--rechazada-texto);
+    --peligro-fondo: var(--rechazada-fondo);
+    --exito-texto: var(--aprobada-texto);
+    --exito-fondo: var(--aprobada-fondo);
+    --advertencia-texto: var(--pendiente-texto);
+    --advertencia-fondo: var(--pendiente-fondo);
+    --info-texto: #99F6E4;
+    --info-fondo: #0B2A2E;
+
+    --superposicion-marca-inicio: rgba(6, 26, 29, 0.94);
+    --superposicion-marca-fin: rgba(15, 118, 110, 0.25);
+
     --disponible-texto: #A7F3D0;
     --disponible-fondo: #064E3B;
     --prestado-texto: #BFDBFE;
@@ -105,16 +147,14 @@
     --mantenimiento-texto: #FED7AA;
     --mantenimiento-fondo: #7C2D12;
     --baja-texto: #FECACA;
-    --baja-fondo: #7F1D1D;
+    --baja-fondo: #2A1012;
 
-    --pendiente-texto: #FDE68A;
-    --pendiente-fondo: #78350F;
     --activo-texto: #BFDBFE;
     --activo-fondo: #1E3A8A;
     --devuelto-texto: #A7F3D0;
     --devuelto-fondo: #064E3B;
     --rechazado-texto: #FECACA;
-    --rechazado-fondo: #7F1D1D;
+    --rechazado-fondo: #2A1012;
   }
 }
 
@@ -140,6 +180,27 @@ html[data-tema="oscuro"] {
   --acento-sobre-oscuro: #2DD4BF;
   --anillo-foco: #2DD4BF;
 
+  --rechazada-texto: #FECACA;
+  --rechazada-fondo: #2A1012;
+  --aprobada-texto: #A7F3D0;
+  --aprobada-fondo: #062A20;
+  --pendiente-texto: #FDE68A;
+  --pendiente-fondo: #2E1C05;
+  --cancelada-texto: #CBD5E1;
+  --cancelada-fondo: #1E293B;
+
+  --peligro-texto: var(--rechazada-texto);
+  --peligro-fondo: var(--rechazada-fondo);
+  --exito-texto: var(--aprobada-texto);
+  --exito-fondo: var(--aprobada-fondo);
+  --advertencia-texto: var(--pendiente-texto);
+  --advertencia-fondo: var(--pendiente-fondo);
+  --info-texto: #99F6E4;
+  --info-fondo: #0B2A2E;
+
+  --superposicion-marca-inicio: rgba(6, 26, 29, 0.94);
+  --superposicion-marca-fin: rgba(15, 118, 110, 0.25);
+
   --disponible-texto: #A7F3D0;
   --disponible-fondo: #064E3B;
   --prestado-texto: #BFDBFE;
@@ -147,16 +208,14 @@ html[data-tema="oscuro"] {
   --mantenimiento-texto: #FED7AA;
   --mantenimiento-fondo: #7C2D12;
   --baja-texto: #FECACA;
-  --baja-fondo: #7F1D1D;
+  --baja-fondo: #2A1012;
 
-  --pendiente-texto: #FDE68A;
-  --pendiente-fondo: #78350F;
   --activo-texto: #BFDBFE;
   --activo-fondo: #1E3A8A;
   --devuelto-texto: #A7F3D0;
   --devuelto-fondo: #064E3B;
   --rechazado-texto: #FECACA;
-  --rechazado-fondo: #7F1D1D;
+  --rechazado-fondo: #2A1012;
 }
 
 /* Escalas tipográficas accesibles */

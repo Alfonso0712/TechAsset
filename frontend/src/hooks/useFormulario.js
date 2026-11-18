@@ -1,80 +1,118 @@
-import { useState, useCallback } from 'react';
+// Nielsen 5 · Nielsen 9 · Shneiderman 6 · Estado de formulario y bloqueo de doble envío
+import { useState, useRef, useCallback } from 'react';
+import { MENSAJES } from '../constants/mensajes';
 
-export function useFormulario({ valoresIniciales = {}, validar, onSubmit }) {
+export function useFormulario({ valoresIniciales, validar, alEnviar, onSubmit }) {
+  const funcionEnvio = alEnviar || onSubmit;
   const [valores, setValores] = useState(valoresIniciales);
   const [errores, setErrores] = useState({});
   const [tocados, setTocados] = useState({});
-  const [enviando, setEnviando] = useState(false);
-  const [mensajeGeneral, setMensajeGeneral] = useState(null);
+  const [enProceso, setEnProceso] = useState(false);
+  const [errorGeneral, setErrorGeneral] = useState('');
+  const [resumenEstado, setResumenEstado] = useState('');
+  const enProcesoRef = useRef(false);
+  const camposRef = useRef({});
 
-  const cambiarValor = useCallback((campo, valor) => {
-    setValores(prev => ({ ...prev, [campo]: valor }));
-    if (validar) {
-      setErrores(prev => {
-        const nuevosErrores = validar({ ...valores, [campo]: valor });
-        return { ...prev, [campo]: nuevosErrores[campo] };
-      });
+  const registrarRef = useCallback((nombre) => (el) => {
+    if (el) camposRef.current[nombre] = el;
+  }, []);
+
+  const enfocarPrimerError = useCallback((mapa) => {
+    const k = Object.keys(mapa).find((c) => Boolean(mapa[c]));
+    if (k && camposRef.current[k]?.focus) camposRef.current[k].focus();
+  }, []);
+
+  const cambiarValor = useCallback((nombre, valor) => {
+    if (enProcesoRef.current) return;
+    setValores((prev) => ({ ...prev, [nombre]: valor }));
+    setErrores((prev) => (prev[nombre] ? { ...prev, [nombre]: '' } : prev));
+    setErrorGeneral('');
+    setResumenEstado('');
+  }, []);
+
+  const cambiarValores = useCallback((nuevos) => {
+    if (enProcesoRef.current) return;
+    setValores((prev) => ({ ...prev, ...nuevos }));
+    setErrores((prev) => {
+      const copia = { ...prev };
+      Object.keys(nuevos).forEach((k) => delete copia[k]);
+      return copia;
+    });
+    setErrorGeneral('');
+    setResumenEstado('');
+  }, []);
+
+  const marcarTocado = useCallback((nombre) => {
+    setTocados((prev) => ({ ...prev, [nombre]: true }));
+  }, []);
+
+  const manejarBlur = useCallback((nombre) => {
+    if (enProcesoRef.current) return;
+    setTocados((prev) => ({ ...prev, [nombre]: true }));
+    if (typeof validar === 'function') {
+      const res = validar(valores);
+      if (res && typeof res === 'object') {
+        const err = res.errores ? res.errores[nombre] : res[nombre];
+        setErrores((prev) => ({ ...prev, [nombre]: err || '' }));
+      }
     }
   }, [validar, valores]);
-
-  const marcarTocado = useCallback((campo) => {
-    setTocados(prev => ({ ...prev, [campo]: true }));
-    if (validar) {
-      const errs = validar(valores);
-      setErrores(errs);
-    }
-  }, [validar, valores]);
-
-  const reiniciar = useCallback((nuevosValores = valoresIniciales) => {
-    setValores(nuevosValores);
-    setErrores({});
-    setTocados({});
-    setEnviando(false);
-    setMensajeGeneral(null);
-  }, [valoresIniciales]);
 
   const manejarEnvio = useCallback(async (e) => {
-    if (e && typeof e.preventDefault === 'function') {
-      e.preventDefault();
-    }
-
-    if (validar) {
-      const errs = validar(valores);
-      setErrores(errs);
-      const todosTocados = Object.keys(valores).reduce((acc, k) => ({ ...acc, [k]: true }), {});
-      setTocados(todosTocados);
-      if (Object.keys(errs).length > 0) {
-        return false;
+    e?.preventDefault();
+    if (enProcesoRef.current) return;
+    if (typeof validar === 'function') {
+      const v = validar(valores);
+      const esValido = v && typeof v === 'object' && 'valido' in v ? v.valido : Object.keys(v || {}).length === 0;
+      const mapaErrores = v && typeof v === 'object' && 'errores' in v ? v.errores : v;
+      if (!esValido) {
+        setErrores(mapaErrores || {});
+        setResumenEstado(MENSAJES.RESUMEN_ERRORES_FORMULARIO);
+        enfocarPrimerError(mapaErrores || {});
+        return;
       }
     }
-
-    setEnviando(true);
-    setMensajeGeneral(null);
+    enProcesoRef.current = true;
+    setEnProceso(true);
+    setErrorGeneral('');
+    setResumenEstado('');
     try {
-      if (onSubmit) {
-        await onSubmit(valores);
-      }
-      return true;
-    } catch (err) {
-      setMensajeGeneral(err.message || 'Error al procesar el formulario');
-      return false;
+      await funcionEnvio?.(valores, {
+        setErrores,
+        setErrorGeneral,
+        setValores,
+        enfocarPrimerError,
+        camposRef
+      });
     } finally {
-      setEnviando(false);
+      enProcesoRef.current = false;
+      try {
+        setEnProceso(false);
+      } catch {
+        // ignorar
+      }
     }
-  }, [onSubmit, validar, valores]);
+  }, [validar, valores, funcionEnvio, enfocarPrimerError]);
 
   return {
     valores,
-    errores,
-    tocados,
-    enviando,
-    mensajeGeneral,
-    setMensajeGeneral,
-    cambiarValor,
-    marcarTocado,
-    reiniciar,
-    manejarEnvio,
     setValores,
-    setErrores
+    errores,
+    setErrores,
+    tocados,
+    enProceso,
+    enviando: enProceso,
+    errorGeneral,
+    setErrorGeneral,
+    mensajeGeneral: errorGeneral,
+    setMensajeGeneral: setErrorGeneral,
+    resumenEstado,
+    cambiarValor,
+    cambiarValores,
+    marcarTocado,
+    manejarBlur,
+    manejarEnvio,
+    registrarRef,
+    camposRef
   };
 }

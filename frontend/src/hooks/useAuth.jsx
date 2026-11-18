@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { authService } from '../services/authService';
-import { interpretarRespuestaError } from '../validation/interpretarRespuesta';
+import { interpretarRespuesta } from '../validation/interpretarRespuesta';
 import { PreferenciasProvider } from '../context/PreferenciasContext';
 
 export const ContextoAuth = createContext(null);
@@ -32,15 +32,19 @@ export function AuthProvider({ children, usuarioInicial = null }) {
     return () => ctrl.abort();
   }, [usuarioInicial]);
 
-  const iniciarSesion = useCallback(async (correo, contrasena, signal) => {
-    const { estado, datos } = await authService.login(correo, contrasena, signal);
-    if (estado === 200 && datos?.usuario) {
-      setUsuario(datos.usuario);
-      setPermisos(datos.permisos || []);
-      return { ok: true, usuario: datos.usuario };
+  const iniciarSesion = useCallback(async (credenciales, signal) => {
+    const correo = typeof credenciales === 'object' && credenciales !== null ? credenciales.correo : credenciales;
+    const contrasena = typeof credenciales === 'object' && credenciales !== null ? credenciales.contrasena : arguments[1];
+    const resp = await authService.login(correo, contrasena, signal);
+    const resultado = interpretarRespuesta(resp);
+    if (resultado.ok && resultado.datos) {
+      const u = resultado.datos.usuario || resultado.datos;
+      const p = resultado.datos.permisos || [];
+      setUsuario(u);
+      setPermisos(p);
+      return { ...resultado, usuario: u };
     }
-    const errorMsg = interpretarRespuestaError(estado, datos);
-    return { ok: false, error: errorMsg, estado };
+    return resultado;
   }, []);
 
   const cerrarSesion = useCallback(async (signal) => {

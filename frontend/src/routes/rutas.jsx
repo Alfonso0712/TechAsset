@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import LayoutPrincipal from '../layouts/LayoutPrincipal';
+import LayoutAutenticacion from '../layouts/LayoutAutenticacion';
 import RutaProtegida from './RutaProtegida';
 import Ingresar from '../pages/Ingresar';
 import Panel from '../pages/Panel';
@@ -13,8 +14,13 @@ import { PERMISOS } from '../constants/permisos';
 
 export const enrutador = createBrowserRouter([
   {
-    path: RUTAS.INGRESAR,
-    element: <Ingresar />
+    element: <LayoutAutenticacion />,
+    children: [
+      {
+        path: RUTAS.INGRESAR,
+        element: <Ingresar />
+      }
+    ]
   },
   {
     path: RUTAS.RAIZ,

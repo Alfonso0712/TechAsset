@@ -36,7 +36,17 @@ export default {
         'devuelto-texto': 'var(--devuelto-texto)',
         'devuelto-fondo': 'var(--devuelto-fondo)',
         'rechazado-texto': 'var(--rechazado-texto)',
-        'rechazado-fondo': 'var(--rechazado-fondo)'
+        'rechazado-fondo': 'var(--rechazado-fondo)',
+        'rechazada-texto': 'var(--rechazada-texto)',
+        'rechazada-fondo': 'var(--rechazada-fondo)',
+        'aprobada-texto': 'var(--aprobada-texto)',
+        'aprobada-fondo': 'var(--aprobada-fondo)',
+        'peligro-texto': 'var(--peligro-texto)',
+        'peligro-fondo': 'var(--peligro-fondo)',
+        'exito-texto': 'var(--exito-texto)',
+        'exito-fondo': 'var(--exito-fondo)',
+        'advertencia-texto': 'var(--advertencia-texto)',
+        'advertencia-fondo': 'var(--advertencia-fondo)'
       },
       fontFamily: {
         sans: ['"Montserrat Variable"', '"Segoe UI"', 'system-ui', 'Arial', 'sans-serif']

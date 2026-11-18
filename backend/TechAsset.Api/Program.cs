@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,37 @@ using TechAsset.Api.Middlewares;
 using TechAsset.Application.Extensions;
 using TechAsset.Infrastructure.Data;
 using TechAsset.Infrastructure.Extensions;
+
+// Cargar variables de entorno desde archivo .env si existen
+var directorioActual = Directory.GetCurrentDirectory();
+var posiblesRutasEnv = new[]
+{
+    Path.Combine(directorioActual, ".env"),
+    Path.Combine(directorioActual, "..", ".env"),
+    Path.Combine(directorioActual, "..", "..", ".env")
+};
+foreach (var rutaEnv in posiblesRutasEnv)
+{
+    if (File.Exists(rutaEnv))
+    {
+        foreach (var linea in File.ReadAllLines(rutaEnv))
+        {
+            var trimmed = linea.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed) || trimmed.StartsWith("#")) continue;
+            var partes = trimmed.Split('=', 2);
+            if (partes.Length == 2)
+            {
+                var clave = partes[0].Trim();
+                var valor = partes[1].Trim();
+                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(clave)))
+                {
+                    Environment.SetEnvironmentVariable(clave, valor);
+                }
+            }
+        }
+        break;
+    }
+}
 
 var builder = WebApplication.CreateBuilder(args);
 

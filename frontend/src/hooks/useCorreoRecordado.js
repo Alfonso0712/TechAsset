@@ -1,29 +1,31 @@
+// ISO 9241-11 · Eficiencia: recuerda solo el correo corporativo, nunca la contraseña
 import { useState, useCallback } from 'react';
 
 const CLAVE_CORREO = 'techasset_correo_recordado';
 
-export function useCorreoRecordado() {
-  const [correoRecordado, setCorreoRecordado] = useState(() => {
-    try {
-      return localStorage.getItem(CLAVE_CORREO) || '';
-    } catch {
-      return '';
-    }
-  });
+function leerCorreoGuardado() {
+  try {
+    return localStorage.getItem(CLAVE_CORREO) || '';
+  } catch {
+    return '';
+  }
+}
 
-  const guardarCorreo = useCallback((correo, recordar) => {
+export function useCorreoRecordado() {
+  const correoInicial = leerCorreoGuardado();
+  const [recordar, setRecordar] = useState(Boolean(correoInicial));
+
+  const guardarCorreo = useCallback((correo, debeRecordar) => {
     try {
-      if (recordar && correo) {
-        localStorage.setItem(CLAVE_CORREO, correo.trim());
-        setCorreoRecordado(correo.trim());
+      if (debeRecordar && correo) {
+        localStorage.setItem(CLAVE_CORREO, correo);
       } else {
         localStorage.removeItem(CLAVE_CORREO);
-        setCorreoRecordado('');
       }
     } catch {
-      // Ignore
+      // Almacenamiento bloqueado
     }
   }, []);
 
-  return { correoRecordado, guardarCorreo };
+  return { correoInicial, correoRecordado: correoInicial, recordar, setRecordar, guardarCorreo };
 }

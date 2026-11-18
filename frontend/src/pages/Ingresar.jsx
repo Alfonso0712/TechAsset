@@ -1,185 +1,132 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+// Nielsen 1 · Nielsen 5 · Nielsen 9 · Shneiderman 7 · Inicio de sesión corporativo TechAsset
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { useFormulario } from '../hooks/useFormulario';
 import { useCorreoRecordado } from '../hooks/useCorreoRecordado';
-import { validarLogin } from '../validation/reglasAuth';
+import { useFormulario } from '../hooks/useFormulario';
+import { validarLogin } from '../validation/validadores';
+import { MENSAJES } from '../constants/mensajes';
 import { RUTAS } from '../constants/rutas';
-import LogoTechAsset from '../components/navegacion/LogoTechAsset';
-import CampoFormulario from '../components/formulario/CampoFormulario';
 import TextInput from '../components/formulario/TextInput';
 import PasswordInput from '../components/formulario/PasswordInput';
+import PanelAyuda from '../components/formulario/PanelAyuda';
 import Button from '../components/ui/Button';
 import AlertMessage from '../components/ui/AlertMessage';
+import LogoTechAsset from '../components/ui/LogoTechAsset';
 
 export default function Ingresar() {
-  const { iniciarSesion, autenticado } = useAuth();
-  const { correoRecordado, guardarCorreo } = useCorreoRecordado();
-  const [recordar, setRecordar] = useState(Boolean(correoRecordado));
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navegar = useNavigate();
+  const { iniciarSesion } = useAuth();
+  const { correoInicial, guardarCorreo } = useCorreoRecordado();
+  const [enfocarAlerta, setEnfocarAlerta] = useState(false);
 
-  const origen = location.state?.from?.pathname || RUTAS.PANEL;
-
-  useEffect(() => {
-    if (autenticado) {
-      navigate(origen, { replace: true });
-    }
-  }, [autenticado, navigate, origen]);
-
-  const {
-    valores,
-    errores,
-    enviando,
-    mensajeGeneral,
-    setMensajeGeneral,
-    cambiarValor,
-    marcarTocado,
-    manejarEnvio,
-    setValores
-  } = useFormulario({
-    valoresIniciales: {
-      correo: correoRecordado || '',
-      contrasena: ''
-    },
+  const form = useFormulario({
+    valoresIniciales: { correo: correoInicial || '', contrasena: '' },
     validar: validarLogin,
-    onSubmit: async ({ correo, contrasena }) => {
-      const resultado = await iniciarSesion(correo, contrasena);
-      if (resultado.ok) {
-        guardarCorreo(correo, recordar);
-        navigate(origen, { replace: true });
-      } else {
-        setMensajeGeneral(resultado.error);
+    alEnviar: async (valores, { setErrores, setErrorGeneral, enfocarPrimerError, camposRef }) => {
+      const { correoNormalizado } = validarLogin(valores);
+      const res = await iniciarSesion({ correo: correoNormalizado, contrasena: valores.contrasena });
+      if (res.ok) {
+        guardarCorreo(correoNormalizado, true);
+        navegar(RUTAS.PANEL, { replace: true });
+        return;
+      }
+      if (res.errores && Object.keys(res.errores).length > 0) {
+        setErrores(res.errores);
+        enfocarPrimerError(res.errores);
+        return;
+      }
+      setEnfocarAlerta(res.accion !== 'reautenticar');
+      setErrorGeneral(res.errorGeneral || MENSAJES.ERROR_SERVIDOR);
+      if (res.accion === 'reautenticar') {
+        camposRef.current.contrasena?.focus();
+        camposRef.current.contrasena?.select?.();
       }
     }
   });
 
-  const cargarDemo = (correoDemo, claveDemo) => {
-    setValores({ correo: correoDemo, contrasena: claveDemo });
-    setMensajeGeneral(null);
-  };
+  useEffect(() => {
+    document.title = 'TechAsset — Iniciar sesión';
+    form.camposRef.current.correo?.focus();
+  }, [form.camposRef]);
 
   return (
-    <div className="min-h-screen bg-fondo flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="flex justify-center mb-2">
-          <LogoTechAsset />
-        </div>
-        <h2 className="mt-4 text-2xl font-bold tracking-tight text-texto">
-          Sistema de Inventario y Préstamos
-        </h2>
-        <p className="mt-1 text-xs text-texto-suave">
-          Ingrese sus credenciales corporativas autorizadas
-        </p>
+    <div className="w-full max-w-[360px] mx-auto p-4 sm:p-5 rounded-tarjeta border border-borde/70 bg-superficie text-texto shadow-[0_10px_35px_-5px_rgba(0,0,0,0.08),0_4px_15px_-3px_rgba(0,0,0,0.04)] dark:shadow-[0_10px_35px_-5px_rgba(0,0,0,0.4)] space-y-3">
+      <div className="flex flex-col items-center text-center">
+        <Link
+          to="/"
+          className="flex flex-col items-center gap-0.5 mb-1 no-underline group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primario rounded"
+          aria-label="Ir a la página principal de TechAsset"
+        >
+          <LogoTechAsset variante="libre" className="w-10 h-10 group-hover:scale-105 transition-transform" />
+          <span className="text-xs font-bold tracking-wider text-primario">TECHASSET</span>
+        </Link>
+        <h1 className="text-xl sm:text-2xl font-bold text-texto tracking-tight">Iniciar sesión</h1>
+        <p className="mt-0.5 text-xs sm:text-sm text-texto-suave">Ingrese sus credenciales para continuar.</p>
       </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
-        <div className="bg-superficie py-8 px-6 shadow-xl rounded-2xl border border-borde sm:px-10">
-          {mensajeGeneral && (
-            <AlertMessage
-              variante="peligro"
-              mensaje={mensajeGeneral}
-              className="mb-6"
-            />
-          )}
-
-          <form onSubmit={manejarEnvio} className="space-y-5" noValidate>
-            <CampoFormulario
-              id="correo"
-              etiqueta="Correo electrónico"
-              error={errores.correo}
-              obligatorio
-            >
-              <TextInput
-                id="correo"
-                name="correo"
-                type="email"
-                placeholder="usuario@innovatech.com"
-                value={valores.correo}
-                onChange={(e) => cambiarValor('correo', e.target.value)}
-                onBlur={() => marcarTocado('correo')}
-                error={Boolean(errores.correo)}
-                disabled={enviando}
-                autoComplete="email"
-              />
-            </CampoFormulario>
-
-            <CampoFormulario
-              id="contrasena"
-              etiqueta="Contraseña"
-              error={errores.contrasena}
-              obligatorio
-            >
-              <PasswordInput
-                id="contrasena"
-                name="contrasena"
-                placeholder="••••••••"
-                value={valores.contrasena}
-                onChange={(e) => cambiarValor('contrasena', e.target.value)}
-                onBlur={() => marcarTocado('contrasena')}
-                error={Boolean(errores.contrasena)}
-                disabled={enviando}
-                autoComplete="current-password"
-              />
-            </CampoFormulario>
-
-            <div className="flex items-center justify-between text-xs">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={recordar}
-                  onChange={(e) => setRecordar(e.target.checked)}
-                  className="rounded border-borde text-primario focus:ring-anillo-foco w-4 h-4"
-                />
-                <span className="text-texto-suave font-medium">Recordar correo</span>
-              </label>
-            </div>
-
-            <Button
-              tipo="submit"
-              variante="primary"
-              enProceso={enviando}
-              textoProceso="Iniciando sesión…"
-              className="w-full h-11 text-sm font-semibold"
-            >
-              Iniciar sesión
-            </Button>
-          </form>
-
-          {/* Accesos rápidos de demostración */}
-          <div className="mt-8 pt-6 border-t border-borde">
-            <span className="block text-center text-xs font-semibold text-texto-suave uppercase tracking-wider mb-3">
-              Credenciales de prueba
-            </span>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => cargarDemo('admin@innovatech.com', 'Admin123*')}
-                className="p-2 text-center rounded-lg border border-borde hover:border-primario hover:bg-superficie-2 text-[0.6875rem] font-semibold text-texto transition-colors"
-              >
-                <div className="font-bold text-primario truncate">Admin</div>
-                <div className="text-texto-suave/80 truncate">Completo</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => cargarDemo('resp.tecnologia@innovatech.com', 'Resp123*')}
-                className="p-2 text-center rounded-lg border border-borde hover:border-primario hover:bg-superficie-2 text-[0.6875rem] font-semibold text-texto transition-colors"
-              >
-                <div className="font-bold text-primario truncate">Resp. TI</div>
-                <div className="text-texto-suave/80 truncate">Gestión</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => cargarDemo('colaborador1@innovatech.com', 'Colab123*')}
-                className="p-2 text-center rounded-lg border border-borde hover:border-primario hover:bg-superficie-2 text-[0.6875rem] font-semibold text-texto transition-colors"
-              >
-                <div className="font-bold text-primario truncate">Colaborador</div>
-                <div className="text-texto-suave/80 truncate">Solicitante</div>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div role="status" aria-live="polite" className="sr-only">{form.resumenEstado}</div>
+      {form.errorGeneral && (
+        <AlertMessage
+          variante="error"
+          rol="alert"
+          mensaje={form.errorGeneral}
+          compacto
+          enfocarAlAparecer={enfocarAlerta}
+        />
+      )}
+      <form onSubmit={form.manejarEnvio} noValidate className="space-y-2.5 sm:space-y-3">
+        <TextInput
+          ref={form.registrarRef('correo')}
+          nombre="correo"
+          etiqueta="Correo corporativo"
+          tipo="email"
+          obligatorio
+          valor={form.valores.correo}
+          alCambiar={(e) => form.cambiarValor('correo', e.target.value)}
+          alSalir={() => form.manejarBlur('correo')}
+          error={form.errores.correo}
+          ayuda=""
+          placeholder="nombre@innovatech.com"
+          autoComplete="username"
+          inputMode="email"
+          enterKeyHint="next"
+          soloLectura={form.enProceso}
+        />
+        <PasswordInput
+          ref={form.registrarRef('contrasena')}
+          nombre="contrasena"
+          etiqueta="Contraseña"
+          obligatorio
+          valor={form.valores.contrasena}
+          alCambiar={(e) => form.cambiarValor('contrasena', e.target.value)}
+          alSalir={() => form.manejarBlur('contrasena')}
+          error={form.errores.contrasena}
+          ayuda=""
+          placeholder="Ingresar contraseña"
+          autoComplete="current-password"
+          enterKeyHint="done"
+          soloLectura={form.enProceso}
+        />
+        <Button
+          tipo="submit"
+          variante="primario"
+          enProceso={form.enProceso}
+          textoProceso={MENSAJES.VALIDANDO}
+          className="w-full"
+        >
+          Iniciar sesión
+        </Button>
+      </form>
+      <p className="text-xs sm:text-sm text-texto-suave text-center">
+        ¿No tiene acceso? <span className="font-semibold text-texto">Solicítelo al Administrador del sistema.</span>
+      </p>
+      <PanelAyuda
+        deshabilitado={form.enProceso}
+        alRellenarDemo={(c) => {
+          form.cambiarValores({ correo: c.correo, contrasena: c.contrasenaDemo });
+          form.camposRef.current.correo?.focus();
+        }}
+      />
     </div>
   );
 }

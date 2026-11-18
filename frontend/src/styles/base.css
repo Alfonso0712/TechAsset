@@ -22,6 +22,10 @@ p { max-width: 70ch; line-height: 1.6; margin: 0; }
 .ancho-lectura { max-width: 70ch; }
 .cifra-tabular { font-variant-numeric: tabular-nums; }
 
+.capa-superposicion-login {
+  background: linear-gradient(to right, var(--superposicion-marca-inicio) 0%, var(--superposicion-marca-inicio) 35%, var(--superposicion-marca-fin) 80%);
+}
+
 .fondo-modal {
   background-color: rgba(15, 23, 42, 0.7);
   position: fixed;
