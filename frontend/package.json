@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint . --max-warnings=0",
+    "check:tokens": "node scripts/check-tokens.js",
+    "lint": "npm run check:tokens && eslint . --max-warnings=0",
     "test": "vitest run"
   },
   "dependencies": {
