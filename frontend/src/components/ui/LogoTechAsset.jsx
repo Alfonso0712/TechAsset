@@ -1,25 +1,30 @@
-// Logo corporativo institucional TechAsset · Cuadrado redondeado Azul Marino (#091E3E) + Cian (#06A3DA)
-export default function LogoTechAsset({
-  variante = 'marca',
-  className = '',
-  alt = 'Logo TechAsset - Innovatech Solutions'
-}) {
-  const clasesTamano = {
-    marca: 'w-11 h-11 text-lg',
-    lateral: 'w-9 h-9 text-base',
-    compacto: 'w-8 h-8 text-sm',
-    libre: 'w-10 h-10 text-base'
-  };
+// Nielsen 4 · Componente único de Logo TechAsset institucional · Innovatech Solutions S.A.C.
+import logoImg from '../../assets/logo-techasset.png';
 
-  const tamano = clasesTamano[variante] || 'w-10 h-10 text-base';
+const MAPA_ALTURAS = {
+  sm: 'h-8 w-8',
+  md: 'h-10 w-10',
+  lg: 'h-12 w-12', // 48px (cabecera del panel)
+  xl: 'h-14 w-14', // 56px (tarjeta de login)
+  panel: 'h-12 w-12',
+  tarjeta: 'h-14 w-14',
+  sidebar: 'h-9 w-9',
+  header: 'h-8 w-8'
+};
+
+export default function LogoTechAsset({
+  tamano = 'md',
+  className = '',
+  alt = 'Logo TechAsset'
+}) {
+  const dimension = MAPA_ALTURAS[tamano] || tamano;
 
   return (
-    <div
-      role="img"
-      aria-label={alt}
-      className={`inline-flex items-center justify-center shrink-0 rounded-lg bg-[#091E3E] text-[#06A3DA] border border-[#06A3DA]/40 font-extrabold tracking-wider shadow-sm select-none ${tamano} ${className}`.trim()}
-    >
-      TA
-    </div>
+    <img
+      src={logoImg}
+      alt={alt}
+      className={`shrink-0 object-contain select-none pointer-events-none ${dimension} ${className}`.trim()}
+      loading="eager"
+    />
   );
 }

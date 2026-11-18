@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import Icono from '../ui/Icono';
-import LogoTechAsset from './LogoTechAsset';
+import LogoTechAsset from '../ui/LogoTechAsset';
 import { ELEMENTOS_NAVEGACION } from '../../constants/navegacion';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -30,8 +30,16 @@ export default function BarraLateral({ abierta = false, alCerrar }) {
       >
         {/* Cabecera Sidebar */}
         <div className="h-16 px-5 flex items-center justify-between border-b border-slate-800 bg-slate-950/40">
-          <div className="text-white">
-            <LogoTechAsset />
+          <div className="flex items-center gap-2.5">
+            <LogoTechAsset tamano="header" alt="" />
+            <div className="flex flex-col leading-none">
+              <span className="font-extrabold text-base tracking-tight text-white">
+                Tech<span className="text-[#38BDF0]">Asset</span>
+              </span>
+              <span className="text-[0.625rem] font-medium tracking-wider uppercase text-lateral-texto">
+                Innovatech Solutions
+              </span>
+            </div>
           </div>
           <button
             type="button"
@@ -61,7 +69,7 @@ export default function BarraLateral({ abierta = false, alCerrar }) {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-primario text-white font-semibold shadow-sm'
+                    ? 'bg-primario text-sobre-primario font-semibold shadow-sm'
                     : 'text-lateral-texto hover:text-white hover:bg-lateral-hover'
                 }`
               }
