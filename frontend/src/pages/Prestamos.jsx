@@ -218,7 +218,7 @@ export default function Prestamos() {
             onClick={() => setPestanaActiva(pestana.clave)}
             className={`px-4 py-2 text-xs font-semibold rounded-lg whitespace-nowrap transition-colors ${
               pestanaActiva === pestana.clave
-                ? 'bg-primario text-white shadow-xs'
+                ? 'bg-primario text-sobre-primario shadow-xs'
                 : 'text-texto-suave hover:text-texto hover:bg-superficie-2'
             }`}
           >

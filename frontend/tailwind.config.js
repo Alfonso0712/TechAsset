@@ -32,6 +32,11 @@ export default {
         'peligro-texto': 'var(--peligro-texto)',
         'peligro-fondo': 'var(--peligro-fondo)',
 
+        'error-texto': 'var(--error-texto)',
+        'error-borde': 'var(--error-borde)',
+        'error-fondo': 'var(--error-fondo)',
+        'error-banner-texto': 'var(--error-banner-texto)',
+
         'disponible-texto': 'var(--disponible-texto)',
         'disponible-fondo': 'var(--disponible-fondo)',
         'prestado-texto': 'var(--prestado-texto)',

@@ -2,7 +2,7 @@ import { forwardRef } from 'react';
 import Icono from './Icono';
 
 const VARIANTES_BASE = {
-  primary: 'bg-primario text-white hover:bg-primario-hover border border-transparent font-medium shadow-sm',
+  primary: 'bg-primario text-sobre-primario hover:bg-primario-hover border border-transparent font-medium shadow-sm',
   'neutral-info': 'bg-superficie-2 text-primario border border-borde hover:bg-primario-suave font-medium',
   success: 'bg-[var(--btn-success-bg)] text-white border border-[var(--btn-success-border)] hover:bg-[var(--btn-success-hover-bg)] font-semibold shadow-sm',
   danger: 'bg-[var(--btn-danger-bg)] text-white border border-[var(--btn-danger-border)] hover:bg-[var(--btn-danger-hover-bg)] font-semibold shadow-sm',

@@ -39,6 +39,12 @@
   --peligro-texto: #7F1D1D;
   --peligro-fondo: #FDE2E2;
 
+  /* Tokens Específicos de Error Accesible (WCAG AA/AAA) */
+  --error-texto: #B91C1C;
+  --error-borde: #B91C1C;
+  --error-fondo: #FDE2E2;
+  --error-banner-texto: #991B1B;
+
   /* Mapeo de Entidades:
      Disponible y Devuelto = exito
      Prestado y Activo = info
@@ -143,6 +149,12 @@
     --peligro-texto: #FECACA;
     --peligro-fondo: #341113;
 
+    /* Tokens Específicos de Error Accesible (WCAG AA/AAA) */
+    --error-texto: #FCA5A5;
+    --error-borde: #F87171;
+    --error-fondo: #3A1414;
+    --error-banner-texto: #FECACA;
+
     --disponible-texto: var(--exito-texto);
     --disponible-fondo: var(--exito-fondo);
     --devuelto-texto: var(--exito-texto);
@@ -210,6 +222,12 @@ html[data-tema="oscuro"] {
   --advertencia-fondo: #382306;
   --peligro-texto: #FECACA;
   --peligro-fondo: #341113;
+
+  /* Tokens Específicos de Error Accesible (WCAG AA/AAA) */
+  --error-texto: #FCA5A5;
+  --error-borde: #F87171;
+  --error-fondo: #3A1414;
+  --error-banner-texto: #FECACA;
 
   --disponible-texto: var(--exito-texto);
   --disponible-fondo: var(--exito-fondo);

@@ -70,7 +70,7 @@ export default function PaginacionTabla({
                   aria-current={it === paginaActual ? 'page' : undefined}
                   className={`h-8 min-w-[2rem] px-2 rounded-md border text-xs font-semibold transition-colors ${
                     it === paginaActual
-                      ? 'bg-primario text-white border-primario'
+                      ? 'bg-primario text-sobre-primario border-primario'
                       : 'border-borde text-texto hover:bg-superficie-2'
                   }`}
                 >
