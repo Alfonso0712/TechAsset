@@ -22,5 +22,8 @@ export function interpretarRespuestaError(estado, datos) {
   if (estado >= 400 && estado < 500) {
     return datos?.mensaje || datos?.detail || datos?.error || MENSAJES.CAMPOS_OBLIGATORIOS;
   }
+  if (estado === 502 || estado === 503 || estado === 504) {
+    return 'No se pudo comunicar con el servidor backend. Verifique que el servicio esté activo.';
+  }
   return datos?.detail || datos?.mensaje || MENSAJES.ERROR_GENERICO;
 }
