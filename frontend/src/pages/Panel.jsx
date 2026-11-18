@@ -17,13 +17,12 @@ import ModalAprobarPrestamo from '../components/prestamos/ModalAprobarPrestamo';
 import ModalRechazarPrestamo from '../components/prestamos/ModalRechazarPrestamo';
 import FormularioSolicitarPrestamo from '../components/prestamos/FormularioSolicitarPrestamo';
 
-import AlertMessage from '../components/ui/AlertMessage';
 import Button from '../components/ui/Button';
 import Cargando from '../components/ui/Cargando';
 import Toast from '../components/ui/Toast';
 
 export default function Panel() {
-  const { usuario, puede } = useAuth();
+  const { puede } = useAuth();
   const [dashboard, setDashboard] = useState(null);
   const [prestamos, setPrestamos] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -73,12 +72,12 @@ export default function Panel() {
     setToasts((prev) => [...prev.slice(-3), { id: Date.now(), tipo, mensaje }]);
   };
 
-  const handleExitoAprobar = (prestamoActualizado) => {
+  const handleExitoAprobar = () => {
     agregarToast(`Solicitud de préstamo aprobada exitosamente.`);
     cargarDatos();
   };
 
-  const handleExitoRechazar = (prestamoActualizado) => {
+  const handleExitoRechazar = () => {
     agregarToast(`Solicitud de préstamo rechazada.`);
     cargarDatos();
   };
@@ -116,7 +115,7 @@ export default function Panel() {
         <>
           <KpisPanel dashboard={dashboard} />
 
-          <ResumenOcupacion prestamos={prestamos} />
+          <ResumenOcupacion prestamos={prestamos} metricas={dashboard} />
 
           {puedeAprobar && (
             <RequiereAtencion

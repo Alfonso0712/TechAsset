@@ -1,11 +1,10 @@
 // Gráfica de dona accesible SVG de distribución de equipos por estado · TechAsset
-import Icono from '../ui/Icono';
 
 const CONFIG_ESTADOS = [
-  { clave: 'Disponible', label: 'Disponible', varColor: 'var(--exito-texto)', icono: 'CheckCircle2' },
-  { clave: 'Prestado', label: 'Prestado', varColor: 'var(--info-texto)', icono: 'PackageCheck' },
-  { clave: 'Mantenimiento', label: 'En mantenimiento', varColor: 'var(--advertencia-texto)', icono: 'AlertTriangle' },
-  { clave: 'Baja', label: 'Baja técnica', varColor: 'var(--peligro-texto)', icono: 'XCircle' }
+  { clave: 'Disponible', label: 'Disponible', varColor: 'var(--grafico-disponible)', icono: 'CheckCircle2' },
+  { clave: 'Prestado', label: 'Prestado', varColor: 'var(--grafico-prestado)', icono: 'UserCheck' },
+  { clave: 'Mantenimiento', label: 'En mantenimiento', varColor: 'var(--grafico-mantenimiento)', icono: 'Wrench' },
+  { clave: 'Baja', label: 'Baja técnica', varColor: 'var(--grafico-baja)', icono: 'Ban' }
 ];
 
 export default function GraficaReservasEstado({ dashboard }) {

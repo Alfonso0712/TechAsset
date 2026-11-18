@@ -27,6 +27,16 @@ const CONFIG_TONOS = {
     fondo: 'bg-peligro-fondo',
     texto: 'text-peligro-texto',
     borde: 'border-peligro-borde'
+  },
+  acento: {
+    fondo: 'bg-superficie-2',
+    texto: 'text-primario-enlace',
+    borde: 'border-borde'
+  },
+  'marca-oscuro': {
+    fondo: 'bg-marca-oscuro',
+    texto: 'text-white',
+    borde: 'border-marca-oscuro'
   }
 };
 
@@ -39,9 +49,8 @@ export default function CardIndicador({
   icono = 'Laptop',
   tono = 'primario',
   destino = '',
-  textoAccion = 'Ver más',
+  textoAccion = 'Ver',
   compacto = true,
-  acento = false,
   ariaLabel = ''
 }) {
   const txtEtiqueta = etiqueta || titulo || '';
@@ -52,34 +61,47 @@ export default function CardIndicador({
   const nombreAccesible = ariaLabel || `${txtEtiqueta}: ${valor}. ${textoAccion}`;
 
   if (compacto) {
-    const acentoBorde = acento ? 'border-l-4 border-l-advertencia-borde' : '';
     return (
       <div
-        className={`card-indicador relative flex flex-col justify-between p-4 rounded-tarjeta border border-borde bg-superficie hover:border-primario focus-within:ring-2 focus-within:ring-anillo-foco focus-within:border-primario transition-colors shadow-xs ${acentoBorde}`.trim()}
+        className="card-indicador relative flex flex-col justify-between p-4 rounded-tarjeta border border-borde bg-superficie hover:border-primario focus-within:ring-2 focus-within:ring-anillo-foco focus-within:border-primario transition-colors shadow-xs h-full"
       >
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-xs sm:text-sm font-semibold text-texto-suave truncate" title={txtEtiqueta}>
-            {txtEtiqueta}
-          </span>
-          <span className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${chipClases}`} aria-hidden="true">
-            <Icono nombre={icono} className="w-4 h-4 shrink-0" />
-          </span>
+        <div>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs sm:text-sm font-semibold text-texto-suave truncate" title={txtEtiqueta}>
+              {txtEtiqueta}
+            </span>
+            <span className={`w-9 h-9 rounded-md flex items-center justify-center shrink-0 border ${chipClases}`} aria-hidden="true">
+              <Icono nombre={icono} className="w-4 h-4 shrink-0" />
+            </span>
+          </div>
+          <div
+            className={`mt-2 font-bold text-texto leading-snug ${
+              esNumero
+                ? 'text-2xl sm:text-3xl leading-none cifra-tabular truncate'
+                : 'text-base sm:text-lg line-clamp-2 break-words'
+            }`}
+            title={String(valor)}
+          >
+            {valor}
+          </div>
         </div>
-        <div
-          className={`mt-3 font-bold text-texto leading-snug ${
-            esNumero
-              ? 'text-2xl sm:text-3xl leading-none cifra-tabular truncate'
-              : 'text-base sm:text-lg line-clamp-2 break-words'
-          }`}
-          title={String(valor)}
-        >
-          {valor}
+
+        <div className="mt-3 pt-2 border-t border-borde/40 flex items-center justify-between text-xs">
+          {txtDescripcion ? (
+            <span className="text-texto-suave truncate" title={txtDescripcion}>
+              {txtDescripcion}
+            </span>
+          ) : (
+            <span />
+          )}
+          {destino && (
+            <span className="font-semibold text-primario-enlace inline-flex items-center gap-0.5 ml-auto">
+              Ver
+              <Icono nombre="ChevronRight" className="w-3.5 h-3.5" />
+            </span>
+          )}
         </div>
-        {txtDescripcion && (
-          <p className="mt-1 text-xs text-texto-suave truncate m-0" title={txtDescripcion}>
-            {txtDescripcion}
-          </p>
-        )}
+
         {destino && (
           <Link
             to={destino}

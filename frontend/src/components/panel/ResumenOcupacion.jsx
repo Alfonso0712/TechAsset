@@ -1,37 +1,38 @@
-// Franja compacta de resumen de actividad corporativa · TechAsset
+// Franja compacta de resumen de actividad corporativa · TechAsset · America/Lima
 import { Link } from 'react-router-dom';
 import Icono from '../ui/Icono';
 import { RUTAS } from '../../constants/rutas';
+import { fechaHoyLima, obtenerRangoSemanaLima, esPrestamoVencido } from '../../utils/fechas';
 
-export default function ResumenOcupacion({ prestamos = [] }) {
-  const hoyIso = new Date().toISOString().split('T')[0];
+export default function ResumenOcupacion({ prestamos = [], metricas = null }) {
+  const hoyIso = fechaHoyLima();
+  const { lunesIso, domingoIso } = obtenerRangoSemanaLima();
 
-  // Inicio y fin de la semana en curso (Lunes a Domingo)
-  const ahora = new Date();
-  const diaSemana = ahora.getDay() || 7;
-  const lunes = new Date(ahora);
-  lunes.setDate(ahora.getDate() - diaSemana + 1);
-  const domingo = new Date(lunes);
-  domingo.setDate(lunes.getDate() + 6);
-  const lunesIso = lunes.toISOString().split('T')[0];
-  const domingoIso = domingo.toISOString().split('T')[0];
+  const hoyRegistradosCalc = prestamos.filter((p) => {
+    const fPrestamo = p.fechaPrestamo || (p.fechaCreacion && p.fechaCreacion.slice(0, 10));
+    return fPrestamo === hoyIso;
+  }).length;
 
-  const hoyRegistrados = prestamos.filter(
-    (p) => p.fechaPrestamo === hoyIso || (p.fechaCreacion && p.fechaCreacion.startsWith(hoyIso))
-  ).length;
+  const devolucionesSemanaCalc = prestamos.filter((p) => {
+    const fDevEst = p.fechaDevolucionEstimada || p.fde_Prestamo;
+    return (
+      (p.estado === 'Activo' || p.estado === 'Prestado') &&
+      fDevEst >= lunesIso &&
+      fDevEst <= domingoIso
+    );
+  }).length;
 
-  const devolucionesSemana = prestamos.filter(
-    (p) =>
-      p.estado === 'Prestado' &&
-      p.fechaDevolucionEstimada >= lunesIso &&
-      p.fechaDevolucionEstimada <= domingoIso
-  ).length;
+  const vencidosCalc = prestamos.filter((p) => esPrestamoVencido(p)).length;
+
+  const hoyRegistrados = metricas?.prestamosHoy ?? hoyRegistradosCalc;
+  const devolucionesSemana = metricas?.devolucionesSemana ?? devolucionesSemanaCalc;
+  const vencidos = metricas?.prestamosVencidos ?? vencidosCalc;
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2.5 rounded-control border border-borde bg-superficie text-xs sm:text-sm shadow-xs">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
         <span className="font-semibold text-texto flex items-center gap-1.5">
-          <Icono nombre="Activity" className="w-4 h-4 text-primario-enlace" />
+          <Icono nombre="Info" className="w-4 h-4 text-primario-enlace" />
           <span>Resumen de actividad:</span>
         </span>
         <span className="text-texto-suave">
@@ -39,6 +40,9 @@ export default function ResumenOcupacion({ prestamos = [] }) {
         </span>
         <span className="text-texto-suave">
           • Esta semana: <strong className="font-bold text-texto cifra-tabular">{devolucionesSemana}</strong> {devolucionesSemana === 1 ? 'devolución prevista' : 'devoluciones previstas'}
+        </span>
+        <span className={vencidos > 0 ? 'text-peligro-texto font-bold' : 'text-texto-suave'}>
+          • <strong className={`font-bold cifra-tabular ${vencidos > 0 ? 'text-peligro-texto' : 'text-texto'}`}>{vencidos}</strong> {vencidos === 1 ? 'vencido' : 'vencidos'}
         </span>
       </div>
       <Link

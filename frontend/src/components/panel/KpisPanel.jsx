@@ -1,4 +1,4 @@
-// Fila de 6 KPIs compactos del Panel · TechAsset
+// Fila de 6 KPIs compactos del Panel · TechAsset (RF-13)
 import CardIndicador from '../ui/CardIndicador';
 import { RUTAS } from '../../constants/rutas';
 
@@ -8,7 +8,14 @@ export default function KpisPanel({ dashboard }) {
   const prestados = dashboard?.equiposPrestados ?? 0;
   const mantenimiento = dashboard?.equiposMantenimiento ?? 0;
   const totalPrestamos = dashboard?.totalPrestamos ?? 0;
-  const areaMayorUso = dashboard?.areaMayorUso || 'Sin datos suficientes';
+  const areaMayorUso = dashboard?.areaMayorUso || 'Sin datos';
+
+  const topAreaItem = Array.isArray(dashboard?.prestamosPorArea) && dashboard.prestamosPorArea.length > 0
+    ? dashboard.prestamosPorArea[0]
+    : null;
+  const textoSubArea = topAreaItem?.totalPrestamos
+    ? `${topAreaItem.totalPrestamos} préstamos`
+    : 'Mayor volumen de préstamos';
 
   const kpis = [
     {
@@ -22,7 +29,7 @@ export default function KpisPanel({ dashboard }) {
     },
     {
       clave: 'disponibles',
-      etiqueta: 'Disponibles',
+      etiqueta: 'Equipos disponibles',
       valor: disponibles,
       icono: 'CheckCircle2',
       tono: 'exito',
@@ -31,21 +38,20 @@ export default function KpisPanel({ dashboard }) {
     },
     {
       clave: 'prestados',
-      etiqueta: 'Prestados',
+      etiqueta: 'Equipos prestados',
       valor: prestados,
-      icono: 'PackageCheck',
+      icono: 'UserCheck',
       tono: 'info',
       destino: `${RUTAS.EQUIPOS}?estado=Prestado`,
       ariaLabel: `Equipos prestados: ${prestados}. Ver equipos prestados`
     },
     {
       clave: 'mantenimiento',
-      etiqueta: 'En mantenimiento',
+      etiqueta: 'Equipos en mantenimiento',
       valor: mantenimiento,
-      icono: 'AlertTriangle',
+      icono: 'Wrench',
       tono: 'advertencia',
       destino: `${RUTAS.EQUIPOS}?estado=Mantenimiento`,
-      acento: mantenimiento > 0,
       ariaLabel: `Equipos en mantenimiento: ${mantenimiento}. Ver equipos en mantenimiento`
     },
     {
@@ -53,7 +59,7 @@ export default function KpisPanel({ dashboard }) {
       etiqueta: 'Total de préstamos',
       valor: totalPrestamos,
       icono: 'ClipboardList',
-      tono: 'primario',
+      tono: 'acento',
       destino: RUTAS.PRESTAMOS,
       ariaLabel: `Total de préstamos: ${totalPrestamos}. Ver historial de préstamos`
     },
@@ -61,11 +67,11 @@ export default function KpisPanel({ dashboard }) {
       clave: 'areaMayorUso',
       etiqueta: 'Área con mayor uso',
       valor: areaMayorUso,
-      descripcion: 'Mayor volumen de préstamos',
-      icono: 'TrendingUp',
-      tono: 'info',
+      descripcion: textoSubArea,
+      icono: 'Building2',
+      tono: 'marca-oscuro',
       destino: `${RUTAS.REPORTES}?tab=areas`,
-      ariaLabel: `Área con mayor uso: ${areaMayorUso}`
+      ariaLabel: `Área con mayor uso: ${areaMayorUso}, ${textoSubArea}`
     }
   ];
 
