@@ -9,6 +9,7 @@ import { equipoService } from '../../services/equipoService';
 import { interpretarRespuesta } from '../../validation/interpretarRespuesta';
 import { CATEGORIAS_EQUIPO, ESTADOS_EQUIPO } from '../../constants/estados';
 import { MAPA_CATEGORIAS_EQUIPO } from '../../constants/etiquetas';
+import { CLASES_FORMULARIO } from '../formulario/CampoFormulario';
 
 const OPCIONES_CATEGORIA = Object.entries(CATEGORIAS_EQUIPO).map(([_, valor]) => ({
   valor,
@@ -86,6 +87,14 @@ export default function FormularioEquipo({
     }
   }, [abierto, targetEquipo]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const tieneCambios = Boolean(
+    form.valores.codigoPatrimonial !== (targetEquipo?.codigoPatrimonial || '') ||
+    form.valores.nombre !== (targetEquipo?.nombre || '') ||
+    form.valores.categoria !== (targetEquipo?.categoria || '') ||
+    form.valores.marca !== (targetEquipo?.marca || '') ||
+    form.valores.ubicacion !== (targetEquipo?.ubicacion || '')
+  );
+
   return (
     <ModalDialog
       abierto={abierto}
@@ -97,9 +106,10 @@ export default function FormularioEquipo({
       variantePrimaria="primary"
       enProceso={form.enProceso}
       alConfirmar={form.manejarEnvio}
+      tieneCambiosSinGuardar={tieneCambios}
       tamano="md"
     >
-      <form onSubmit={form.manejarEnvio} className="space-y-4" noValidate>
+      <form onSubmit={form.manejarEnvio} className={CLASES_FORMULARIO.formulario} noValidate>
         {form.errorGeneral && (
           <AlertMessage variante="error" rol="alert" mensaje={form.errorGeneral} />
         )}
@@ -119,7 +129,7 @@ export default function FormularioEquipo({
           soloLectura={esEdicion || form.enProceso}
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className={CLASES_FORMULARIO.filaDoble}>
           <TextInput
             ref={form.registrarRef('nombre')}
             id="nombre"
@@ -150,7 +160,7 @@ export default function FormularioEquipo({
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className={CLASES_FORMULARIO.filaDoble}>
           <TextInput
             ref={form.registrarRef('marca')}
             id="marca"

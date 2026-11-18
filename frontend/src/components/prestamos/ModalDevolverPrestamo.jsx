@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import ModalDialog from '../ui/ModalDialog';
-import CampoFormulario from '../formulario/CampoFormulario';
 import DateInput from '../formulario/DateInput';
 import TextAreaInput from '../formulario/TextAreaInput';
 import AlertMessage from '../ui/AlertMessage';
@@ -75,6 +74,7 @@ export default function ModalDevolverPrestamo({
       enProceso={enProceso}
       deshabilitado={!confirmarDevolucion || longitud < 10 || longitud > 500}
       alConfirmar={handleDevolver}
+      tieneCambiosSinGuardar={longitud > 0}
       tamano="md"
     >
       <div className="space-y-4">
@@ -97,26 +97,23 @@ export default function ModalDevolverPrestamo({
           min={prestamo.fechaPrestamo}
         />
 
-        <CampoFormulario
+        <TextAreaInput
           id="observacionDevolucion"
-          etiqueta={`Observación técnica obligatoria (${longitud}/500)`}
+          nombre="observacionDevolucion"
+          etiqueta="Observación técnica"
           obligatorio
-          ayuda="Detalle el estado del hardware, pantalla, cargador y funcionamiento tras la revisión técnica (mín. 10, máx. 500 caracteres)."
-        >
-          <TextAreaInput
-            id="observacionDevolucion"
-            name="observacionDevolucion"
-            placeholder="Ejemplo: Equipo retornado en excelente estado físico. Pantalla sin rayones, cargador original operativo y teclado verificado…"
-            value={observacion}
-            onChange={(e) => {
-              setObservacion(e.target.value);
-              setError(null);
-            }}
-            filas={4}
-            disabled={enProceso}
-            maxLength={500}
-          />
-        </CampoFormulario>
+          ayuda="Detalle la condición física y funcional del equipo (mínimo 10 caracteres)."
+          placeholder="Ejemplo: Equipo retornado en excelente estado físico. Pantalla sin rayones, cargador original operativo y teclado verificado…"
+          value={observacion}
+          onChange={(e) => {
+            setObservacion(e.target.value);
+            setError(null);
+          }}
+          filas={4}
+          disabled={enProceso}
+          maxLength={500}
+          contador={`${longitud}/500`}
+        />
 
         <div className="p-3 rounded-control bg-superficie-2 border border-borde">
           <label className="flex items-start gap-2 text-xs text-texto font-medium cursor-pointer">

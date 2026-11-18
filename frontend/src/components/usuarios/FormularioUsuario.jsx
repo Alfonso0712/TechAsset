@@ -10,6 +10,7 @@ import { usuarioService } from '../../services/usuarioService';
 import { areaService } from '../../services/areaService';
 import { interpretarRespuesta } from '../../validation/interpretarRespuesta';
 import { ROLES } from '../../constants/roles';
+import { CLASES_FORMULARIO } from '../formulario/CampoFormulario';
 
 const OPCIONES_ROL = [
   { valor: ROLES.COLABORADOR, etiqueta: 'Colaborador' },
@@ -93,6 +94,15 @@ export default function FormularioUsuario({
     }
   }, [abierto, targetUsuario]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const tieneCambios = Boolean(
+    form.valores.nombres !== (targetUsuario?.nombres || '') ||
+    form.valores.apellidos !== (targetUsuario?.apellidos || '') ||
+    form.valores.correo !== (targetUsuario?.correo || '') ||
+    form.valores.contrasena ||
+    form.valores.rol !== (targetUsuario?.rol || ROLES.COLABORADOR) ||
+    form.valores.areaId !== (targetUsuario?.areaId || '')
+  );
+
   return (
     <ModalDialog
       abierto={abierto}
@@ -104,12 +114,13 @@ export default function FormularioUsuario({
       variantePrimaria="primary"
       enProceso={form.enProceso}
       alConfirmar={form.manejarEnvio}
+      tieneCambiosSinGuardar={tieneCambios}
       tamano="md"
     >
-      <form onSubmit={form.manejarEnvio} className="space-y-4" noValidate>
+      <form onSubmit={form.manejarEnvio} className={CLASES_FORMULARIO.formulario} noValidate>
         {form.errorGeneral && <AlertMessage variante="error" rol="alert" mensaje={form.errorGeneral} />}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className={CLASES_FORMULARIO.filaDoble}>
           <TextInput
             ref={form.registrarRef('nombres')}
             id="nombres"
@@ -173,7 +184,7 @@ export default function FormularioUsuario({
           />
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className={CLASES_FORMULARIO.filaDoble}>
           <SelectInput
             ref={form.registrarRef('areaId')}
             id="areaId"
