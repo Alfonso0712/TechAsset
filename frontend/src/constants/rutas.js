@@ -4,7 +4,8 @@ export const RUTA_IMAGEN_FONDO_LOGIN = imagenFondoLogin;
 
 export const RUTAS = Object.freeze({
   RAIZ: '/',
-  INGRESAR: '/ingresar',
+  INGRESAR: '/login',
+  LOGIN: '/login',
   PANEL: '/panel',
   EQUIPOS: '/equipos',
   PRESTAMOS: '/prestamos',

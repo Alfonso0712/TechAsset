@@ -12,13 +12,20 @@ export default function ItemNavegacion({ item, alCerrarMenuMovil }) {
       className={({ isActive }) =>
         `w-full min-h-[2.75rem] px-4 py-2.5 rounded-control flex items-center gap-3 text-[1rem] transition-colors no-underline text-left outline-none focus-visible:ring-2 focus-visible:ring-anillo-foco ${
           isActive
-            ? 'bg-lateral-activo-fondo text-white font-semibold border-l-[3px] border-acento'
-            : 'text-lateral-texto font-medium hover:bg-lateral-hover hover:text-white'
+            ? 'bg-lateral-activo-fondo text-lateral-activo-texto font-semibold border-l-[3px] border-primario'
+            : 'text-lateral-texto font-medium hover:bg-lateral-hover hover:text-texto'
         }`
       }
     >
-      <Icono nombre={item.icono} className="w-5 h-5 shrink-0" />
-      <span>{item.etiqueta || item.titulo}</span>
+      {({ isActive }) => (
+        <>
+          <Icono
+            nombre={item.icono}
+            className={`w-5 h-5 shrink-0 ${isActive ? 'text-lateral-activo-texto' : 'text-lateral-icono'}`}
+          />
+          <span>{item.etiqueta || item.titulo}</span>
+        </>
+      )}
     </NavLink>
   );
 }

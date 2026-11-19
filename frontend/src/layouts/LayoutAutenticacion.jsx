@@ -26,7 +26,7 @@ export default function LayoutAutenticacion({ children }) {
       >
         <div className="absolute inset-0 capa-superposicion-login pointer-events-none" aria-hidden="true" />
         <RedParticulas />
-        <div className="relative z-10 flex items-center justify-between gap-4 flex-wrap">
+        <div className="relative z-10 flex items-center justify-between gap-4 flex-wrap [text-shadow:_0_1px_2px_rgba(0,0,0,0.5)]">
           <Link
             to="/"
             className="flex items-center gap-3 no-underline group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF0] rounded"
@@ -42,7 +42,7 @@ export default function LayoutAutenticacion({ children }) {
           </Link>
         </div>
 
-        <div className="relative z-10 max-w-[340px] my-auto py-4 space-y-4">
+        <div className="relative z-10 max-w-[340px] my-auto py-4 space-y-4 [text-shadow:_0_1px_2px_rgba(0,0,0,0.5)]">
           <div className="flex flex-col items-start">
             <span className="inline-flex items-center px-3 py-1 mb-3 rounded-pill bg-white/[0.12] border border-white/25 text-xs font-semibold text-white">
               Sistema corporativo

@@ -39,7 +39,7 @@ export default function PaginacionTabla({
             aria-label="Registros por página"
             className="h-8 px-2.5 rounded-pill border border-borde bg-superficie text-texto text-xs font-semibold focus:outline-none focus:border-primario-enlace"
           >
-            {[5, 10, 20, 50].map((n) => (
+            {[5, 10, 25, 50].map((n) => (
               <option key={n} value={n}>
                 {n} / pág.
               </option>

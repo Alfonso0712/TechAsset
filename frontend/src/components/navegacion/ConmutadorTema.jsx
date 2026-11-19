@@ -21,7 +21,7 @@ export default function ConmutadorTema({ tema: temaProp, alAlternar, className =
       onClick={manejarAlternar}
       className={`h-[38px] inline-flex items-center gap-1.5 px-3 rounded-pill border ${estiloFondo} text-xs font-semibold transition-colors cursor-pointer ${className}`.trim()}
     >
-      <Icono nombre={esOscuro ? 'Sun' : 'Moon'} className="w-3.5 h-3.5 text-[#38BDF0]" />
+      <Icono nombre={esOscuro ? 'Sun' : 'Moon'} className="w-3.5 h-3.5 text-primario" />
       <span>{etiqueta}</span>
     </button>
   );

@@ -100,7 +100,7 @@ export default function FormularioEquipo({
       abierto={abierto}
       alCerrar={alCerrar}
       titulo={esEdicion ? 'Editar equipo' : 'Nuevo equipo'}
-      subtitulo={esEdicion ? `Actualice los datos del equipo ${targetEquipo?.codigoPatrimonial}` : 'Ingrese los datos para dar de alta un equipo en inventario'}
+      subtitulo={esEdicion ? `Actualice los datos del equipo ${targetEquipo?.codigoPatrimonial}` : 'Ingrese los datos para registrar un nuevo equipo.'}
       textoPrimario={esEdicion ? 'Guardar cambios' : 'Registrar equipo'}
       textoSecundario="Cancelar"
       variantePrimaria="primary"
@@ -108,12 +108,14 @@ export default function FormularioEquipo({
       alConfirmar={form.manejarEnvio}
       tieneCambiosSinGuardar={tieneCambios}
       tamano="md"
+      className="!max-w-3xl"
     >
       <form onSubmit={form.manejarEnvio} className={CLASES_FORMULARIO.formulario} noValidate>
         {form.errorGeneral && (
           <AlertMessage variante="error" rol="alert" mensaje={form.errorGeneral} />
         )}
 
+        {/* Fila 1: Código patrimonial (ancho completo) */}
         <TextInput
           ref={form.registrarRef('codigoPatrimonial')}
           id="codigoPatrimonial"
@@ -129,6 +131,7 @@ export default function FormularioEquipo({
           soloLectura={esEdicion || form.enProceso}
         />
 
+        {/* Fila 2: Nombre del equipo | Categoría (dos columnas) */}
         <div className={CLASES_FORMULARIO.filaDoble}>
           <TextInput
             ref={form.registrarRef('nombre')}
@@ -160,6 +163,7 @@ export default function FormularioEquipo({
           />
         </div>
 
+        {/* Fila 3: Marca | Estado inicial de alta (dos columnas) */}
         <div className={CLASES_FORMULARIO.filaDoble}>
           <TextInput
             ref={form.registrarRef('marca')}
@@ -175,36 +179,37 @@ export default function FormularioEquipo({
             soloLectura={form.enProceso}
           />
 
-          <TextInput
-            ref={form.registrarRef('ubicacion')}
-            id="ubicacion"
-            nombre="ubicacion"
-            etiqueta="Ubicación física"
-            placeholder="Almacén Central TI - Estante B"
-            valor={form.valores.ubicacion}
-            alCambiar={(e) => form.cambiarValor('ubicacion', e.target.value)}
-            alSalir={() => form.manejarBlur('ubicacion')}
-            error={form.errores.ubicacion}
-            obligatorio
-            soloLectura={form.enProceso}
-          />
+          {!esEdicion && (
+            <SelectInput
+              ref={form.registrarRef('estadoInicial')}
+              id="estadoInicial"
+              nombre="estadoInicial"
+              etiqueta="Estado inicial de alta"
+              placeholder="Estado inicial"
+              opciones={OPCIONES_ESTADO_INICIAL}
+              valor={form.valores.estadoInicial}
+              alCambiar={(e) => form.cambiarValor('estadoInicial', e.target.value)}
+              error={form.errores.estadoInicial}
+              obligatorio={false}
+              soloLectura={form.enProceso}
+            />
+          )}
         </div>
 
-        {!esEdicion && (
-          <SelectInput
-            ref={form.registrarRef('estadoInicial')}
-            id="estadoInicial"
-            nombre="estadoInicial"
-            etiqueta="Estado inicial de alta"
-            placeholder="Estado inicial"
-            opciones={OPCIONES_ESTADO_INICIAL}
-            valor={form.valores.estadoInicial}
-            alCambiar={(e) => form.cambiarValor('estadoInicial', e.target.value)}
-            error={form.errores.estadoInicial}
-            obligatorio={false}
-            soloLectura={form.enProceso}
-          />
-        )}
+        {/* Fila 4: Ubicación física (ancho completo) */}
+        <TextInput
+          ref={form.registrarRef('ubicacion')}
+          id="ubicacion"
+          nombre="ubicacion"
+          etiqueta="Ubicación física"
+          placeholder="Ej. Piso 4 - Sala Render"
+          valor={form.valores.ubicacion}
+          alCambiar={(e) => form.cambiarValor('ubicacion', e.target.value)}
+          alSalir={() => form.manejarBlur('ubicacion')}
+          error={form.errores.ubicacion}
+          obligatorio
+          soloLectura={form.enProceso}
+        />
       </form>
     </ModalDialog>
   );

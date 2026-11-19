@@ -9,7 +9,7 @@ describe('Componente IconButton', () => {
     expect(boton).toBeInTheDocument();
     expect(boton).toHaveClass('h-11');
     expect(boton).toHaveClass('w-11');
-    expect(boton).toHaveClass('rounded-full');
+    expect(boton).toHaveClass('rounded-lg');
   });
 
   it('aplica las clases semánticas de la variante cambiar-estado', () => {

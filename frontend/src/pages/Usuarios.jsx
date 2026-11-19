@@ -133,32 +133,39 @@ export default function Usuarios() {
 
   const columnas = [
     {
-      clave: 'usuario',
+      clave: 'nombreCompleto',
       encabezado: 'Usuario',
       ordenable: true,
-      claseEncabezado: 'min-w-[15rem] px-3',
-      claseCelda: 'min-w-[15rem] px-3',
+      claseEncabezado: 'min-w-[13rem] max-w-[18rem] px-3',
+      claseCelda: 'min-w-[13rem] max-w-[18rem] px-3',
       render: (u) => (
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="w-8 h-8 rounded-full bg-primario-suave text-primario dark:text-primario-enlace font-bold text-xs flex items-center justify-center shrink-0">
             {obtenerIniciales(u.nombreCompleto) || 'U'}
           </span>
-          <div className="min-w-0 flex-1">
-            <span className="font-semibold text-texto block text-sm truncate" title={u.nombreCompleto}>
-              {u.nombreCompleto}
-            </span>
-            <span className="text-xs text-texto-suave block truncate" title={u.correo}>
-              {u.correo}
-            </span>
-          </div>
+          <span className="font-semibold text-texto text-sm truncate block" title={u.nombreCompleto}>
+            {u.nombreCompleto}
+          </span>
         </div>
+      )
+    },
+    {
+      clave: 'correo',
+      encabezado: 'Correo',
+      ordenable: true,
+      claseEncabezado: 'min-w-[13rem] max-w-[18rem] px-3',
+      claseCelda: 'min-w-[13rem] max-w-[18rem] px-3',
+      render: (u) => (
+        <span className="text-xs text-texto-suave truncate block" title={u.correo}>
+          {u.correo}
+        </span>
       )
     },
     {
       clave: 'area',
       encabezado: 'Área',
-      claseEncabezado: 'min-w-[12rem] px-3 hidden md:table-cell',
-      claseCelda: 'min-w-[12rem] px-3 hidden md:table-cell',
+      claseEncabezado: 'min-w-[10rem] max-w-[14rem] px-3 hidden md:table-cell',
+      claseCelda: 'min-w-[10rem] max-w-[14rem] px-3 hidden md:table-cell',
       render: (u) => (
         <span className="text-xs text-texto-suave line-clamp-1" title={u.areaNombre || u.area?.nombre || 'General'}>
           {u.areaNombre || u.area?.nombre || 'General'}
@@ -193,8 +200,9 @@ export default function Usuarios() {
     {
       clave: 'acciones',
       encabezado: 'Acciones',
-      claseEncabezado: 'w-[1%] whitespace-nowrap text-right pl-3 pr-4',
-      claseCelda: 'w-[1%] whitespace-nowrap text-right pl-3 pr-4',
+      align: 'right',
+      claseEncabezado: 'w-px whitespace-nowrap text-right pl-3 pr-4',
+      claseCelda: 'w-px whitespace-nowrap text-right pl-3 pr-4',
       render: (u) => (
         <AccionesFilaUsuario
           usuario={u}

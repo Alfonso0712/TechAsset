@@ -142,18 +142,13 @@ public class PrestamoRepository : IPrestamoRepository
 
     public async Task<string?> ObtenerAreaConMayorUsoAsync(CancellationToken ct = default)
     {
-        var areas = await _context.Prestamos
+        return await _context.Prestamos
             .AsNoTracking()
             .Where(p => p.Solicitante != null && p.Solicitante.Area != null)
-            .Select(p => p.Solicitante!.Area!.Nom_Area)
-            .ToListAsync(ct);
-
-        return areas
-            .GroupBy(a => a)
-            .Select(g => new { Area = g.Key, Total = g.Count() })
-            .OrderByDescending(x => x.Total)
-            .Select(x => x.Area)
-            .FirstOrDefault();
+            .GroupBy(p => p.Solicitante!.Area!.Nom_Area)
+            .OrderByDescending(g => g.Count())
+            .Select(g => g.Key)
+            .FirstOrDefaultAsync(ct);
     }
 
     public async Task<IReadOnlyList<PrestamosPorAreaDto>> ObtenerPrestamosPorAreaAsync(
@@ -178,23 +173,28 @@ public class PrestamoRepository : IPrestamoRepository
         if (fechaHasta.HasValue)
             queryPrestamos = queryPrestamos.Where(p => p.Fpr_Prestamo <= fechaHasta.Value);
 
-        var datosPrestamos = await queryPrestamos
-            .Select(p => new
+        var agregadosPorArea = await queryPrestamos
+            .GroupBy(p => p.Solicitante!.Ida_Usuario)
+            .Select(g => new
             {
-                IdArea = p.Solicitante!.Ida_Usuario,
-                Estado = p.Est_Prestamo
+                IdArea = g.Key,
+                Total = g.Count(),
+                Activos = g.Count(p => p.Est_Prestamo == EstadoPrestamo.Activo),
+                Devueltos = g.Count(p => p.Est_Prestamo == EstadoPrestamo.Devuelto),
+                Pendientes = g.Count(p => p.Est_Prestamo == EstadoPrestamo.Pendiente)
             })
             .ToListAsync(ct);
 
-        var totalGeneral = datosPrestamos.Count;
+        var totalGeneral = agregadosPorArea.Sum(x => x.Total);
+        var dictAgregados = agregadosPorArea.ToDictionary(x => x.IdArea);
 
         var resultado = areas.Select(a =>
         {
-            var delArea = datosPrestamos.Where(p => p.IdArea == a.Id_Area).ToList();
-            var total = delArea.Count;
-            var activos = delArea.Count(p => p.Estado == EstadoPrestamo.Activo);
-            var devueltos = delArea.Count(p => p.Estado == EstadoPrestamo.Devuelto);
-            var pendientes = delArea.Count(p => p.Estado == EstadoPrestamo.Pendiente);
+            dictAgregados.TryGetValue(a.Id_Area, out var datosArea);
+            var total = datosArea?.Total ?? 0;
+            var activos = datosArea?.Activos ?? 0;
+            var devueltos = datosArea?.Devueltos ?? 0;
+            var pendientes = datosArea?.Pendientes ?? 0;
             var porcentaje = totalGeneral > 0 ? Math.Round((double)total / totalGeneral * 100, 1) : 0.0;
 
             return new PrestamosPorAreaDto(
@@ -225,11 +225,10 @@ public class PrestamoRepository : IPrestamoRepository
         CancellationToken ct = default)
     {
         var query = _context.Prestamos
-            .AsNoTracking()
-            .Where(p => p.Equipo != null);
+            .AsNoTracking();
 
         if (categoria.HasValue)
-            query = query.Where(p => p.Equipo!.Cat_Equipo == categoria.Value);
+            query = query.Where(p => p.Equipo != null && p.Equipo.Cat_Equipo == categoria.Value);
 
         if (fechaDesde.HasValue)
             query = query.Where(p => p.Fpr_Prestamo >= fechaDesde.Value);
@@ -237,31 +236,41 @@ public class PrestamoRepository : IPrestamoRepository
         if (fechaHasta.HasValue)
             query = query.Where(p => p.Fpr_Prestamo <= fechaHasta.Value);
 
-        var datos = await query
-            .Select(p => new
+        var agrupados = await query
+            .GroupBy(p => p.Ide_Prestamo)
+            .Select(g => new
             {
-                p.Ide_Prestamo,
-                p.Equipo!.Cop_Equipo,
-                p.Equipo.Nom_Equipo,
-                p.Equipo.Cat_Equipo,
-                p.Equipo.Mar_Equipo,
-                p.Fpr_Prestamo
+                EquipoId = g.Key,
+                Total = g.Count(),
+                Ultimo = g.Max(x => x.Fpr_Prestamo)
             })
+            .OrderByDescending(x => x.Total)
+            .Take(limite)
             .ToListAsync(ct);
 
-        return datos
-            .GroupBy(p => new { p.Ide_Prestamo, p.Cop_Equipo, p.Nom_Equipo, p.Cat_Equipo, p.Mar_Equipo })
-            .Select(g => new EquiposMasUtilizadosDto(
-                g.Key.Ide_Prestamo,
-                g.Key.Cop_Equipo,
-                g.Key.Nom_Equipo,
-                g.Key.Cat_Equipo,
-                g.Count(),
-                g.Key.Mar_Equipo,
-                g.Max(x => x.Fpr_Prestamo)
-            ))
-            .OrderByDescending(x => x.TotalPrestamos)
-            .Take(limite)
+        if (!agrupados.Any())
+            return Array.Empty<EquiposMasUtilizadosDto>();
+
+        var equipoIds = agrupados.Select(x => x.EquipoId).ToList();
+        var equipos = await _context.Equipos.AsNoTracking()
+            .Where(e => equipoIds.Contains(e.Id_Equipo))
+            .ToDictionaryAsync(e => e.Id_Equipo, ct);
+
+        return agrupados
+            .Where(a => equipos.ContainsKey(a.EquipoId))
+            .Select(a =>
+            {
+                var eq = equipos[a.EquipoId];
+                return new EquiposMasUtilizadosDto(
+                    a.EquipoId,
+                    eq.Cop_Equipo,
+                    eq.Nom_Equipo,
+                    eq.Cat_Equipo,
+                    a.Total,
+                    eq.Mar_Equipo,
+                    a.Ultimo
+                );
+            })
             .ToList();
     }
 
@@ -271,19 +280,17 @@ public class PrestamoRepository : IPrestamoRepository
         DateOnly domingo,
         CancellationToken ct = default)
     {
-        var datos = await _context.Prestamos
+        var prestamosHoy = await _context.Prestamos
             .AsNoTracking()
-            .Select(p => new
-            {
-                p.Fpr_Prestamo,
-                p.Fde_Prestamo,
-                p.Est_Prestamo
-            })
-            .ToListAsync(ct);
+            .CountAsync(p => p.Fpr_Prestamo == hoy, ct);
 
-        var prestamosHoy = datos.Count(p => p.Fpr_Prestamo == hoy);
-        var devolucionesSemana = datos.Count(p => p.Est_Prestamo == EstadoPrestamo.Activo && p.Fde_Prestamo >= lunes && p.Fde_Prestamo <= domingo);
-        var vencidos = datos.Count(p => p.Est_Prestamo == EstadoPrestamo.Activo && p.Fde_Prestamo < hoy);
+        var devolucionesSemana = await _context.Prestamos
+            .AsNoTracking()
+            .CountAsync(p => p.Est_Prestamo == EstadoPrestamo.Activo && p.Fde_Prestamo >= lunes && p.Fde_Prestamo <= domingo, ct);
+
+        var vencidos = await _context.Prestamos
+            .AsNoTracking()
+            .CountAsync(p => p.Est_Prestamo == EstadoPrestamo.Activo && p.Fde_Prestamo < hoy, ct);
 
         return (prestamosHoy, devolucionesSemana, vencidos);
     }

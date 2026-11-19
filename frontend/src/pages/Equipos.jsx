@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useDebounce } from '../hooks/useDebounce';
 import { PERMISOS } from '../constants/permisos';
+import { canEditEquipo, canChangeEstadoEquipo, canViewHistorialEquipo } from '../utils/permisosEquipo';
 import { normalizarTexto } from '../utils/normalizarTexto';
 import { equipoService } from '../services/equipoService';
 
@@ -14,6 +15,7 @@ import ModalCambiarEstadoEquipo from '../components/equipos/ModalCambiarEstadoEq
 import FormularioSolicitarPrestamo from '../components/prestamos/FormularioSolicitarPrestamo';
 
 import TableList from '../components/ui/TableList';
+import PestanasConteo from '../components/ui/PestanasConteo';
 import CategoriaEquipoChip from '../components/ui/CategoriaEquipoChip';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
@@ -22,7 +24,7 @@ import Toast from '../components/ui/Toast';
 import AlertMessage from '../components/ui/AlertMessage';
 
 export default function Equipos() {
-  const { puede } = useAuth();
+  const { puede, usuario } = useAuth();
   const [equipos, setEquipos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -42,8 +44,9 @@ export default function Equipos() {
   const [toasts, setToasts] = useState([]);
 
   const puedeCrear = puede(PERMISOS.EQUIPOS_CREAR);
-  const puedeEditar = puede(PERMISOS.EQUIPOS_EDITAR);
-  const puedeCambiarEstado = puede(PERMISOS.EQUIPOS_CAMBIAR_ESTADO);
+  const puedeEditar = canEditEquipo(usuario, puede);
+  const puedeCambiarEstado = canChangeEstadoEquipo(usuario, puede);
+  const puedeVerHistorial = canViewHistorialEquipo(usuario, puede);
   const puedeSolicitar = puede(PERMISOS.PRESTAMOS_SOLICITAR);
 
   const cargarEquipos = useCallback(async () => {
@@ -108,10 +111,13 @@ export default function Equipos() {
       clave: 'codigoPatrimonial',
       encabezado: 'Cód. patrimonial',
       ordenable: true,
-      claseEncabezado: 'w-[1%] whitespace-nowrap px-3',
-      claseCelda: 'w-[1%] whitespace-nowrap px-3',
+      claseEncabezado: 'whitespace-nowrap pl-4 pr-2',
+      claseCelda: 'whitespace-nowrap pl-4 pr-2',
       render: (e) => (
-        <span className="font-mono font-bold text-texto text-xs tracking-wider">
+        <span
+          className="font-mono font-medium text-texto text-xs tracking-wider"
+          title={e.codigoPatrimonial}
+        >
           {e.codigoPatrimonial}
         </span>
       )
@@ -120,33 +126,49 @@ export default function Equipos() {
       clave: 'nombre',
       encabezado: 'Equipo',
       ordenable: true,
-      claseEncabezado: 'min-w-[11rem] px-3',
-      claseCelda: 'min-w-[11rem] px-3',
+      claseEncabezado: 'max-w-[220px] px-2',
+      claseCelda: 'max-w-[220px] px-2',
       render: (e) => (
-        <div>
-          <span className="font-semibold text-texto line-clamp-1 block" title={e.nombre}>
-            {e.nombre}
-          </span>
-          <span className="text-xs text-texto-suave block">
-            {e.marca} {e.modelo}
-          </span>
-        </div>
+        <span
+          className="font-medium text-texto text-sm truncate block"
+          title={e.nombre}
+        >
+          {e.nombre}
+        </span>
+      )
+    },
+    {
+      clave: 'marca',
+      encabezado: 'Marca',
+      ordenable: true,
+      claseEncabezado: 'whitespace-nowrap px-2',
+      claseCelda: 'whitespace-nowrap px-2',
+      render: (e) => (
+        <span
+          className="text-sm text-texto-suave whitespace-nowrap block"
+          title={e.marca || '—'}
+        >
+          {e.marca || '—'}
+        </span>
       )
     },
     {
       clave: 'categoria',
       encabezado: 'Categoría',
-      claseEncabezado: 'w-[1%] whitespace-nowrap px-3 hidden md:table-cell',
-      claseCelda: 'w-[1%] whitespace-nowrap px-3 hidden md:table-cell',
+      claseEncabezado: 'whitespace-nowrap px-2',
+      claseCelda: 'whitespace-nowrap px-2',
       render: (e) => <CategoriaEquipoChip categoria={e.categoria} />
     },
     {
       clave: 'ubicacion',
       encabezado: 'Ubicación',
-      claseEncabezado: 'min-w-[8rem] max-w-[12rem] px-3 hidden lg:table-cell',
-      claseCelda: 'min-w-[8rem] max-w-[12rem] px-3 hidden lg:table-cell',
+      claseEncabezado: 'whitespace-nowrap px-2',
+      claseCelda: 'whitespace-nowrap px-2',
       render: (e) => (
-        <span className="text-xs text-texto-suave line-clamp-1" title={e.ubicacion}>
+        <span
+          className="text-sm text-texto-suave whitespace-nowrap block"
+          title={e.ubicacion || 'Almacén Central'}
+        >
           {e.ubicacion || 'Almacén Central'}
         </span>
       )
@@ -154,23 +176,25 @@ export default function Equipos() {
     {
       clave: 'estado',
       encabezado: 'Estado',
-      claseEncabezado: 'w-[1%] whitespace-nowrap px-3',
-      claseCelda: 'w-[1%] whitespace-nowrap px-3',
+      claseEncabezado: 'whitespace-nowrap px-2',
+      claseCelda: 'whitespace-nowrap px-2',
       render: (e) => <Badge estado={e.estado} />
     },
     {
       clave: 'acciones',
       encabezado: 'Acciones',
-      claseEncabezado: 'w-[1%] whitespace-nowrap text-right pl-3 pr-4',
-      claseCelda: 'w-[1%] whitespace-nowrap text-right pl-3 pr-4',
+      align: 'right',
+      claseEncabezado: 'w-px whitespace-nowrap text-right pl-2 pr-4',
+      claseCelda: 'w-px whitespace-nowrap text-right pl-2 pr-4',
       render: (e) => (
         <AccionesFilaEquipo
           equipo={e}
           puedeEditar={puedeEditar}
           puedeCambiarEstado={puedeCambiarEstado}
+          puedeVerHistorial={puedeVerHistorial}
           puedeSolicitar={puedeSolicitar}
-          alEditar={setEquipoParaEditar}
-          alCambiarEstado={setEquipoParaCambiarEstado}
+          alEditar={(eq) => puedeEditar && setEquipoParaEditar(eq)}
+          alCambiarEstado={(eq) => puedeCambiarEstado && setEquipoParaCambiarEstado(eq)}
           alSolicitar={(id) => setEquipoParaSolicitarId(id)}
         />
       )
@@ -188,7 +212,7 @@ export default function Equipos() {
     <div className="space-y-5 max-w-[1440px] mx-auto w-full">
       <EncabezadoPagina
         titulo="Equipos"
-        descripcion="Catálogo de activos tecnológicos, estado operativo y disponibilidad para préstamos corporativos."
+        descripcion="Catálogo de activos tecnológicos, estado y disponibilidad para préstamos."
         accionPrimaria={
           puedeCrear ? (
             <Button
@@ -214,38 +238,18 @@ export default function Equipos() {
       />
 
       {/* Chips de estado con conteo (Fidelidad ReservaUPLA / RF-05..RF-08) */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1" role="region" aria-label="Filtro rápido por estado">
-        {[
-          { clave: '', etiqueta: 'Todos', cant: equipos.length },
-          { clave: 'Disponible', etiqueta: 'Disponibles', cant: equipos.filter((e) => e.estado === 'Disponible').length },
-          { clave: 'Prestado', etiqueta: 'Prestados', cant: equipos.filter((e) => e.estado === 'Prestado').length },
-          { clave: 'Mantenimiento', etiqueta: 'Mantenimiento', cant: equipos.filter((e) => e.estado === 'Mantenimiento').length },
-          { clave: 'Baja', etiqueta: 'Baja', cant: equipos.filter((e) => e.estado === 'Baja').length }
-        ].map((chip) => {
-          const esActivo = estadoFiltro === chip.clave;
-          return (
-            <button
-              key={chip.clave}
-              type="button"
-              onClick={() => setEstadoFiltro(chip.clave)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-pill text-xs font-semibold cursor-pointer border transition-colors whitespace-nowrap ${
-                esActivo
-                  ? 'bg-primario text-sobre-primario border-primario shadow-xs'
-                  : 'bg-superficie text-texto-suave border-borde hover:bg-superficie-2 hover:text-texto'
-              }`}
-            >
-              <span>{chip.etiqueta}</span>
-              <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] cifra-tabular font-bold ${
-                  esActivo ? 'bg-white/20 text-white' : 'bg-superficie-2 text-texto-suave'
-                }`}
-              >
-                {chip.cant}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      <PestanasConteo
+        ariaLabel="Filtro rápido por estado"
+        opciones={[
+          { valor: '', etiqueta: 'Todos', cantidad: equipos.length },
+          { valor: 'Disponible', etiqueta: 'Disponibles', cantidad: equipos.filter((e) => e.estado === 'Disponible').length },
+          { valor: 'Prestado', etiqueta: 'Prestados', cantidad: equipos.filter((e) => e.estado === 'Prestado').length },
+          { valor: 'Mantenimiento', etiqueta: 'Mantenimiento', cantidad: equipos.filter((e) => e.estado === 'Mantenimiento').length },
+          { valor: 'Baja', etiqueta: 'Baja', cantidad: equipos.filter((e) => e.estado === 'Baja').length }
+        ]}
+        seleccionado={estadoFiltro}
+        alCambiar={setEstadoFiltro}
+      />
 
       {error && (
         <div className="mb-4">
@@ -281,7 +285,7 @@ export default function Equipos() {
         />
       )}
 
-      {equipoParaEditar && (
+      {puedeEditar && equipoParaEditar && (
         <FormularioEquipo
           abierto={Boolean(equipoParaEditar)}
           equipo={equipoParaEditar}
@@ -290,7 +294,7 @@ export default function Equipos() {
         />
       )}
 
-      {equipoParaCambiarEstado && (
+      {puedeCambiarEstado && equipoParaCambiarEstado && (
         <ModalCambiarEstadoEquipo
           abierto={Boolean(equipoParaCambiarEstado)}
           equipo={equipoParaCambiarEstado}

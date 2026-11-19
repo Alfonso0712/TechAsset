@@ -35,6 +35,7 @@ const IconButton = forwardRef(function IconButton(
     'aria-label': ariaLabelProp,
     variante = 'detalle',
     tooltip,
+    align = 'end',
     disabled = false,
     deshabilitado = false,
     className = '',
@@ -52,13 +53,16 @@ const IconButton = forwardRef(function IconButton(
   const textoTooltip = tooltip || etiqueta;
   const estaBloqueado = Boolean(disabled || deshabilitado);
   const handlerClick = alHacerClic || onClick;
+  const posTooltip = align === 'end' ? 'right-0' : align === 'start' ? 'left-0' : 'left-1/2 -translate-x-1/2';
 
   return (
     <button
       ref={ref}
       type={tipo || type}
       disabled={estaBloqueado}
+      aria-disabled={props['aria-disabled'] ?? (estaBloqueado ? 'true' : undefined)}
       aria-label={label}
+      title={props.title || textoTooltip}
       onClick={(e) => {
         if (estaBloqueado) {
           e.preventDefault();
@@ -66,14 +70,14 @@ const IconButton = forwardRef(function IconButton(
         }
         handlerClick?.(e);
       }}
-      className={`group relative inline-flex items-center justify-center h-11 w-11 min-h-[2.75rem] min-w-[2.75rem] rounded-full border transition-all cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-anillo-foco disabled:opacity-50 disabled:cursor-not-allowed ${conf.clases} ${className}`.trim()}
+      className={`group relative inline-flex items-center justify-center h-11 w-11 min-h-[2.75rem] min-w-[2.75rem] rounded-lg border transition-all cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-anillo-foco disabled:opacity-75 disabled:cursor-not-allowed ${conf.clases} ${className}`.trim()}
       {...props}
     >
       <Icono nombre={nombreIcono} className="w-[18px] h-[18px]" />
       {textoTooltip && (
         <span
           role="tooltip"
-          className="pointer-events-none hidden group-hover:block group-focus-visible:block absolute -top-8 left-1/2 -translate-x-1/2 z-50 whitespace-nowrap rounded-sm px-2 py-0.5 text-xs bg-lateral-fondo text-white shadow-sm transition-opacity"
+          className={`pointer-events-none hidden group-hover:block group-focus-visible:block absolute -top-8 ${posTooltip} z-50 whitespace-nowrap rounded-sm px-2 py-0.5 text-xs bg-slate-900 text-white shadow-sm transition-opacity`}
         >
           {textoTooltip}
         </span>

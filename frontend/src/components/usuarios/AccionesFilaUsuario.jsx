@@ -1,6 +1,5 @@
 // Acciones por fila de usuario (editar y activar/desactivar) · ISO 9241-110 · TechAsset
-import Button from '../ui/Button';
-import Icono from '../ui/Icono';
+import IconButton from '../ui/IconButton';
 
 export default function AccionesFilaUsuario({
   usuario,
@@ -29,37 +28,35 @@ export default function AccionesFilaUsuario({
   return (
     <div className="inline-flex items-center justify-end gap-1.5">
       {puedeEditar && (
-        <Button
-          variante="ghost"
-          tamano="sm"
+        <IconButton
+          variante="editar"
+          etiqueta={`Editar usuario ${usuario.nombreCompleto}`}
+          tooltip="Editar usuario"
           aria-label={`Editar usuario ${usuario.nombreCompleto}`}
-          title="Editar usuario"
+          align="end"
           alHacerClic={() => alEditar?.(usuario)}
-        >
-          <Icono nombre="Pencil" className="w-4 h-4 text-texto-suave hover:text-texto" />
-        </Button>
+        />
       )}
 
       {puedeCambiarEstado && (
-        <Button
-          variante="ghost"
-          tamano="sm"
-          deshabilitado={noPuedeDesactivar}
-          aria-label={tooltipEstado}
-          title={tooltipEstado}
-          alHacerClic={() => !noPuedeDesactivar && alCambiarEstado?.(usuario)}
+        <span
+          className="inline-flex"
+          title={noPuedeDesactivar ? tooltipEstado : undefined}
         >
-          <Icono
-            nombre="Power"
-            className={`w-4 h-4 ${
-              noPuedeDesactivar
-                ? 'text-texto-suave/40 cursor-not-allowed'
-                : usuario.activo
-                  ? 'text-peligro-texto hover:text-peligro-texto/80'
-                  : 'text-exito-texto hover:text-exito-texto/80'
-            }`}
+          <IconButton
+            variante="cambiar-estado"
+            icono="Power"
+            etiqueta={tooltipEstado}
+            tooltip={tooltipEstado}
+            aria-label={tooltipEstado}
+            aria-disabled={noPuedeDesactivar ? 'true' : undefined}
+            disabled={noPuedeDesactivar}
+            deshabilitado={noPuedeDesactivar}
+            className={noPuedeDesactivar ? 'disabled:opacity-80' : ''}
+            align="end"
+            alHacerClic={() => !noPuedeDesactivar && alCambiarEstado?.(usuario)}
           />
-        </Button>
+        </span>
       )}
     </div>
   );

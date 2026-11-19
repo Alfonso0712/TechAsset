@@ -9,7 +9,7 @@ export default function CategoriaEquipoChip({ categoria }) {
 
   return (
     <span className="inline-flex items-center gap-1.5 text-sm text-texto whitespace-nowrap" title={etiqueta}>
-      <Icono nombre={nombreIcono} className="w-3.5 h-3.5 text-texto-suave shrink-0" />
+      <Icono nombre={nombreIcono} className="w-4 h-4 text-texto-suave shrink-0" strokeWidth={1.75} />
       <span>{etiqueta}</span>
     </span>
   );

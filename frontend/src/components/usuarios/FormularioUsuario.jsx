@@ -108,7 +108,7 @@ export default function FormularioUsuario({
       abierto={abierto}
       alCerrar={alCerrar}
       titulo={esEdicion ? 'Editar usuario' : 'Nuevo usuario'}
-      subtitulo={esEdicion ? `Actualice los datos de ${targetUsuario?.nombreCompleto || 'usuario'}` : 'Alta de cuenta corporativa'}
+      subtitulo={esEdicion ? `Actualice los datos de ${targetUsuario?.nombreCompleto || 'usuario'}` : 'Completa los datos para registrar nuevo usuario.'}
       textoPrimario={esEdicion ? 'Guardar cambios' : 'Crear usuario'}
       textoSecundario="Cancelar"
       variantePrimaria="primary"

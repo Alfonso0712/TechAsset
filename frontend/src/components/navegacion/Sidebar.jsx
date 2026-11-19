@@ -14,14 +14,14 @@ export default function Sidebar({ abiertoMovil = false, alCerrarMovil, usuario: 
   const items = obtenerItemsNavegacion(usuario, puede);
 
   const contenido = (
-    <div className="flex flex-col h-full w-64 bg-lateral-fondo text-lateral-texto border-r border-borde/20">
+    <div className="flex flex-col h-full w-64 bg-lateral-fondo text-lateral-texto border-r border-lateral-borde">
       <div className="p-4 flex-1 flex flex-col overflow-y-auto">
-        <div className="flex items-center justify-between gap-3 pb-4 border-b border-white/15">
+        <div className="flex items-center justify-between gap-3 pb-4 border-b border-lateral-borde">
           <div className="flex items-center gap-3">
             <LogoTechAsset tamano="panel" alt="" />
             <div>
-              <span className="block text-[1.125rem] font-bold text-white leading-tight">TechAsset</span>
-              <span className="block text-[0.875rem] text-lateral-texto">Gestión de activos</span>
+              <span className="block text-[1.125rem] font-bold text-texto leading-tight">TechAsset</span>
+              <span className="block text-[0.875rem] text-texto-suave">Gestión de activos</span>
             </div>
           </div>
           {abiertoMovil && (
@@ -29,7 +29,7 @@ export default function Sidebar({ abiertoMovil = false, alCerrarMovil, usuario: 
               type="button"
               onClick={alCerrarMovil}
               aria-label="Cerrar menú lateral"
-              className="lg:hidden h-9 w-9 min-h-[2.25rem] min-w-[2.25rem] p-2 inline-flex items-center justify-center rounded-full text-lateral-texto hover:text-white hover:bg-white/10"
+              className="lg:hidden h-9 w-9 min-h-[2.25rem] min-w-[2.25rem] p-2 inline-flex items-center justify-center rounded-full text-lateral-texto hover:text-texto hover:bg-lateral-hover"
             >
               <Icono nombre="X" className="w-5 h-5" />
             </button>

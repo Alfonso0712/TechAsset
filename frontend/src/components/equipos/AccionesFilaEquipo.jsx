@@ -9,52 +9,65 @@ export default function AccionesFilaEquipo({
   puedeEditar,
   puedeCambiarEstado,
   puedeSolicitar,
+  puedeVerHistorial = true,
   alEditar,
   alCambiarEstado,
   alSolicitar
 }) {
   const tienePrestamoActivo = equipo.estado === 'Prestado';
 
-  if (puedeEditar || puedeCambiarEstado) {
+  if (puedeEditar || puedeCambiarEstado || puedeVerHistorial) {
     const tooltipCambiarEstado = tienePrestamoActivo
-      ? 'No se puede cambiar el estado: el equipo se encuentra actualmente prestado'
-      : 'Cambiar estado del equipo';
+      ? 'No disponible: el equipo tiene un préstamo activo'
+      : 'Cambiar estado';
 
     return (
       <div className="inline-flex items-center justify-end gap-1.5">
         {puedeEditar && (
           <IconButton
             variante="editar"
-            etiqueta={`Editar ${equipo.nombre}`}
+            etiqueta="Editar equipo"
             tooltip="Editar equipo"
+            aria-label="Editar equipo"
             alHacerClic={() => alEditar?.(equipo)}
           />
         )}
 
         {puedeCambiarEstado && (
-          <IconButton
-            variante="cambiar-estado"
-            icono="RefreshCw"
-            etiqueta={tooltipCambiarEstado}
-            tooltip={tooltipCambiarEstado}
-            disabled={tienePrestamoActivo}
-            deshabilitado={tienePrestamoActivo}
-            alHacerClic={() => !tienePrestamoActivo && alCambiarEstado?.(equipo)}
-          />
+          <span
+            className="inline-flex"
+            title={tienePrestamoActivo ? tooltipCambiarEstado : undefined}
+          >
+            <IconButton
+              variante="cambiar-estado"
+              icono="RefreshCw"
+              etiqueta={tooltipCambiarEstado}
+              tooltip={tooltipCambiarEstado}
+              aria-label={tooltipCambiarEstado}
+              aria-disabled={tienePrestamoActivo ? 'true' : undefined}
+              disabled={tienePrestamoActivo}
+              deshabilitado={tienePrestamoActivo}
+              className={tienePrestamoActivo ? 'disabled:opacity-80' : ''}
+              alHacerClic={() => !tienePrestamoActivo && alCambiarEstado?.(equipo)}
+            />
+          </span>
         )}
 
-        <Link
-          to={`/reportes?equipoId=${equipo.id}`}
-          aria-label={`Ver historial de movimientos de ${equipo.nombre}`}
-          title="Ver historial de movimientos"
-        >
-          <IconButton
-            variante="historial"
-            icono="History"
-            etiqueta={`Historial de ${equipo.nombre}`}
-            tooltip="Ver historial de movimientos"
-          />
-        </Link>
+        {puedeVerHistorial && (
+          <Link
+            to={`/reportes?equipoId=${equipo.id}`}
+            aria-label="Ver historial"
+            title="Ver historial"
+          >
+            <IconButton
+              variante="historial"
+              icono="History"
+              etiqueta="Ver historial"
+              tooltip="Ver historial"
+              aria-label="Ver historial"
+            />
+          </Link>
+        )}
       </div>
     );
   }

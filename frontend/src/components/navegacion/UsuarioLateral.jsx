@@ -21,9 +21,9 @@ export default function UsuarioLateral({ compacto = false, alCerrarMenu, usuario
   if (compacto) {
     return (
       <div className="p-4 flex flex-col items-center">
-        <div className="pt-3 border-t border-borde/20 w-full flex flex-col items-center gap-2">
+        <div className="pt-3 border-t border-lateral-borde w-full flex flex-col items-center gap-2">
           <span
-            className="w-8 h-8 rounded-full bg-white/15 text-white font-bold text-xs flex items-center justify-center shrink-0"
+            className="w-8 h-8 rounded-full bg-primario-suave text-primario font-bold text-xs flex items-center justify-center shrink-0"
             title={`${usuario?.nombreCompleto || 'Usuario'} (${usuario?.rol || 'Administrador'})`}
           >
             {iniciales}
@@ -32,12 +32,12 @@ export default function UsuarioLateral({ compacto = false, alCerrarMenu, usuario
             type="button"
             onClick={manejarLogout}
             aria-label="Cerrar sesión"
-            className="group relative h-9 w-9 min-h-[2.25rem] min-w-[2.25rem] p-2 inline-flex items-center justify-center rounded-full text-lateral-texto hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="group relative h-9 w-9 min-h-[2.25rem] min-w-[2.25rem] p-2 inline-flex items-center justify-center rounded-full text-lateral-texto hover:text-texto hover:bg-lateral-hover transition-colors cursor-pointer"
           >
-            <Icono nombre="LogOut" className="w-4 h-4" />
+            <Icono nombre="LogOut" className="w-4 h-4 text-lateral-icono" />
             <span
               role="tooltip"
-              className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 whitespace-nowrap rounded-sm px-2 py-0.5 text-xs bg-lateral-fondo text-white shadow-sm opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity"
+              className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 whitespace-nowrap rounded-sm px-2 py-0.5 text-xs bg-slate-900 text-white shadow-sm opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity"
             >
               Cerrar sesión
             </span>
@@ -49,16 +49,16 @@ export default function UsuarioLateral({ compacto = false, alCerrarMenu, usuario
 
   return (
     <div className="p-4 bg-lateral-fondo text-lateral-texto">
-      <div className="pt-4 border-t border-white/15 space-y-2.5">
+      <div className="pt-4 border-t border-lateral-borde space-y-2.5">
         <div className="flex items-center gap-2.5 min-w-0">
-          <span className="w-9 h-9 rounded-full bg-white/15 text-white font-bold text-xs flex items-center justify-center shrink-0">
+          <span className="w-9 h-9 rounded-full bg-primario-suave text-primario font-bold text-xs flex items-center justify-center shrink-0">
             {iniciales}
           </span>
           <div className="min-w-0 flex-1 leading-tight">
-            <p className="text-sm font-semibold text-white truncate m-0">
+            <p className="text-sm font-semibold text-texto truncate m-0">
               {usuario?.nombreCompleto || 'Usuario'}
             </p>
-            <p className="text-xs text-lateral-texto/80 truncate m-0">
+            <p className="text-xs text-texto-suave truncate m-0">
               {usuario?.rol || 'Administrador'}
             </p>
           </div>
@@ -67,9 +67,9 @@ export default function UsuarioLateral({ compacto = false, alCerrarMenu, usuario
           type="button"
           onClick={manejarLogout}
           aria-label="Cerrar sesión"
-          className="w-full h-8 px-2.5 rounded-control inline-flex items-center gap-2 text-xs font-semibold text-lateral-texto hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+          className="w-full h-8 px-2.5 rounded-control inline-flex items-center gap-2 text-xs font-semibold text-lateral-texto hover:text-texto hover:bg-lateral-hover transition-colors cursor-pointer"
         >
-          <Icono nombre="LogOut" className="w-4 h-4 shrink-0" />
+          <Icono nombre="LogOut" className="w-4 h-4 shrink-0 text-lateral-icono" />
           <span>Cerrar sesión</span>
         </button>
       </div>

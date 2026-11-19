@@ -1,11 +1,23 @@
 // Nielsen 9 · Contrato { estado, datos } -> { ok, datos, errores, errorGeneral, accion }
 import { MENSAJES } from '../constants/mensajes';
 
+function normalizarClaveCampo(campo) {
+  if (!campo || typeof campo !== 'string') return '';
+  // Eliminar prefijos de model binding de ASP.NET Core como "$." o "model." o "dto."
+  let limpia = campo.replace(/^(\$\.|model\.|dto\.)/i, '');
+  if (limpia.includes('.')) {
+    const partes = limpia.split('.');
+    limpia = partes[partes.length - 1];
+  }
+  return limpia.charAt(0).toLowerCase() + limpia.slice(1);
+}
+
 function mapearErroresServidor(errors) {
   const resultado = {};
   if (!errors || typeof errors !== 'object') return resultado;
   Object.entries(errors).forEach(([campo, lista]) => {
-    const clave = campo.charAt(0).toLowerCase() + campo.slice(1);
+    const clave = normalizarClaveCampo(campo);
+    if (!clave) return;
     const primerMensaje = Array.isArray(lista) ? lista[0] : String(lista);
     if (primerMensaje) resultado[clave] = primerMensaje;
   });
@@ -43,7 +55,7 @@ export function interpretarRespuesta(respuesta) {
       ok: false,
       datos: null,
       errores,
-      errorGeneral: Object.keys(errores).length === 0 ? (datos?.mensaje || datos?.detail || datos?.message || MENSAJES.RESUMEN_ERRORES_FORMULARIO) : '',
+      errorGeneral: Object.keys(errores).length === 0 ? (datos?.mensaje || datos?.detail || datos?.message || datos?.error || MENSAJES.RESUMEN_ERRORES_FORMULARIO) : '',
       accion: 'corregir'
     };
   }
@@ -70,11 +82,19 @@ export function interpretarRespuesta(respuesta) {
 
   if (estado === 409) {
     const errores = mapearErroresServidor(datos?.errors);
+    const mensajeTexto = datos?.mensaje || datos?.detail || datos?.message || datos?.error || '';
+    if (Object.keys(errores).length === 0 && mensajeTexto) {
+      if (/código patrimonial|codigo patrimonial/i.test(mensajeTexto)) {
+        errores.codigoPatrimonial = mensajeTexto;
+      } else if (/correo|email/i.test(mensajeTexto)) {
+        errores.correo = mensajeTexto;
+      }
+    }
     return {
       ok: false,
       datos: null,
       errores,
-      errorGeneral: Object.keys(errores).length === 0 ? (datos?.mensaje || datos?.detail || datos?.message || MENSAJES.PRESTAMO_DUPLICADO_ACTIVO) : '',
+      errorGeneral: Object.keys(errores).length === 0 ? (mensajeTexto || MENSAJES.PRESTAMO_DUPLICADO_ACTIVO) : '',
       accion: 'conflicto'
     };
   }
@@ -111,5 +131,6 @@ export function interpretarRespuesta(respuesta) {
 // Compatibilidad con código previo que llamaba interpretarRespuestaError
 export function interpretarRespuestaError(estado, datos) {
   const res = interpretarRespuesta({ estado, datos });
-  return res.errorGeneral || MENSAJES.ERROR_GENERICO;
+  const primerErrorCampo = Object.values(res.errores || {})[0];
+  return primerErrorCampo || res.errorGeneral || MENSAJES.ERROR_GENERICO;
 }

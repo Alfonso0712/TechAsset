@@ -56,6 +56,7 @@ export default function Prestamos() {
   const puedeGestionar = puede(PERMISOS.PRESTAMOS_APROBAR_RECHAZAR);
   const puedeSolicitar = puede(PERMISOS.PRESTAMOS_SOLICITAR);
   const esColaborador = usuario?.rol === 'Colaborador';
+  const esResponsableTI = usuario?.rol === 'ResponsableTecnologia';
 
   const cargarPrestamos = useCallback(async () => {
     setCargando(true);
@@ -176,26 +177,19 @@ export default function Prestamos() {
       claseCelda: 'min-w-[9.5rem] max-w-[12.5rem] px-2.5',
       render: (p) => {
         const nombre = p.solicitanteNombre || p.solicitante?.nombreCompleto || 'Colaborador';
-        const correo = p.solicitanteCorreo || p.solicitante?.correo || '';
-        const area = p.solicitanteArea || p.solicitante?.areaNombre || '';
         return (
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-8 h-8 rounded-full bg-primario-suave text-primario dark:text-primario-enlace font-bold text-xs flex items-center justify-center shrink-0">
               {obtenerIniciales(nombre) || 'U'}
             </span>
-            <div className="min-w-0 flex-1">
-              <button
-                type="button"
-                onClick={() => setPrestamoDetalle(p)}
-                className="font-semibold text-texto hover:text-primario-enlace hover:underline line-clamp-1 block text-sm text-left truncate"
-                title={nombre}
-              >
-                {nombre}
-              </button>
-              <p className="text-xs text-texto-suave truncate mt-0.5" title={`${correo} · ${area}`}>
-                {correo} {area ? `· ${area}` : ''}
-              </p>
-            </div>
+            <button
+              type="button"
+              onClick={() => setPrestamoDetalle(p)}
+              className="font-semibold text-texto hover:text-primario-enlace hover:underline text-sm text-left truncate block"
+              title={nombre}
+            >
+              {nombre}
+            </button>
           </div>
         );
       }
@@ -272,8 +266,9 @@ export default function Prestamos() {
     {
       clave: 'acciones',
       encabezado: 'Acciones',
-      claseEncabezado: 'w-[1%] whitespace-nowrap text-right pl-2 pr-3',
-      claseCelda: 'w-[1%] whitespace-nowrap text-right pl-2 pr-3',
+      align: 'right',
+      claseEncabezado: 'w-px whitespace-nowrap text-right pl-2 pr-3',
+      claseCelda: 'w-px whitespace-nowrap text-right pl-2 pr-3',
       render: (p) => (
         <AccionesFilaPrestamo
           prestamo={p}
@@ -306,7 +301,7 @@ export default function Prestamos() {
         titulo={tituloPagina}
         descripcion={descPagina}
         accionPrimaria={
-          puedeGestionar ? (
+          puedeGestionar && !esResponsableTI ? (
             <Button
               variante="primario"
               alHacerClic={() => setModalDirectoAbierto(true)}

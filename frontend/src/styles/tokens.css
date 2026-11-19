@@ -1,19 +1,19 @@
 /* TechAsset Design System Tokens · Colorimetría v3 · Innovatech Solutions · WCAG 2.2 AA */
 :root {
   /* Modo Claro */
-  --fondo: #F4F6FA;
+  --fondo: #F8FAFC;
   --superficie: #FFFFFF;
-  --superficie-2: #EBF0F8;
-  --borde: #D0D8E8;
-  --borde-control: #7B8BA6;
+  --superficie-2: #F1F5F9;
+  --borde: #E2E8F0;
+  --borde-control: #CBD5E1;
   --texto: #0F172A;
-  --texto-suave: #4A5568;
+  --texto-suave: #475569;
 
-  /* Colores de Marca Primarios (TechAsset WCAG 2.2 AA) */
-  --primario: #0369A1;
-  --primario-hover: #075985;
-  --primario-enlace: #0369A1;
-  --primario-suave: #EBF0F8;
+  /* Colores de Marca Primarios (TechAsset WCAG 2.2 AA · Innovatech Solutions #06A3DA) */
+  --primario: #06A3DA;
+  --primario-hover: #0589B8;
+  --primario-enlace: #0589B8;
+  --primario-suave: #E6F6FC;
   --sobre-primario: #FFFFFF;
   --marca-oscuro: #091E3E;
 
@@ -21,14 +21,17 @@
   --acento: #06A3DA;
   --acento-sobre-oscuro: #38BDF0;
 
-  /* Identidad Lateral / Menú */
-  --lateral-fondo: #091E3E;
-  --lateral-texto: #D3E3F2;
-  --lateral-activo-fondo: #12335F;
-  --lateral-hover: rgba(255, 255, 255, 0.08);
+  /* Identidad Lateral / Menú (Modo Claro: Fondo blanco corporativo) */
+  --lateral-fondo: #FFFFFF;
+  --lateral-texto: #334155;
+  --lateral-icono: #64748B;
+  --lateral-activo-fondo: #E6F6FC;
+  --lateral-activo-texto: #06A3DA;
+  --lateral-hover: #F1F5F9;
+  --lateral-borde: #E2E8F0;
 
   /* Foco visible de accesibilidad */
-  --anillo-foco: #0369A1;
+  --anillo-foco: #06A3DA;
 
   /* Estados Semánticos (Modo Claro) */
   --exito-texto: #14532D;
@@ -83,8 +86,8 @@
   --aprobada-fondo: var(--exito-fondo);
   --rechazada-texto: var(--peligro-texto);
   --rechazada-fondo: var(--peligro-fondo);
-  --cancelada-texto: #4A5568;
-  --cancelada-fondo: #EBF0F8;
+  --cancelada-texto: #475569;
+  --cancelada-fondo: #F1F5F9;
 
   /* Botones de acción semánticos */
   --btn-success-bg: #15803D;
@@ -110,12 +113,12 @@
   --grafico-prestado: #6366F1;
   --grafico-mantenimiento: #D97706;
   --grafico-baja: #DC2626;
-  --grafico-marca: #0369A1;
+  --grafico-marca: #06A3DA;
 
   /* Tokens IconButton WCAG AA */
   --ib-editar-fondo: #E0F2FE;
   --ib-editar-borde: #BAE6FD;
-  --ib-editar-texto: #075985;
+  --ib-editar-texto: #0589B8;
   --ib-cambiar-fondo: #FFF1CC;
   --ib-cambiar-borde: #FCD34D;
   --ib-cambiar-texto: #6B3F00;
@@ -126,9 +129,9 @@
   --ib-habilitar-borde: #86EFAC;
   --ib-habilitar-texto: #14532D;
 
-  /* Gradiente de fondo login TechAsset (#091E3E -> #12335F con transparencia) */
-  --superposicion-marca-inicio: rgba(9, 30, 62, 0.92);
-  --superposicion-marca-fin: rgba(18, 51, 95, 0.35);
+  /* Gradiente de fondo login TechAsset (Neutro direccional con transparencia) */
+  --superposicion-marca-inicio: rgba(0, 0, 0, 0.68);
+  --superposicion-marca-fin: rgba(0, 0, 0, 0.18);
 
   /* Radios de borde y alturas (WCAG 2.2 AA touch target >= 44px / 2.75rem) */
   --radius-sm: 0.375rem;
@@ -163,8 +166,11 @@
 
     --lateral-fondo: #08101F;
     --lateral-texto: #D3E3F2;
+    --lateral-icono: #94A3B8;
     --lateral-activo-fondo: #12335F;
+    --lateral-activo-texto: #FFFFFF;
     --lateral-hover: rgba(255, 255, 255, 0.08);
+    --lateral-borde: rgba(255, 255, 255, 0.15);
 
     --anillo-foco: #7DD3FC;
 
@@ -260,8 +266,8 @@
     --ib-habilitar-borde: #16A34A;
     --ib-habilitar-texto: #BBF7D0;
 
-    --superposicion-marca-inicio: rgba(8, 16, 31, 0.95);
-    --superposicion-marca-fin: rgba(18, 51, 95, 0.35);
+    --superposicion-marca-inicio: rgba(0, 0, 0, 0.78);
+    --superposicion-marca-fin: rgba(0, 0, 0, 0.22);
   }
 }
 
@@ -286,8 +292,11 @@ html[data-tema="oscuro"] {
 
   --lateral-fondo: #08101F;
   --lateral-texto: #D3E3F2;
+  --lateral-icono: #94A3B8;
   --lateral-activo-fondo: #12335F;
+  --lateral-activo-texto: #FFFFFF;
   --lateral-hover: rgba(255, 255, 255, 0.08);
+  --lateral-borde: rgba(255, 255, 255, 0.15);
 
   --anillo-foco: #7DD3FC;
 
@@ -383,6 +392,6 @@ html[data-tema="oscuro"] {
   --ib-habilitar-borde: #16A34A;
   --ib-habilitar-texto: #BBF7D0;
 
-  --superposicion-marca-inicio: rgba(8, 16, 31, 0.95);
-  --superposicion-marca-fin: rgba(18, 51, 95, 0.35);
+  --superposicion-marca-inicio: rgba(0, 0, 0, 0.78);
+  --superposicion-marca-fin: rgba(0, 0, 0, 0.22);
 }

@@ -94,7 +94,7 @@ const Button = forwardRef(function Button(
           role="tooltip"
           className={`pointer-events-none hidden group-hover:block group-focus-visible:block absolute -top-8 ${
             alineacionTooltip === 'derecha' ? 'right-0' : alineacionTooltip === 'izquierda' ? 'left-0' : 'left-1/2 -translate-x-1/2'
-          } z-50 whitespace-nowrap rounded-sm px-2 py-0.5 text-xs bg-lateral-fondo text-white shadow-sm transition-opacity`}
+          } z-50 whitespace-nowrap rounded-sm px-2 py-0.5 text-xs bg-slate-900 text-white shadow-sm transition-opacity`}
         >
           {tooltip}
         </span>

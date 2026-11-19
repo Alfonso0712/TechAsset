@@ -88,6 +88,7 @@ public class PrestamosController : ControllerBase
     }
 
     [HttpPatch("{id:guid}/devolver")]
+    [HttpPost("{id:guid}/devolver")]
     [Authorize(Policy = Permisos.PrestamosDevolver)]
     public async Task<ActionResult<PrestamoDto>> RegistrarDevolucion(
         Guid id,

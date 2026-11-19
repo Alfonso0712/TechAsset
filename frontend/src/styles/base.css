@@ -9,6 +9,7 @@ html {
   line-height: 1.6;
   background-color: var(--fondo);
   color: var(--texto);
+  scroll-behavior: smooth;
 }
 body {
   margin: 0;
@@ -50,7 +51,9 @@ p { max-width: 70ch; line-height: 1.6; margin: 0; }
 .cifra-tabular { font-variant-numeric: tabular-nums; }
 
 .capa-superposicion-login {
-  background: linear-gradient(to right, var(--superposicion-marca-inicio) 0%, var(--superposicion-marca-inicio) 35%, var(--superposicion-marca-fin) 80%);
+  background:
+    linear-gradient(to right, color-mix(in srgb, var(--primario) 12%, transparent) 0%, color-mix(in srgb, var(--primario) 4%, transparent) 100%),
+    linear-gradient(to right, var(--superposicion-marca-inicio) 0%, var(--superposicion-marca-inicio) 30%, var(--superposicion-marca-fin) 100%);
 }
 
 .fondo-modal {

@@ -86,12 +86,15 @@ export default function TableList({
                     : 'descending'
                   : 'none'
                 : undefined;
+              const esDerecha = col.align === 'right' || col.alineacion === 'derecha' || col.claseEncabezado?.includes('text-right');
               return (
                 <th
                   key={col.clave}
                   scope="col"
                   aria-sort={ariaSort}
                   className={`whitespace-nowrap py-3 text-[0.8125rem] font-semibold text-texto-suave align-middle ${
+                    esDerecha ? 'text-right' : 'text-left'
+                  } ${
                     col.claseEncabezado?.includes('px-') ||
                     col.claseEncabezado?.includes('pr-') ||
                     col.claseEncabezado?.includes('pl-')
@@ -100,22 +103,35 @@ export default function TableList({
                   } ${col.claseEncabezado || ''}`.trim()}
                 >
                   {col.ordenable ? (
-                    <button
-                      type="button"
-                      onClick={() => alternar(col.clave)}
-                      className="inline-flex items-center gap-1.5 font-semibold text-texto-suave hover:text-texto focus:outline-none focus:underline"
-                      aria-label={`Ordenar por ${col.encabezado}`}
-                    >
-                      <span>{col.encabezado}</span>
-                      {activo && (
-                        <Icono
-                          nombre={orden.dir === 'asc' ? 'ArrowUp' : 'ArrowDown'}
-                          className="w-3.5 h-3.5 text-primario shrink-0"
-                        />
-                      )}
-                    </button>
+                    <div className={`w-full flex ${esDerecha ? 'justify-end' : 'justify-start'}`}>
+                      <button
+                        type="button"
+                        onClick={() => alternar(col.clave)}
+                        className={`group inline-flex items-center gap-1.5 font-semibold transition-colors focus:outline-none focus:underline ${
+                          activo ? 'text-texto' : 'text-texto-suave hover:text-texto'
+                        }`}
+                        aria-label={`Ordenar por ${col.encabezado}`}
+                      >
+                        <span>{col.encabezado}</span>
+                        {activo ? (
+                          <Icono
+                            nombre={orden.dir === 'asc' ? 'ArrowUp' : 'ArrowDown'}
+                            className="w-3.5 h-3.5 text-primario shrink-0"
+                            strokeWidth={2}
+                          />
+                        ) : (
+                          <Icono
+                            nombre="ArrowUpDown"
+                            className="w-3.5 h-3.5 text-texto-suave/60 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            strokeWidth={2}
+                          />
+                        )}
+                      </button>
+                    </div>
                   ) : (
-                    col.encabezado
+                    <span className={esDerecha ? 'block text-right' : ''}>
+                      {col.encabezado}
+                    </span>
                   )}
                 </th>
               );

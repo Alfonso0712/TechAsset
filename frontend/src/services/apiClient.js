@@ -2,6 +2,9 @@ import { TIMEOUT_PETICION_MS } from '../constants/reglas';
 import { ejecutarPeticionMock } from '../mocks/baseDatosMock';
 
 function usarAdaptadorMock() {
+  if (import.meta.env?.PROD) {
+    return false;
+  }
   const valor = import.meta.env?.VITE_USAR_MOCK;
   return valor === 'true' || valor === true;
 }
